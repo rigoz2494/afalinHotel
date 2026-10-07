@@ -72,7 +72,7 @@ const { t, locale } = useLocale();
                                 <th
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-4 py-3 font-medium sm:px-6 sm:py-4"
+                                    class="px-4 py-3 text-center font-medium sm:px-6 sm:py-4"
                                 >
                                     {{ column.label }}
                                 </th>
@@ -85,7 +85,7 @@ const { t, locale } = useLocale();
                                 class="transition hover:bg-white/5"
                             >
                                 <td
-                                    class="px-4 py-3 text-sm font-medium sm:px-6 sm:py-5 sm:text-base"
+                                    class="px-4 py-3 align-middle text-sm font-medium sm:px-6 sm:py-5 sm:text-base"
                                 >
                                     {{ row.room_name }}
                                 </td>
@@ -94,8 +94,22 @@ const { t, locale } = useLocale();
                                     :key="column.id"
                                     class="px-2 py-2 align-top sm:px-3 sm:py-3"
                                 >
+                                    <!--
+                                        A fixed min-height, not `h-full`: a percentage height
+                                        on a flex child doesn't reliably resolve against a
+                                        <td>'s row-equalized height across browsers, which is
+                                        why the "Select" button used to sit right under the
+                                        price content (jumping up or down depending on whether
+                                        a deal badge pushed that content taller) instead of
+                                        staying pinned to the bottom. Tall enough for the
+                                        deal case (struck-through price + final price + badge,
+                                        possibly wrapped to two lines) plus the button/stepper
+                                        below it, so every cell in the row — with or without a
+                                        deal badge — ends up the same height, and `justify-between`
+                                        can then reliably lock every button to the same line.
+                                    -->
                                     <div
-                                        class="flex h-full flex-col items-start justify-between gap-1.5"
+                                        class="flex min-h-24 flex-col items-start justify-between gap-1.5 sm:min-h-28"
                                     >
                                         <!--
                                             Case B (deal): the final price is below the room's
