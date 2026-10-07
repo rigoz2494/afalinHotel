@@ -13,7 +13,10 @@ class HotelSettingSeeder extends Seeder
         $settings = [
             'hotel_name' => HotelSetting::DEFAULT_HOTEL_NAME,
             'tagline' => 'Where every stay becomes a story.',
-            'promo_banner' => 'Special Offer: Book now and get a 5% discount on early bird reservations!',
+            'promo_banner' => [
+                'en' => 'Special Offer: Book now and get a 5% discount on early bird reservations!',
+                'ru' => 'Специальное предложение: забронируйте сейчас и получите скидку 5% при раннем бронировании!',
+            ],
             'contacts' => [
                 'phone' => '+1 555 010 0100',
                 'email' => 'reservations@afalina.example',

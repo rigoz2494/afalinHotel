@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RoomPrices\Tables;
 
 use App\Models\Room;
+use App\Models\RoomPrice;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -18,7 +19,11 @@ class RoomPricesTable
             ->columns([
                 TextColumn::make('room.name')
                     ->label(__('Room'))
-                    ->formatStateUsing(fn (?array $state): string => $state['en'] ?? $state['ru'] ?? '—')
+                    // `->getStateUsing()`, not `->formatStateUsing()`: see
+                    // the identical comment in RoomsTable.php — the latter
+                    // gets called once per array element, not with the
+                    // {en, ru} pair itself, for an array-cast attribute.
+                    ->getStateUsing(fn (RoomPrice $record): string => $record->room->name['en'] ?? $record->room->name['ru'] ?? '—')
                     ->sortable(),
                 TextColumn::make('price_override')
                     ->label(__('Price override'))

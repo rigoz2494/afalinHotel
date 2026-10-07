@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CallbackRequests\Tables;
 
 use App\Enums\CallbackRequestStatus;
+use App\Models\CallbackRequest;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -27,9 +28,15 @@ class CallbackRequestsTable
                     ->searchable(),
                 TextColumn::make('rooms')
                     ->label(__('Rooms'))
-                    ->formatStateUsing(fn (?array $state): string => $state === null
+                    // `->getStateUsing()`, not `->formatStateUsing()`: the
+                    // latter gets called once per line item for a list-cast
+                    // attribute like this one, not once with the whole
+                    // list — `count($state)` on a single line item (an
+                    // associative array of its own fields) was quietly
+                    // showing the field count instead of the room count.
+                    ->getStateUsing(fn (CallbackRequest $record): string => $record->rooms === null
                         ? '—'
-                        : trans_choice('{1} :count room|[2,*] :count rooms', count($state), ['count' => count($state)])),
+                        : trans_choice('{1} :count room|[2,*] :count rooms', count($record->rooms), ['count' => count($record->rooms)])),
                 TextColumn::make('currency')
                     ->label(__('Currency'))
                     ->sortable(),

@@ -2,7 +2,10 @@ export type HotelSettings = {
     // Both languages are always present, like section_headings below.
     hotel_name: { en: string; ru: string };
     tagline: string | null;
-    promo_banner: string | null;
+    // null hides the banner entirely; once any text is set, both keys are
+    // present — see the `localized()` helper for the "ru falls back to en"
+    // behavior if only one language was filled in.
+    promo_banner: { en: string | null; ru: string | null } | null;
     hero_images: string[];
     contacts: Record<string, string>;
     // Both languages are always present; see the `localized()` helper.

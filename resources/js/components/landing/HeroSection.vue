@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { Gift } from '@lucide/vue';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
 
 const props = defineProps<{ hotel: HotelSettings }>();
 const { t, locale } = useLocale();
+
+// null (hidden) when the admin hasn't set a promo in either language;
+// otherwise the guest's own language, falling back to English if only
+// that one was filled in — see HotelSetting::normalizedPromoBanner().
+const promoBanner = computed(() =>
+    props.hotel.promo_banner
+        ? localized(props.hotel.promo_banner, locale.value)
+        : null,
+);
 
 const activeSlide = ref(0);
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -67,11 +76,11 @@ onBeforeUnmount(() => {
                 {{ hotel.tagline }}
             </p>
             <p
-                v-if="hotel.promo_banner"
+                v-if="promoBanner"
                 class="mx-auto mt-6 flex max-w-xl items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/15 px-4 py-1.5 text-xs text-amber-100 backdrop-blur sm:mt-8 sm:px-5 sm:py-2 sm:text-sm"
             >
                 <Gift class="size-4 shrink-0 text-amber-300" />
-                {{ hotel.promo_banner }}
+                {{ promoBanner }}
             </p>
             <a
                 href="#rooms"

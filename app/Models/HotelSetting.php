@@ -108,4 +108,28 @@ class HotelSetting extends Model
 
         return $name;
     }
+
+    /**
+     * Unlike {@see defaultedHotelName()}, there's no sensible default promo
+     * text to fall back to — an admin who never set one just keeps seeing
+     * no banner at all (the frontend hides it when this returns null).
+     *
+     * @return array{en: string|null, ru: string|null}|null
+     */
+    public static function normalizedPromoBanner(mixed $stored): ?array
+    {
+        // Pre-translation data was a single, English-only string; treat it
+        // as the "en" value rather than discarding it.
+        if (is_string($stored)) {
+            return $stored === '' ? null : ['en' => $stored, 'ru' => null];
+        }
+
+        if (! is_array($stored)) {
+            return null;
+        }
+
+        $banner = ['en' => $stored['en'] ?? null, 'ru' => $stored['ru'] ?? null];
+
+        return filled($banner['en']) || filled($banner['ru']) ? $banner : null;
+    }
 }

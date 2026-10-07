@@ -290,7 +290,7 @@ export function provideLocale(): LocaleContext {
  * even that is missing.
  */
 export function localized(
-    value: Partial<Record<Locale, string>> | null | undefined,
+    value: Partial<Record<Locale, string | null>> | null | undefined,
     locale: Locale,
 ): string {
     return value?.[locale] || value?.en || '';

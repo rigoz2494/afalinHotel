@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Rooms\Tables;
 
 use App\Models\Currency;
+use App\Models\Room;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,7 +26,15 @@ class RoomsTable
                     ->circular(),
                 TextColumn::make('name')
                     ->label(__('Name'))
-                    ->formatStateUsing(fn (?array $state): string => $state['en'] ?? $state['ru'] ?? '—')
+                    // `->getStateUsing()`, not `->formatStateUsing()`: the
+                    // latter only ever receives the *whole* state, but
+                    // Filament auto-detects an array-cast attribute like
+                    // this {en, ru} pair as a "list" state and calls the
+                    // formatter once per element — i.e. once with the
+                    // string "Standard Double Room", then again with
+                    // "Стандарт...", never with the array itself. This
+                    // computes the display string directly instead.
+                    ->getStateUsing(fn (Room $record): string => $record->name['en'] ?? $record->name['ru'] ?? '—')
                     ->sortable(),
                 TextColumn::make('bed_type')
                     ->label(__('Bed'))

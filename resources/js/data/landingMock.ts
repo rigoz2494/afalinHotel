@@ -11,8 +11,10 @@ const unsplash = (id: string, width = 1600): string =>
 export const mockHotel: HotelSettings = {
     hotel_name: { en: 'Afalina', ru: 'Афалина' },
     tagline: 'Quiet luxury in the heart of the city',
-    promo_banner:
-        'Special Offer: Book now and get a 5% discount on early bird reservations!',
+    promo_banner: {
+        en: 'Special Offer: Book now and get a 5% discount on early bird reservations!',
+        ru: 'Специальное предложение: забронируйте сейчас и получите скидку 5% при раннем бронировании!',
+    },
     // Hero slides come only from the database (see HeroImageSeeder).
     hero_images: [],
     contacts: {

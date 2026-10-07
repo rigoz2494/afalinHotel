@@ -31,7 +31,9 @@ class HotelSettingsResource extends JsonResource
             // real name, never a blank or a generic placeholder.
             'hotel_name' => HotelSetting::defaultedHotelName($this->resource['hotel_name'] ?? null),
             'tagline' => $this->resource['tagline'] ?? null,
-            'promo_banner' => $this->resource['promo_banner'] ?? null,
+            // {en, ru} once any text is set, null (hidden) otherwise — see
+            // HotelSetting::normalizedPromoBanner().
+            'promo_banner' => HotelSetting::normalizedPromoBanner($this->resource['promo_banner'] ?? null),
             'hero_images' => $heroImages,
             'contacts' => $this->resource['contacts'] ?? [],
             // Any section/locale the admin hasn't set yet falls back to a

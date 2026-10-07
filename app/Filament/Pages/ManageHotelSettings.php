@@ -49,7 +49,7 @@ class ManageHotelSettings extends Page
         $this->form->fill([
             'hotel_name' => HotelSetting::defaultedHotelName($settings->get('hotel_name')),
             'tagline' => $settings->get('tagline'),
-            'promo_banner' => $settings->get('promo_banner'),
+            'promo_banner' => HotelSetting::normalizedPromoBanner($settings->get('promo_banner')) ?? ['en' => null, 'ru' => null],
             'hero_images' => $settings->get('hero_images', []),
             'contacts' => $settings->get('contacts', []),
             'section_headings' => HotelSetting::defaultedSectionHeadings($settings->get('section_headings', [])),
@@ -85,10 +85,24 @@ class ManageHotelSettings extends Page
                         TextInput::make('tagline')
                             ->label(__('Tagline'))
                             ->maxLength(150),
-                        Textarea::make('promo_banner')
+                        Tabs::make('promo_banner_locale')
                             ->label(__('Promo banner'))
-                            ->helperText(__('Shown as a pill above the "View rooms" button. Leave blank to hide it.'))
-                            ->rows(2),
+                            ->tabs([
+                                Tab::make(__('English'))
+                                    ->schema([
+                                        Textarea::make('promo_banner.en')
+                                            ->label(__('Promo banner'))
+                                            ->helperText(__('Shown as a pill above the "View rooms" button. Leave both languages blank to hide it.'))
+                                            ->rows(2),
+                                    ]),
+                                Tab::make(__('Russian'))
+                                    ->schema([
+                                        Textarea::make('promo_banner.ru')
+                                            ->label(__('Promo banner'))
+                                            ->helperText(__('Shown to guests browsing the site in Russian. Left blank, the English text above is shown instead.'))
+                                            ->rows(2),
+                                    ]),
+                            ]),
                         FileUpload::make('hero_images')
                             ->label(__('Hero slideshow photos'))
                             ->helperText(__('These fade into one another every 5 seconds behind the hero title. Uploads are resized to 1920px wide and converted to WebP.'))

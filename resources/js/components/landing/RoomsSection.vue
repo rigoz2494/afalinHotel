@@ -256,8 +256,18 @@ const stepImage = (direction: 1 | -1): void => {
             </div>
         </div>
 
+        <!--
+            justify-start, not justify-center: the "Previous/Next room"
+            arrows sit near the top of this block, and a centered flex
+            column re-centers its *whole* group whenever anything inside it
+            changes height — the description (fixed below), but just as
+            much the amenity badge row, which has a different tag count per
+            room and disappears entirely for the one room with none at all.
+            Anchoring to the top makes the arrows' position immune to any of
+            that, instead of chasing every individual variable-height child.
+        -->
         <div
-            class="relative z-10 flex flex-1 flex-col justify-center gap-3 overflow-y-auto p-5 sm:gap-4 sm:p-8 lg:h-full lg:w-2/5 lg:gap-3 lg:p-10"
+            class="relative z-10 flex flex-1 flex-col justify-start gap-3 overflow-y-auto p-5 sm:gap-4 sm:p-8 lg:h-full lg:w-2/5 lg:gap-3 lg:p-10"
         >
             <div>
                 <p
