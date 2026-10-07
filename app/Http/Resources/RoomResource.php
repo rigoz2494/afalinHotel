@@ -32,13 +32,10 @@ class RoomResource extends JsonResource
             'amenities' => [
                 'capacity' => $this->capacity,
                 'bed_type' => $this->bed_type,
-                'furniture' => $this->furniture,
-                // Nullable: the client falls back to the English list above
-                // when this hasn't been set (not seeded, or admin-added
-                // without a translation yet), the same way faqs do.
-                'furniture_ru' => $this->furniture_ru,
-                'has_tv' => $this->has_tv,
-                'has_air_conditioning' => $this->has_air_conditioning,
+                // A fixed vocabulary of tags (see Room::AMENITY_TAGS), each
+                // mapped to one icon and a bilingual label on the frontend —
+                // not free text, so there's nothing here left to translate.
+                'tags' => $this->amenities ?? [],
             ],
         ];
     }

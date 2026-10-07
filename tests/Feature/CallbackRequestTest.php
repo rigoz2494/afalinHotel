@@ -49,7 +49,7 @@ class CallbackRequestTest extends TestCase
 
     public function test_selected_rooms_are_priced_by_the_server_not_the_browser(): void
     {
-        $deluxe = Room::factory()->create(['name' => 'Deluxe Room', 'base_price' => 200, 'discount_percentage' => null]);
+        $deluxe = Room::factory()->create(['name' => ['en' => 'Deluxe Room', 'ru' => 'Делюкс'], 'base_price' => 200, 'discount_percentage' => null]);
         // +50% season modifier makes the regular rate $300, then a 10% promo makes it $270.
         $period = PricingPeriod::factory()->create(['name' => 'Month 1', 'modifier_percentage' => 50]);
         RoomPrice::factory()->create([
@@ -57,7 +57,7 @@ class CallbackRequestTest extends TestCase
             'pricing_period_id' => $period->id,
             'discount_percentage' => 10,
         ]);
-        $suite = Room::factory()->create(['name' => 'Family Suite', 'base_price' => 210]);
+        $suite = Room::factory()->create(['name' => ['en' => 'Family Suite', 'ru' => 'Семейный люкс'], 'base_price' => 210]);
 
         $this->postJson(route('api.v1.callback-requests.store'), [
             'name' => 'Jane',

@@ -105,7 +105,7 @@ class CurrencyTest extends TestCase
         $this->assertSame(0.92, $booking->exchange_rate);
         $this->assertEquals([[
             'room_id' => $room->id,
-            'room_name' => $room->name,
+            'room_name' => $room->name['en'],
             'period' => 'June',
             'currency' => 'EUR',
             'base_price' => 135,

@@ -26,6 +26,7 @@ const hotelPhoneHref = computed(() =>
 );
 
 const form = reactive({ name: '', phone: '', message: '' });
+const wantsBalcony = ref(false);
 const status = ref<'idle' | 'sending' | 'sent' | 'error'>('idle');
 const phoneError = ref<string | null>(null);
 
@@ -82,6 +83,7 @@ const submit = async (): Promise<void> => {
             },
             body: JSON.stringify({
                 ...form,
+                wants_balcony: wantsBalcony.value,
                 // The currency and its converted prices are locked into the booking.
                 currency: selected.value.code,
                 rooms: items.value.map((item) => ({
@@ -99,6 +101,7 @@ const submit = async (): Promise<void> => {
         }
 
         Object.assign(form, { name: '', phone: '', message: '' });
+        wantsBalcony.value = false;
         clear();
         status.value = 'sent';
 
@@ -222,6 +225,16 @@ const inputClass =
                 :placeholder="t('messagePlaceholder')"
                 :class="inputClass"
             ></textarea>
+            <label
+                class="flex items-center gap-2.5 text-sm text-white/80 select-none"
+            >
+                <input
+                    v-model="wantsBalcony"
+                    type="checkbox"
+                    class="size-4 rounded border-white/25 bg-black/35 text-amber-300 focus:ring-amber-300/50"
+                />
+                {{ t('balconyPreference') }}
+            </label>
             <button
                 type="submit"
                 :disabled="status === 'sending'"

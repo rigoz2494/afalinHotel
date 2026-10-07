@@ -18,8 +18,22 @@ import type { PricingColumn, PricingRow } from '@/types/landing';
  * through next to the lower final price, with an "N% off" badge.
  */
 
-export const rawPrice = (row: PricingRow, column: PricingColumn): number =>
-    Number(row.prices[column.id] ?? row.base_price);
+/** True for a cell that's a literal display override (e.g. "900/1300" for a
+ * child/adult split rate) rather than a price to do arithmetic on. */
+export const isPriceOverride = (
+    row: PricingRow,
+    column: PricingColumn,
+): boolean => typeof row.prices[column.id] === 'string';
+
+export const rawPrice = (row: PricingRow, column: PricingColumn): number => {
+    const value = row.prices[column.id];
+
+    // An override cell has nothing numeric to fall back to here — the
+    // template renders it via `isPriceOverride` instead of this value.
+    return typeof value === 'string'
+        ? Number(row.base_price)
+        : (value ?? Number(row.base_price));
+};
 
 export const cellPrice = (row: PricingRow, column: PricingColumn): number => {
     const percentage = row.monthly_discounts?.[column.id];

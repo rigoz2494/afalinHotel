@@ -20,8 +20,8 @@ class BookingCrudTest extends TestCase
 
     public function test_guest_can_submit_a_multi_room_booking(): void
     {
-        $deluxe = Room::factory()->create(['name' => 'Deluxe Room', 'base_price' => 100, 'discount_percentage' => null]);
-        $suite = Room::factory()->create(['name' => 'Family Suite', 'base_price' => 210, 'discount_percentage' => null]);
+        $deluxe = Room::factory()->create(['name' => ['en' => 'Deluxe Room', 'ru' => 'Делюкс'], 'base_price' => 100, 'discount_percentage' => null]);
+        $suite = Room::factory()->create(['name' => ['en' => 'Family Suite', 'ru' => 'Семейный люкс'], 'base_price' => 210, 'discount_percentage' => null]);
         // 26% season modifier turns Deluxe's $100 base into $126 for Month 1.
         PricingPeriod::factory()->create(['name' => 'Month 1', 'sort_order' => 1, 'modifier_percentage' => 26]);
         PricingPeriod::factory()->create(['name' => 'Month 2', 'sort_order' => 2]);

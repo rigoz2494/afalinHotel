@@ -9,13 +9,18 @@ class PricingPeriodSeeder extends Seeder
 {
     public function run(): void
     {
-        // A realistic seasonal curve: a quiet month, two regular months, then a
-        // peak month, each priced from the room's own base price automatically.
+        // The four real seasons. Each period's modifier is calibrated to the
+        // Standard Double room (the most common category) — its own rate for
+        // every season comes out exact from this formula alone. The other
+        // five rooms don't share a single clean percentage curve with it (a
+        // real hotel's seasonal pricing rarely does), so RoomSeeder gives
+        // them an explicit RoomPrice::price_override for the seasons where
+        // the formula alone wouldn't land on their real rate.
         $periods = [
-            ['name' => 'Month 1', 'modifier_percentage' => -10],
-            ['name' => 'Month 2', 'modifier_percentage' => 0],
-            ['name' => 'Month 3', 'modifier_percentage' => 10],
-            ['name' => 'Month 4', 'modifier_percentage' => 25],
+            ['name' => '01.05–10.06', 'modifier_percentage' => 0],
+            ['name' => '11.06–30.06', 'modifier_percentage' => 22.22],
+            ['name' => '01.07–31.08', 'modifier_percentage' => 33.33],
+            ['name' => '01.09–30.09', 'modifier_percentage' => 22.22],
         ];
 
         foreach ($periods as $index => $period) {

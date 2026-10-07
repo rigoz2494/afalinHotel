@@ -12,19 +12,18 @@ export type HotelSettings = {
 export type Room = {
     id: number;
     slug: string;
-    name: string;
-    description: string | null;
+    // Both languages are always present, like hotel_name above.
+    name: { en: string; ru: string };
+    description: { en: string; ru: string };
     images: string[];
     base_price: number | string;
     amenities: {
         capacity: number;
         bed_type: string;
-        furniture: string[];
-        // Null until set by the admin or by auto-translation at seed time;
-        // see the `localized()`-style fallback where this is displayed.
-        furniture_ru: string[] | null;
-        has_tv: boolean;
-        has_air_conditioning: boolean;
+        // A fixed vocabulary of tags (see Room::AMENITY_TAGS on the
+        // backend), each rendered as one icon + bilingual label — see
+        // the `amenity*` keys in useLocale.ts.
+        tags: string[];
     };
 };
 
@@ -35,10 +34,12 @@ export type PricingColumn = {
 
 export type PricingRow = {
     room_id: number;
-    room_name: string;
-    // Keyed by the column's PricingPeriod id, not its (editable) label.
-    // A room without a price row for some active period simply has no
-    // entry for that key.
+    // Both languages are always present, like Room.name above.
+    room_name: { en: string; ru: string };
+    // Keyed by the column's PricingPeriod id, not its (editable) label. A
+    // room without a price row for some active period simply has no entry
+    // for that key. A string value is a literal display override (e.g. a
+    // child/adult split rate like "900/1300"), not a price to do math on.
     prices: Record<number, number | string>;
     base_price: number | string;
     monthly_discounts?: Record<number, number>;

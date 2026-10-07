@@ -15,6 +15,7 @@ class StoreCallbackRequestRequest extends FormRequest
             'name' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
             'message' => ['nullable', 'string', 'max:2000'],
+            'wants_balcony' => ['nullable', 'boolean'],
             'currency' => ['nullable', 'string', 'size:3'],
             'rooms' => ['nullable', 'array', 'max:20'],
             'rooms.*.room_id' => ['required', 'integer'],

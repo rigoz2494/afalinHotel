@@ -74,11 +74,21 @@ const translations = {
     capacity: { en: 'Capacity', ru: 'Вместимость' },
     guestsCount: { en: '{n} guests', ru: '{n} гостей' },
     bed: { en: 'Bed', ru: 'Кровать' },
-    tv: { en: 'TV', ru: 'Телевизор' },
-    airConditioning: { en: 'Air conditioning', ru: 'Кондиционер' },
-    yes: { en: 'Yes', ru: 'Да' },
-    no: { en: 'No', ru: 'Нет' },
-    furniture: { en: 'Furniture', ru: 'Мебель' },
+    // Amenity tags: a fixed vocabulary (see Room::AMENITY_TAGS), each
+    // rendered as one minimalist icon badge under the room title.
+    amenityDoubleBed: { en: 'Double bed', ru: 'Двуспальная кровать' },
+    amenityTwinBeds: { en: 'Twin beds', ru: 'Раздельные кровати' },
+    amenitySofa: { en: 'Sofa', ru: 'Диван' },
+    amenityArmchair: { en: 'Armchair', ru: 'Кресло' },
+    amenityTable: { en: 'Table', ru: 'Стол' },
+    amenityNightstand: { en: 'Nightstand', ru: 'Тумба' },
+    amenityChairs: { en: 'Chairs', ru: 'Стулья' },
+    amenityWardrobe: { en: 'Wardrobe', ru: 'Шкаф-купе' },
+    amenityHanger: { en: 'Coat rack', ru: 'Напольная вешалка' },
+    amenityTv: { en: 'TV', ru: 'Телевизор' },
+    amenityAc: { en: 'AC', ru: 'Кондиционер' },
+    amenityFridge: { en: 'Fridge', ru: 'Холодильник' },
+    amenitySafeBox: { en: 'Safe', ru: 'Сейф' },
 
     // Pricing table
     pricingIntro: {
@@ -173,6 +183,10 @@ const translations = {
     invalidPhone: {
         en: 'Please enter a complete phone number.',
         ru: 'Пожалуйста, введите полный номер телефона.',
+    },
+    balconyPreference: {
+        en: 'Preference: room with a balcony',
+        ru: 'Пожелание: номер с балконом',
     },
 
     // Direct call

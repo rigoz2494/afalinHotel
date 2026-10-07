@@ -25,16 +25,16 @@ class HotelApiTest extends TestCase
 
     public function test_rooms_endpoint_returns_only_active_rooms_in_order_with_amenities(): void
     {
-        Room::factory()->create(['name' => 'Second', 'sort_order' => 2]);
-        Room::factory()->create(['name' => 'First', 'sort_order' => 1, 'bed_type' => 'King']);
+        Room::factory()->create(['name' => ['en' => 'Second', 'ru' => 'Второй'], 'sort_order' => 2]);
+        Room::factory()->create(['name' => ['en' => 'First', 'ru' => 'Первый'], 'sort_order' => 1, 'bed_type' => 'King']);
         Room::factory()->inactive()->create();
 
         $this->getJson(route('api.v1.rooms.index'))
             ->assertOk()
             ->assertJsonCount(2, 'data')
-            ->assertJsonPath('data.0.name', 'First')
+            ->assertJsonPath('data.0.name.en', 'First')
             ->assertJsonPath('data.0.amenities.bed_type', 'King')
-            ->assertJsonStructure(['data' => [['id', 'slug', 'name', 'description', 'images', 'base_price', 'amenities' => ['capacity', 'bed_type', 'furniture', 'has_tv', 'has_air_conditioning']]]]);
+            ->assertJsonStructure(['data' => [['id', 'slug', 'name' => ['en', 'ru'], 'description' => ['en', 'ru'], 'images', 'base_price', 'amenities' => ['capacity', 'bed_type', 'tags']]]]);
     }
 
     public function test_pricing_endpoint_returns_dynamic_columns_and_rows(): void
@@ -42,7 +42,7 @@ class HotelApiTest extends TestCase
         // June's +10% modifier makes the regular rate $110, July's +20% makes it $120.
         $june = PricingPeriod::factory()->create(['name' => 'June', 'sort_order' => 1, 'modifier_percentage' => 10]);
         $july = PricingPeriod::factory()->create(['name' => 'July', 'sort_order' => 2, 'modifier_percentage' => 20]);
-        $room = Room::factory()->create(['name' => 'Deluxe', 'base_price' => 100]);
+        $room = Room::factory()->create(['name' => ['en' => 'Deluxe', 'ru' => 'Делюкс'], 'base_price' => 100]);
         RoomPrice::factory()->for($room)->for($june, 'pricingPeriod')->create(['discount_percentage' => 5]);
 
         $this->getJson(route('api.v1.pricing.index'))
@@ -51,7 +51,7 @@ class HotelApiTest extends TestCase
                 ['id' => $june->id, 'label' => 'June'],
                 ['id' => $july->id, 'label' => 'July'],
             ])
-            ->assertJsonPath('data.0.room_name', 'Deluxe')
+            ->assertJsonPath('data.0.room_name.en', 'Deluxe')
             ->assertJsonPath('data.0.prices', [(string) $june->id => 110, (string) $july->id => 120])
             ->assertJsonPath('data.0.base_price', 100)
             ->assertJsonPath('data.0.monthly_discounts', [(string) $june->id => 5]);
@@ -60,7 +60,7 @@ class HotelApiTest extends TestCase
     public function test_pricing_endpoint_keeps_discounts_correct_after_a_period_is_renamed(): void
     {
         $period = PricingPeriod::factory()->create(['name' => 'Month 1', 'sort_order' => 1]);
-        $room = Room::factory()->create(['name' => 'Deluxe']);
+        $room = Room::factory()->create(['name' => ['en' => 'Deluxe', 'ru' => 'Делюкс']]);
         RoomPrice::factory()->for($room)->for($period, 'pricingPeriod')->create(['discount_percentage' => 5]);
 
         // Renaming the period (as an admin would in Filament) must not

@@ -41,8 +41,11 @@ export const mockRooms: Room[] = [
     {
         id: 1,
         slug: 'deluxe-double',
-        name: 'Deluxe Double',
-        description: 'Bright, calm room with city views and a plush king bed.',
+        name: { en: 'Deluxe Double', ru: 'Делюкс Дабл' },
+        description: {
+            en: 'Bright, calm room with city views and a plush king bed.',
+            ru: 'Светлый, тихий номер с видом на город и большой кроватью king-size.',
+        },
         images: [
             unsplash('photo-1611892440504-42a792e24d32'),
             unsplash('photo-1618773928121-c32242e63f39'),
@@ -52,22 +55,17 @@ export const mockRooms: Room[] = [
         amenities: {
             capacity: 2,
             bed_type: 'King bed',
-            furniture: ['Work desk', 'Armchair', 'Wardrobe', 'Bedside tables'],
-            furniture_ru: [
-                'Письменный стол',
-                'Кресло',
-                'Шкаф',
-                'Прикроватные тумбочки',
-            ],
-            has_tv: true,
-            has_air_conditioning: true,
+            tags: ['double_bed', 'table', 'nightstand', 'wardrobe', 'tv', 'ac'],
         },
     },
     {
         id: 2,
         slug: 'family-suite',
-        name: 'Family Suite',
-        description: 'Two-room suite with a living area, ideal for families.',
+        name: { en: 'Family Suite', ru: 'Семейный люкс' },
+        description: {
+            en: 'Two-room suite with a living area, ideal for families.',
+            ru: 'Двухкомнатный люкс с гостиной зоной, идеальный для семей.',
+        },
         images: [
             unsplash('photo-1582719478250-c89cae4dc85b'),
             unsplash('photo-1590490360182-c33d57733427'),
@@ -77,17 +75,25 @@ export const mockRooms: Room[] = [
         amenities: {
             capacity: 4,
             bed_type: 'King + 2 singles',
-            furniture: ['Sofa', 'Dining table', 'Wardrobe', 'Kids desk'],
-            furniture_ru: ['Диван', 'Обеденный стол', 'Шкаф', 'Детский стол'],
-            has_tv: true,
-            has_air_conditioning: true,
+            tags: [
+                'double_bed',
+                'sofa',
+                'table',
+                'wardrobe',
+                'hanger',
+                'tv',
+                'ac',
+            ],
         },
     },
     {
         id: 3,
         slug: 'executive-suite',
-        name: 'Executive Suite',
-        description: 'Top-floor suite with panoramic views and a lounge.',
+        name: { en: 'Executive Suite', ru: 'Люкс' },
+        description: {
+            en: 'Top-floor suite with panoramic views and a lounge.',
+            ru: 'Люкс на верхнем этаже с панорамным видом и гостиной зоной.',
+        },
         images: [
             unsplash('photo-1631049307264-da0ec9d70304'),
             unsplash('photo-1611892440504-42a792e24d32'),
@@ -97,20 +103,18 @@ export const mockRooms: Room[] = [
         amenities: {
             capacity: 3,
             bed_type: 'Super king bed',
-            furniture: [
-                'Lounge sofa',
-                'Walk-in wardrobe',
-                'Writing desk',
-                'Minibar',
+            tags: [
+                'double_bed',
+                'armchair',
+                'sofa',
+                'table',
+                'wardrobe',
+                'hanger',
+                'tv',
+                'ac',
+                'fridge',
+                'safe_box',
             ],
-            furniture_ru: [
-                'Диван для отдыха',
-                'Гардеробная',
-                'Письменный стол',
-                'Минибар',
-            ],
-            has_tv: true,
-            has_air_conditioning: true,
         },
     },
 ];
@@ -124,21 +128,21 @@ export const mockPricing: PricingTable = {
     rows: [
         {
             room_id: 1,
-            room_name: 'Deluxe Double',
+            room_name: { en: 'Deluxe Double', ru: 'Делюкс Дабл' },
             prices: { 1: 180, 2: 240, 3: 300 },
             base_price: 180,
             monthly_discounts: {},
         },
         {
             room_id: 2,
-            room_name: 'Family Suite',
+            room_name: { en: 'Family Suite', ru: 'Семейный люкс' },
             prices: { 1: 290, 2: 380, 3: 460 },
             base_price: 290,
             monthly_discounts: { 1: 10 },
         },
         {
             room_id: 3,
-            room_name: 'Executive Suite',
+            room_name: { en: 'Executive Suite', ru: 'Люкс' },
             prices: { 1: 420, 2: 540, 3: 650 },
             base_price: 420,
             monthly_discounts: { 1: 15, 2: 5 },

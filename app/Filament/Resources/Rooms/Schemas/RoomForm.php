@@ -3,13 +3,16 @@
 namespace App\Filament\Resources\Rooms\Schemas;
 
 use App\Models\Currency;
+use App\Models\Room;
 use App\Services\ImageOptimizer;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -25,24 +28,45 @@ class RoomForm
                 Section::make(__('Room details'))
                     ->columns(2)
                     ->schema([
-                        TextInput::make('name')
-                            ->label(__('Name'))
-                            ->required()
-                            ->maxLength(100)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                        Tabs::make('name_and_description_locale')
+                            ->columnSpanFull()
+                            ->tabs([
+                                Tab::make(__('English'))
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('name.en')
+                                            ->label(__('Name'))
+                                            ->required()
+                                            ->maxLength(100)
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                        Textarea::make('description.en')
+                                            ->label(__('Description'))
+                                            ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
+                                            ->placeholder(__('e.g. A bright, quiet room with a king bed and a view of the garden.'))
+                                            ->required()
+                                            ->rows(3)
+                                            ->columnSpanFull(),
+                                    ]),
+                                Tab::make(__('Russian'))
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('name.ru')
+                                            ->label(__('Name'))
+                                            ->required()
+                                            ->maxLength(100),
+                                        Textarea::make('description.ru')
+                                            ->label(__('Description'))
+                                            ->required()
+                                            ->rows(3)
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
                         TextInput::make('slug')
                             ->label(__('Slug'))
                             ->required()
                             ->maxLength(100)
                             ->unique(ignoreRecord: true),
-                        Textarea::make('description')
-                            ->label(__('Description'))
-                            ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
-                            ->placeholder(__('e.g. A bright, quiet room with a king bed and a view of the garden.'))
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
                         TextInput::make('base_price')
                             ->label(__('Base price per night'))
                             ->helperText(__('The starting rate for this room. Seasonal Prices multiplies it automatically for each month — you never need to update it by hand for a season change.'))
@@ -72,18 +96,16 @@ class RoomForm
                             ->label(__('Bed type'))
                             ->required()
                             ->maxLength(50),
-                        TagsInput::make('furniture')
-                            ->label(__('Furniture & amenities'))
-                            ->helperText(__('Press enter after each item, e.g. "Armchair", "Wardrobe".'))
+                        CheckboxList::make('amenities')
+                            ->label(__('Furniture & appliances'))
+                            ->helperText(__('Shown on the public site as a row of icon badges, in whichever language the guest is browsing in.'))
+                            ->options(array_combine(Room::AMENITY_TAGS, [
+                                __('Double bed'), __('Twin beds'), __('Sofa'), __('Armchair'),
+                                __('Table'), __('Nightstand'), __('Chairs'), __('Wardrobe'),
+                                __('Coat rack'), __('TV'), __('Air conditioning'), __('Fridge'), __('Safe'),
+                            ]))
+                            ->columns(3)
                             ->columnSpanFull(),
-                        TagsInput::make('furniture_ru')
-                            ->label(__('Furniture & amenities (Russian)'))
-                            ->helperText(__('Shown to guests browsing the site in Russian. Left blank, the English tags above are shown instead.'))
-                            ->columnSpanFull(),
-                        Toggle::make('has_tv')
-                            ->label(__('Has TV')),
-                        Toggle::make('has_air_conditioning')
-                            ->label(__('Has air conditioning')),
                     ]),
 
                 Section::make(__('Photos'))

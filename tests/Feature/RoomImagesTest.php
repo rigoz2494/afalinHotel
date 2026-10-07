@@ -71,7 +71,7 @@ class RoomImagesTest extends TestCase
         $room = Room::factory()->create(['images' => ['rooms/a.webp', 'rooms/b.webp']]);
 
         Livewire::test(EditRoom::class, ['record' => $room->getRouteKey()])
-            ->fillForm(['name' => 'Renamed Room'])
+            ->fillForm(['name.en' => 'Renamed Room'])
             ->call('save')
             ->assertHasNoFormErrors();
 

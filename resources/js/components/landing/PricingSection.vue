@@ -6,6 +6,7 @@ import { localized, useLocale } from '@/composables/useLocale';
 import {
     cellPrice,
     isDeal,
+    isPriceOverride,
     percentOffBase,
 } from '@/composables/usePricingDisplay';
 import type { HotelSettings, PricingTable } from '@/types/landing';
@@ -87,7 +88,7 @@ const { t, locale } = useLocale();
                                 <td
                                     class="px-4 py-3 align-middle text-sm font-medium sm:px-6 sm:py-5 sm:text-base"
                                 >
-                                    {{ row.room_name }}
+                                    {{ localized(row.room_name, locale) }}
                                 </td>
                                 <td
                                     v-for="column in pricing.columns"
@@ -112,12 +113,25 @@ const { t, locale } = useLocale();
                                         class="flex min-h-24 flex-col items-start justify-between gap-1.5 sm:min-h-28"
                                     >
                                         <!--
+                                            Case C (override): a literal display value, e.g.
+                                            "900/1300" for a child/adult split rate — there's no
+                                            single number here to add to the basket, so this
+                                            row has no Select button, just the text itself.
+                                        -->
+                                        <span
+                                            v-if="isPriceOverride(row, column)"
+                                            class="text-sm text-stone-200 sm:text-base"
+                                            >{{ row.prices[column.id] }}</span
+                                        >
+                                        <!--
                                             Case B (deal): the final price is below the room's
                                             base price — from a season markdown, a promo, or
                                             both. Show the base price struck through next to
                                             the lower final price, with an offer badge.
                                         -->
-                                        <template v-if="isDeal(row, column)">
+                                        <template
+                                            v-else-if="isDeal(row, column)"
+                                        >
                                             <div
                                                 class="flex flex-wrap items-center gap-1.5"
                                             >
@@ -178,70 +192,90 @@ const { t, locale } = useLocale();
                                             }}</span
                                         >
 
-                                        <button
-                                            v-if="
-                                                quantityFor(
-                                                    row.room_id,
-                                                    column.label,
-                                                ) === 0
-                                            "
-                                            type="button"
-                                            class="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200 sm:text-xs"
-                                            @click="
-                                                add(
-                                                    row.room_id,
-                                                    row.room_name,
-                                                    column.label,
-                                                    cellPrice(row, column),
-                                                )
-                                            "
-                                        >
-                                            {{ t('select') }}
-                                            <Plus class="size-3" />
-                                        </button>
-                                        <div
-                                            v-else
-                                            class="flex items-center gap-1.5 rounded-full bg-white/10 p-1"
+                                        <!--
+                                            An override cell (Case C above) has no single
+                                            price to add to the basket, so it gets no
+                                            Select/stepper control at all — just the text.
+                                        -->
+                                        <template
+                                            v-if="!isPriceOverride(row, column)"
                                         >
                                             <button
-                                                type="button"
-                                                :aria-label="t('removeOne')"
-                                                class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
-                                                @click="
-                                                    decrement(
-                                                        row.room_id,
-                                                        column.label,
-                                                    )
-                                                "
-                                            >
-                                                <Minus class="size-2.5" />
-                                            </button>
-                                            <span
-                                                class="min-w-4 text-center text-[11px] font-semibold sm:text-xs"
-                                            >
-                                                {{
+                                                v-if="
                                                     quantityFor(
                                                         row.room_id,
                                                         column.label,
-                                                    )
-                                                }}
-                                            </span>
-                                            <button
+                                                    ) === 0
+                                                "
                                                 type="button"
-                                                :aria-label="t('addOneMore')"
-                                                class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200"
+                                                class="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200 sm:text-xs"
                                                 @click="
                                                     add(
                                                         row.room_id,
-                                                        row.room_name,
+                                                        localized(
+                                                            row.room_name,
+                                                            locale,
+                                                        ),
                                                         column.label,
                                                         cellPrice(row, column),
                                                     )
                                                 "
                                             >
-                                                <Plus class="size-2.5" />
+                                                {{ t('select') }}
+                                                <Plus class="size-3" />
                                             </button>
-                                        </div>
+                                            <div
+                                                v-else
+                                                class="flex items-center gap-1.5 rounded-full bg-white/10 p-1"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    :aria-label="t('removeOne')"
+                                                    class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                                                    @click="
+                                                        decrement(
+                                                            row.room_id,
+                                                            column.label,
+                                                        )
+                                                    "
+                                                >
+                                                    <Minus class="size-2.5" />
+                                                </button>
+                                                <span
+                                                    class="min-w-4 text-center text-[11px] font-semibold sm:text-xs"
+                                                >
+                                                    {{
+                                                        quantityFor(
+                                                            row.room_id,
+                                                            column.label,
+                                                        )
+                                                    }}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    :aria-label="
+                                                        t('addOneMore')
+                                                    "
+                                                    class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200"
+                                                    @click="
+                                                        add(
+                                                            row.room_id,
+                                                            localized(
+                                                                row.room_name,
+                                                                locale,
+                                                            ),
+                                                            column.label,
+                                                            cellPrice(
+                                                                row,
+                                                                column,
+                                                            ),
+                                                        )
+                                                    "
+                                                >
+                                                    <Plus class="size-2.5" />
+                                                </button>
+                                            </div>
+                                        </template>
                                     </div>
                                 </td>
                             </tr>

@@ -14,16 +14,26 @@ class Room extends Model
     /** @use HasFactory<RoomFactory> */
     use HasFactory;
 
+    /**
+     * The fixed vocabulary of amenity tags the admin can pick from, and the
+     * only values `amenities` is ever expected to hold — each maps to one
+     * minimalist icon and a bilingual label on the frontend (see
+     * resources/js/composables/useLocale.ts and RoomsSection.vue).
+     *
+     * @var array<int, string>
+     */
+    public const array AMENITY_TAGS = [
+        'double_bed', 'twin_beds', 'sofa', 'armchair', 'table', 'nightstand',
+        'chairs', 'wardrobe', 'hanger', 'tv', 'ac', 'fridge', 'safe_box',
+    ];
+
     protected $fillable = [
         'name',
         'slug',
         'description',
         'capacity',
         'bed_type',
-        'has_tv',
-        'has_air_conditioning',
-        'furniture',
-        'furniture_ru',
+        'amenities',
         'images',
         'base_price',
         'discount_percentage',
@@ -37,18 +47,18 @@ class Room extends Model
     protected function casts(): array
     {
         return [
-            'furniture' => 'array',
-            'furniture_ru' => 'array',
+            'name' => 'array',
+            'description' => 'array',
+            'amenities' => 'array',
             'images' => 'array',
-            'has_tv' => 'boolean',
-            'has_air_conditioning' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
 
     /**
-     * Optional, room-specific promotional discounts for a given period. These
-     * stack on top of the period's own modifier_percentage; see PricingService.
+     * Optional, room-specific price or discount override for a given period.
+     * The room's regular rate for that period otherwise comes from
+     * PricingPeriod's modifier_percentage; see PricingService.
      *
      * @return HasMany<RoomPrice, $this>
      */

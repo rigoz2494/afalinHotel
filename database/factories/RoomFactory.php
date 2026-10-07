@@ -19,14 +19,12 @@ class RoomFactory extends Factory
         $name = fake()->unique()->words(2, true).' Room';
 
         return [
-            'name' => Str::title($name),
+            'name' => ['en' => Str::title($name), 'ru' => Str::title($name)],
             'slug' => Str::slug($name),
-            'description' => fake()->paragraph(),
+            'description' => ['en' => fake()->paragraph(), 'ru' => fake()->paragraph()],
             'capacity' => fake()->numberBetween(1, 4),
             'bed_type' => fake()->randomElement(['King', 'Queen', 'Twin', 'Double']),
-            'has_tv' => true,
-            'has_air_conditioning' => true,
-            'furniture' => ['Bedside table', 'Wardrobe', 'Armchair', 'Clothes rack'],
+            'amenities' => ['double_bed', 'wardrobe', 'tv', 'ac'],
             'images' => [],
             'base_price' => fake()->numberBetween(80, 500),
             'discount_percentage' => null,

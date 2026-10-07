@@ -17,7 +17,7 @@ class CallbackRequestService
      * browser. The rules match the pricing table: the discount is applied in the
      * base currency and rounded, then the result is converted and rounded again.
      *
-     * @param  array{name: string, phone: string, message?: string|null, currency?: string|null, rooms?: array<int, array{room_id: int, period: string|null, quantity: int}>}  $data
+     * @param  array{name: string, phone: string, message?: string|null, wants_balcony?: bool, currency?: string|null, rooms?: array<int, array{room_id: int, period: string|null, quantity: int}>}  $data
      */
     public function create(array $data, ?string $ipAddress): CallbackRequest
     {
@@ -27,6 +27,7 @@ class CallbackRequestService
             'name' => $data['name'],
             'phone' => $data['phone'],
             'message' => $data['message'] ?? null,
+            'wants_balcony' => $data['wants_balcony'] ?? false,
             'currency' => $currency->code,
             'exchange_rate' => $currency->exchange_rate,
             'rooms' => $this->priceRoomSelection($data['rooms'] ?? [], $currency),
@@ -103,14 +104,29 @@ class CallbackRequestService
                 ->first();
         }
 
+        if ($override?->price_override !== null && ! is_numeric($override->price_override)) {
+            // A literal, non-numeric display value (e.g. "900/1300" for a
+            // child/adult split rate) — there's no single per-unit price to
+            // book a quantity of, the same reason the pricing table shows no
+            // Select button for a cell like this.
+            throw ValidationException::withMessages([
+                "rooms.{$index}.period" => 'This room cannot be booked for that month directly — please call us instead.',
+            ]);
+        }
+
         // The season's modifier prices every room at once; no period means the
-        // plain base rate, with no promotional discount applied to it.
-        $regularPrice = $period === null
-            ? (float) $room->base_price
-            : round($room->base_price * (1 + $period->modifier_percentage / 100));
+        // plain base rate, with no promotional discount applied to it. An
+        // explicit price_override — set where the real rate doesn't fit the
+        // modifier formula closely enough — replaces it outright.
+        $regularPrice = match (true) {
+            $period === null => (float) $room->base_price,
+            $override?->price_override !== null => (float) $override->price_override,
+            default => round($room->base_price * (1 + $period->modifier_percentage / 100)),
+        };
 
         // A room-specific promo override wins; otherwise the room's fallback discount applies.
-        $discount = $period === null
+        // Doesn't stack with a price_override, which is already the final rate.
+        $discount = $period === null || $override?->price_override !== null
             ? null
             : ($override?->discount_percentage ?? $room->discount_percentage);
 
@@ -118,7 +134,10 @@ class CallbackRequestService
 
         return [
             'room_id' => $room->id,
-            'room_name' => $room->name,
+            // A plain-string snapshot for the admin dashboard (always
+            // English, since the admin panel itself runs in English) —
+            // room names are bilingual, but a booking record isn't.
+            'room_name' => $room->name['en'] ?? $room->name['ru'] ?? '',
             'period' => $period?->name,
             'currency' => $currency->code,
             'base_price' => (float) $basePrice,

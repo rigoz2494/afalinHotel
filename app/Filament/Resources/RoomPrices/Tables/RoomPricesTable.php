@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomPrices\Tables;
 
+use App\Models\Room;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,8 +18,11 @@ class RoomPricesTable
             ->columns([
                 TextColumn::make('room.name')
                     ->label(__('Room'))
-                    ->sortable()
-                    ->searchable(),
+                    ->formatStateUsing(fn (?array $state): string => $state['en'] ?? $state['ru'] ?? '—')
+                    ->sortable(),
+                TextColumn::make('price_override')
+                    ->label(__('Price override'))
+                    ->placeholder('—'),
                 TextColumn::make('pricingPeriod.name')
                     ->label(__('Month / season'))
                     ->sortable()
@@ -37,7 +41,12 @@ class RoomPricesTable
             ->filters([
                 SelectFilter::make('room')
                     ->label(__('Room'))
-                    ->relationship('room', 'name')
+                    // `name` is now a bilingual {en, ru} pair, not a plain
+                    // string, so `relationship()`'s title-attribute shortcut
+                    // can't pluck it directly — the options are built by hand.
+                    ->options(fn (): array => Room::query()->ordered()->get()
+                        ->mapWithKeys(fn (Room $room): array => [$room->id => $room->name['en'] ?? $room->name['ru'] ?? '—'])
+                        ->all())
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('pricingPeriod')

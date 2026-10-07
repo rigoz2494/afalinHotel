@@ -9,6 +9,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -32,6 +33,9 @@ class CallbackRequestForm
                             ->label(__('Guest message'))
                             ->disabled()
                             ->columnSpanFull(),
+                        Toggle::make('wants_balcony')
+                            ->label(__('Wants a room with a balcony'))
+                            ->disabled(),
                         TextInput::make('ip_address')
                             ->label(__('IP address'))
                             ->disabled(),

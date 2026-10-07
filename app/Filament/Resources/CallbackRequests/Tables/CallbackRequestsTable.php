@@ -6,8 +6,11 @@ use App\Enums\CallbackRequestStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class CallbackRequestsTable
@@ -30,6 +33,12 @@ class CallbackRequestsTable
                 TextColumn::make('currency')
                     ->label(__('Currency'))
                     ->sortable(),
+                IconColumn::make('wants_balcony')
+                    ->label(__('Balcony'))
+                    ->icon(fn (bool $state): Heroicon => $state ? Heroicon::OutlinedSparkles : Heroicon::OutlinedMinus)
+                    ->color(fn (bool $state): string => $state ? 'warning' : 'gray')
+                    ->tooltip(fn (bool $state): string => $state ? __('Wants a room with a balcony') : __('No balcony preference'))
+                    ->sortable(),
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
@@ -50,6 +59,8 @@ class CallbackRequestsTable
                 SelectFilter::make('status')
                     ->label(__('Status'))
                     ->options(CallbackRequestStatus::class),
+                TernaryFilter::make('wants_balcony')
+                    ->label(__('Balcony preference')),
             ])
             ->recordActions([
                 EditAction::make(),

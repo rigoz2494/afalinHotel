@@ -2,18 +2,29 @@
 import {
     Armchair,
     BedDouble,
-    Check,
+    BedSingle,
     ChevronLeft,
     ChevronRight,
+    DoorClosed,
+    Lamp,
+    Lock,
     Percent,
+    Refrigerator,
+    Shirt,
     Snowflake,
+    Sofa,
+    Table2,
     Tv,
     Users,
 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { useCurrency } from '@/composables/useCurrency';
-import { localized, useLocale } from '@/composables/useLocale';
+import {
+    localized,
+    useLocale,
+    type TranslationKey,
+} from '@/composables/useLocale';
 import {
     cellPrice,
     cheapestColumn,
@@ -33,6 +44,40 @@ const props = defineProps<{
 const { format } = useCurrency();
 const { t, locale } = useLocale();
 
+// Room::AMENITY_TAGS on the backend is the source of truth for which keys
+// are valid; this is purely presentational — one icon and one label key
+// per tag, so a new tag only ever needs adding in one place on each side.
+const AMENITY_ICONS: Record<string, typeof BedDouble> = {
+    double_bed: BedDouble,
+    twin_beds: BedSingle,
+    sofa: Sofa,
+    armchair: Armchair,
+    table: Table2,
+    nightstand: Lamp,
+    chairs: Armchair,
+    wardrobe: DoorClosed,
+    hanger: Shirt,
+    tv: Tv,
+    ac: Snowflake,
+    fridge: Refrigerator,
+    safe_box: Lock,
+};
+const AMENITY_LABEL_KEYS: Record<string, TranslationKey> = {
+    double_bed: 'amenityDoubleBed',
+    twin_beds: 'amenityTwinBeds',
+    sofa: 'amenitySofa',
+    armchair: 'amenityArmchair',
+    table: 'amenityTable',
+    nightstand: 'amenityNightstand',
+    chairs: 'amenityChairs',
+    wardrobe: 'amenityWardrobe',
+    hanger: 'amenityHanger',
+    tv: 'amenityTv',
+    ac: 'amenityAc',
+    fridge: 'amenityFridge',
+    safe_box: 'amenitySafeBox',
+};
+
 // Opens directly on the room this URL is about, instead of always the first
 // one — the deep link from sitemap.xml would otherwise land on the wrong room.
 const initialIndex = props.focusSlug
@@ -44,15 +89,25 @@ const initialIndex = props.focusSlug
 const activeIndex = ref(initialIndex);
 const imageIndex = ref(0);
 const activeRoom = computed(() => props.rooms[activeIndex.value]);
-// Falls back to the English list when no Russian translation has been set
-// yet for this room (not seeded, or admin-added without one) — the same
-// fallback FAQ and section headings use.
-const activeRoomFurniture = computed(() => {
-    const { furniture, furniture_ru: furnitureRu } = activeRoom.value.amenities;
+const activeRoomName = computed(() =>
+    localized(activeRoom.value.name, locale.value),
+);
+const activeRoomDescription = computed(() =>
+    localized(activeRoom.value.description, locale.value),
+);
+// Each tag paired with its icon and label, in the fixed vocabulary order —
+// not the room's own (admin-chosen, unordered) array order — so every
+// room's badge row reads in the same, familiar sequence.
+const activeRoomAmenityTags = computed(() => {
+    const tags = new Set(activeRoom.value.amenities.tags);
 
-    return locale.value === 'ru' && furnitureRu?.length
-        ? furnitureRu
-        : furniture;
+    return Object.keys(AMENITY_ICONS)
+        .filter((tag) => tags.has(tag))
+        .map((tag) => ({
+            tag,
+            icon: AMENITY_ICONS[tag],
+            label: t(AMENITY_LABEL_KEYS[tag]),
+        }));
 });
 
 // The cheapest active month for this room, shown as the card's teaser price.
@@ -97,6 +152,8 @@ watch(activeIndex, () => {
     imageIndex.value = 0;
 });
 
+// Capacity and bed type only — TV/AC/furniture are amenity tags now
+// (activeRoomAmenityTags above), not separate fields.
 const amenityItems = computed(() => {
     const { amenities } = activeRoom.value;
 
@@ -107,16 +164,6 @@ const amenityItems = computed(() => {
             value: t('guestsCount', { n: amenities.capacity }),
         },
         { icon: BedDouble, label: t('bed'), value: amenities.bed_type },
-        {
-            icon: Tv,
-            label: t('tv'),
-            value: amenities.has_tv ? t('yes') : t('no'),
-        },
-        {
-            icon: Snowflake,
-            label: t('airConditioning'),
-            value: amenities.has_air_conditioning ? t('yes') : t('no'),
-        },
     ];
 });
 
@@ -156,7 +203,7 @@ const stepImage = (direction: 1 | -1): void => {
                     <img
                         :key="`${activeRoom.id}-${imageIndex}`"
                         :src="activeRoom.images[imageIndex]"
-                        :alt="`${activeRoom.name} photo ${imageIndex + 1}`"
+                        :alt="`${activeRoomName} photo ${imageIndex + 1}`"
                         class="absolute inset-0 h-full w-full object-cover"
                         loading="lazy"
                         decoding="async"
@@ -249,10 +296,26 @@ const stepImage = (direction: 1 | -1): void => {
                     </div>
                 </div>
                 <h2 class="mt-2 text-2xl font-semibold sm:text-3xl lg:text-4xl">
-                    {{ activeRoom.name }}
+                    {{ activeRoomName }}
                 </h2>
+                <!-- Amenity tags: a fixed vocabulary, each one icon + a
+                bilingual label, right under the room title. -->
+                <ul
+                    v-if="activeRoomAmenityTags.length"
+                    class="mt-2 flex flex-wrap gap-1.5"
+                >
+                    <li
+                        v-for="item in activeRoomAmenityTags"
+                        :key="item.tag"
+                        :title="item.label"
+                        :aria-label="item.label"
+                        class="flex size-8 items-center justify-center rounded-full bg-white/10 text-amber-300 sm:size-9"
+                    >
+                        <component :is="item.icon" class="size-4 sm:size-4.5" />
+                    </li>
+                </ul>
                 <p class="mt-2 text-sm text-white/70 sm:mt-3 sm:text-base">
-                    {{ activeRoom.description }}
+                    {{ activeRoomDescription }}
                 </p>
                 <div
                     class="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4"
@@ -316,23 +379,6 @@ const stepImage = (direction: 1 | -1): void => {
                     </div>
                 </li>
             </ul>
-
-            <div>
-                <p class="mb-2 flex items-center gap-2 text-xs text-white/50">
-                    <Armchair class="size-4 text-amber-300" />
-                    {{ t('furniture') }}
-                </p>
-                <ul class="flex flex-wrap gap-2">
-                    <li
-                        v-for="item in activeRoomFurniture"
-                        :key="item"
-                        class="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-xs sm:px-3 sm:py-1 sm:text-sm"
-                    >
-                        <Check class="size-3.5 text-amber-300" />
-                        {{ item }}
-                    </li>
-                </ul>
-            </div>
         </div>
     </section>
 </template>

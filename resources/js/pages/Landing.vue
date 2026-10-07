@@ -130,12 +130,13 @@ const hotelName = computed(() =>
 // suffix, specifically so this can't double up into "Room — Afalina - Afalina".
 const seoTitle = computed(() =>
     focusRoom.value
-        ? `${focusRoom.value.name} — ${hotelName.value}`
+        ? `${localized(focusRoom.value.name, locale.value)} — ${hotelName.value}`
         : `${hotelName.value}${hotel.value.tagline ? ` — ${hotel.value.tagline}` : ''}`,
 );
 const seoDescription = computed(
     () =>
-        focusRoom.value?.description ||
+        (focusRoom.value &&
+            localized(focusRoom.value.description, locale.value)) ||
         hotel.value.tagline ||
         t('metaDefaultDescription', { hotel: hotelName.value }),
 );

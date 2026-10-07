@@ -25,7 +25,7 @@ class RoomsTable
                     ->circular(),
                 TextColumn::make('name')
                     ->label(__('Name'))
-                    ->searchable()
+                    ->formatStateUsing(fn (?array $state): string => $state['en'] ?? $state['ru'] ?? '—')
                     ->sortable(),
                 TextColumn::make('bed_type')
                     ->label(__('Bed'))

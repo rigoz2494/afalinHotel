@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomPrices\Schemas;
 
+use App\Models\Room;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
@@ -17,7 +18,11 @@ class RoomPriceForm
             ->components([
                 Select::make('room_id')
                     ->label(__('Room'))
-                    ->relationship('room', 'name')
+                    // `name` is now a bilingual {en, ru} pair, not a plain
+                    // string, so `relationship()`'s title-attribute shortcut
+                    // can't pluck it directly — the label is built by hand.
+                    ->relationship('room', 'id')
+                    ->getOptionLabelFromRecordUsing(fn (Room $room): string => $room->name['en'] ?? $room->name['ru'] ?? '—')
                     ->searchable()
                     ->preload()
                     ->required(),
@@ -41,7 +46,11 @@ class RoomPriceForm
                     ->numeric()
                     ->minValue(0)
                     ->maxValue(100)
-                    ->suffix('%')
+                    ->suffix('%'),
+                TextInput::make('price_override')
+                    ->label(__('Price override'))
+                    ->helperText(__('A literal price for this room in this month, replacing the formula outright — e.g. when the real rate doesn\'t follow the season modifier closely enough, or for a non-numeric display like "900/1300". Leave blank to use the formula.'))
+                    ->maxLength(50)
                     ->columnSpanFull(),
             ]);
     }

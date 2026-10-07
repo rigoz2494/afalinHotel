@@ -77,7 +77,7 @@ class SiteIntegrityTest extends TestCase
         $stored = CallbackRequest::query()->firstOrFail()->rooms;
 
         $this->assertSame($shownPrice, (int) $stored[0]['price']);
-        $this->assertSame($room->name, $stored[0]['room_name']);
+        $this->assertSame($room->name['en'], $stored[0]['room_name']);
         $this->assertSame(3, $stored[0]['quantity']);
     }
 
@@ -85,8 +85,8 @@ class SiteIntegrityTest extends TestCase
     {
         // +20% season modifier turns Deluxe's $100 base into $120; no promo needed.
         $period = PricingPeriod::factory()->create(['name' => 'Summer', 'sort_order' => 1, 'modifier_percentage' => 20]);
-        $deluxe = Room::factory()->create(['is_active' => true, 'name' => 'Deluxe', 'base_price' => 100]);
-        $suite = Room::factory()->create(['is_active' => true, 'name' => 'Suite', 'base_price' => 300]);
+        $deluxe = Room::factory()->create(['is_active' => true, 'name' => ['en' => 'Deluxe', 'ru' => 'Делюкс'], 'base_price' => 100]);
+        $suite = Room::factory()->create(['is_active' => true, 'name' => ['en' => 'Suite', 'ru' => 'Люкс'], 'base_price' => 300]);
 
         $this->postJson(route('api.v1.callback-requests.store'), [
             'name' => 'Group Booking',
