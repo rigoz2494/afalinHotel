@@ -16,7 +16,7 @@ class HotelSettingSeeder extends Seeder
             'promo_banner' => 'Special Offer: Book now and get a 5% discount on early bird reservations!',
             'contacts' => [
                 'phone' => '+1 555 010 0100',
-                'email' => 'reservations@afalinahotel.example',
+                'email' => 'reservations@afalina.example',
                 'address' => '1 Seaside Avenue, Riviera',
             ],
             'section_headings' => HotelSetting::DEFAULT_SECTION_HEADINGS,

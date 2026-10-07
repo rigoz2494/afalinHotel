@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 /**
  * The hotel's own name is stored per locale, the same way section headings
- * are, so "Отель Афалина" shows for Russian guests everywhere the brand
+ * are, so "Афалина" shows for Russian guests everywhere the brand
  * appears — the header, the <title> tag and OpenGraph/Twitter share cards.
  */
 class BilingualHotelNameTest extends TestCase
@@ -25,16 +25,16 @@ class BilingualHotelNameTest extends TestCase
 
         Livewire::test(ManageHotelSettings::class)
             ->fillForm([
-                'hotel_name.en' => 'Afalina Hotel',
-                'hotel_name.ru' => 'Отель Афалина',
+                'hotel_name.en' => 'Afalina',
+                'hotel_name.ru' => 'Афалина',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
         $stored = HotelSetting::query()->where('key', 'hotel_name')->firstOrFail()->value;
 
-        $this->assertSame('Afalina Hotel', $stored['en']);
-        $this->assertSame('Отель Афалина', $stored['ru']);
+        $this->assertSame('Afalina', $stored['en']);
+        $this->assertSame('Афалина', $stored['ru']);
     }
 
     public function test_a_fresh_install_defaults_to_the_official_brand_name_in_both_languages(): void
@@ -42,8 +42,8 @@ class BilingualHotelNameTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('hotel.hotel_name.en', 'Afalina Hotel')
-                ->where('hotel.hotel_name.ru', 'Отель Афалина'));
+                ->where('hotel.hotel_name.en', 'Afalina')
+                ->where('hotel.hotel_name.ru', 'Афалина'));
     }
 
     public function test_pre_translation_english_only_text_is_preserved_not_discarded(): void
@@ -57,19 +57,19 @@ class BilingualHotelNameTest extends TestCase
 
         $this->assertSame('The Old Lighthouse Inn', $name['en']);
         // Russian wasn't set before this feature existed, so it defaults.
-        $this->assertSame('Отель Афалина', $name['ru']);
+        $this->assertSame('Афалина', $name['ru']);
     }
 
     public function test_reopening_the_settings_page_shows_the_previously_saved_translation(): void
     {
-        HotelSetting::query()->create(['key' => 'hotel_name', 'value' => ['en' => 'Afalina Hotel', 'ru' => 'Отель Афалина']]);
+        HotelSetting::query()->create(['key' => 'hotel_name', 'value' => ['en' => 'Afalina', 'ru' => 'Афалина']]);
 
         $this->actingAs(User::factory()->create());
 
         Livewire::test(ManageHotelSettings::class)
             ->assertFormSet([
-                'hotel_name.en' => 'Afalina Hotel',
-                'hotel_name.ru' => 'Отель Афалина',
+                'hotel_name.en' => 'Afalina',
+                'hotel_name.ru' => 'Афалина',
             ]);
     }
 }

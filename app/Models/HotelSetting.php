@@ -35,7 +35,7 @@ class HotelSetting extends Model
      *
      * @var array<string, string>
      */
-    public const array DEFAULT_HOTEL_NAME = ['en' => 'Afalina Hotel', 'ru' => 'Отель Афалина'];
+    public const array DEFAULT_HOTEL_NAME = ['en' => 'Afalina', 'ru' => 'Афалина'];
 
     /**
      * @return array<string, string>

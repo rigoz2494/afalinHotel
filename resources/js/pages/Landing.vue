@@ -118,18 +118,19 @@ const focusRoom = computed(() =>
           null)
         : null,
 );
-// The hotel's own name, in the guest's chosen language — never a hardcoded
-// English fallback, so "Отель Афалина" shows for Russian guests everywhere
-// the brand appears: the <title>, the header logo and the OG/Twitter cards.
+// The brand's own name, in the guest's chosen language — never a hardcoded
+// English fallback, so "Афалина" shows for Russian guests everywhere the
+// brand appears: the <title>, the header logo and the OG/Twitter cards. Just
+// the name itself, with no "hotel"/"отель" wording attached to it anywhere.
 const hotelName = computed(() =>
     localized(hotel.value.hotel_name, locale.value),
 );
 // Fully self-contained: used for the <title> tag as well as og:title and
 // twitter:title. app.ts's title() callback is a pass-through, not a brand
-// suffix, specifically so this can't double up into "Room at Hotel - Hotel".
+// suffix, specifically so this can't double up into "Room — Afalina - Afalina".
 const seoTitle = computed(() =>
     focusRoom.value
-        ? `${focusRoom.value.name} ${t('metaRoomTitleSuffix', { hotel: hotelName.value })}`
+        ? `${focusRoom.value.name} — ${hotelName.value}`
         : `${hotelName.value}${hotel.value.tagline ? ` — ${hotel.value.tagline}` : ''}`,
 );
 const seoDescription = computed(

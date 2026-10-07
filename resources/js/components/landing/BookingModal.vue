@@ -12,9 +12,13 @@ const close = (): void => {
     open.value = false;
 };
 
-// Give the guest a moment to see the "Thanks!" message before closing.
+// Fires once the success overlay's own lifetime is over (its ~4s auto-hide,
+// or the guest closing it by hand) — see BookingForm.vue — so this modal
+// never disappears out from under that message while it's still showing.
+// The short extra wait lets the overlay's own 400ms fade-out finish first,
+// instead of this modal unmounting underneath it mid-transition.
 const handleSubmitted = (): void => {
-    setTimeout(close, 1200);
+    setTimeout(close, 400);
 };
 
 // No explicit `window` target: see the comment in SiteHeader.vue.

@@ -192,13 +192,12 @@ const translations = {
         ru: 'Спасибо — менеджер скоро свяжется с вами, чтобы уточнить детали.',
     },
 
-    // SEO meta tags (<title>, description, OpenGraph) — used only when the
-    // admin hasn't set a tagline, so the page never ships a blank description.
+    // SEO meta description — used only when the admin hasn't set a tagline,
+    // so the page never ships a blank one.
     metaDefaultDescription: {
         en: 'Book your stay at {hotel} — premium rooms, transparent seasonal pricing and instant booking.',
         ru: 'Забронируйте номер в {hotel} — премиальные номера, прозрачные сезонные цены и мгновенное бронирование.',
     },
-    metaRoomTitleSuffix: { en: 'at {hotel}', ru: 'в отеле {hotel}' },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type TranslationKey = keyof typeof translations;

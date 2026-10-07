@@ -9,7 +9,7 @@ const unsplash = (id: string, width = 1600): string =>
     `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
 
 export const mockHotel: HotelSettings = {
-    hotel_name: { en: 'Afalina Hotel', ru: 'Отель Афалина' },
+    hotel_name: { en: 'Afalina', ru: 'Афалина' },
     tagline: 'Quiet luxury in the heart of the city',
     promo_banner:
         'Special Offer: Book now and get a 5% discount on early bird reservations!',
@@ -17,7 +17,7 @@ export const mockHotel: HotelSettings = {
     hero_images: [],
     contacts: {
         phone: '+1 (555) 010-2030',
-        email: 'stay@afalinahotel.example',
+        email: 'stay@afalina.example',
     },
     section_headings: {
         rooms: { en: 'Our Rooms', ru: 'Наши номера' },
@@ -157,7 +157,7 @@ export const galleryImages: { src: string; alt: string; tall: boolean }[] = [
     },
     {
         src: unsplash('photo-1542314831-068cd1dbfeeb', 900),
-        alt: 'Hotel exterior',
+        alt: 'Exterior',
         tall: false,
     },
     {

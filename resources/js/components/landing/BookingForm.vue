@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Minus, Phone, Plus, Trash2 } from '@lucide/vue';
-import { computed, onBeforeUnmount, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import BookingSuccessOverlay from '@/components/landing/BookingSuccessOverlay.vue';
 import { store } from '@/actions/App/Http/Controllers/Api/V1/CallbackRequestController';
 import { useBookingBasket } from '@/composables/useBookingBasket';
@@ -34,6 +34,17 @@ let successOverlayTimer: ReturnType<typeof setTimeout> | undefined;
 
 onBeforeUnmount(() => {
     clearTimeout(successOverlayTimer);
+});
+
+// The parent modal closes once the success message's own lifetime is over —
+// whether that's its ~4s auto-hide or the guest dismissing it early by hand —
+// rather than on a second, separately-guessed timer of its own that could
+// close the modal (and tear the overlay down with it) before the guest has
+// had a chance to read it.
+watch(successOverlayOpen, (isOpen, wasOpen) => {
+    if (wasOpen && !isOpen) {
+        emit('submitted');
+    }
 });
 
 const onPhoneInput = (event: Event): void => {
@@ -96,8 +107,6 @@ const submit = async (): Promise<void> => {
         successOverlayTimer = setTimeout(() => {
             successOverlayOpen.value = false;
         }, 4000);
-
-        emit('submitted');
     } catch {
         status.value = 'error';
     }
