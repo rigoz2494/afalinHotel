@@ -29,6 +29,15 @@ class HotelSetting extends Model
     ];
 
     /**
+     * The hotel's own official name, in each supported language, used
+     * whenever the admin hasn't set that locale yet — including on a fresh
+     * install, so the site never ships with a generic placeholder name.
+     *
+     * @var array<string, string>
+     */
+    public const array DEFAULT_HOTEL_NAME = ['en' => 'Afalina Hotel', 'ru' => 'Отель Афалина'];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -68,5 +77,35 @@ class HotelSetting extends Model
         }
 
         return $headings;
+    }
+
+    /**
+     * Fills in whichever language the admin hasn't set yet with the default
+     * brand name, the same way {@see defaultedSectionHeadings()} does for
+     * section titles. Both languages are always returned, in full.
+     *
+     * @return array<string, string>
+     */
+    public static function defaultedHotelName(mixed $stored): array
+    {
+        $name = self::DEFAULT_HOTEL_NAME;
+
+        // Pre-translation data was a single, English-only string; treat it
+        // as the "en" value rather than discarding it.
+        if (is_string($stored) && $stored !== '') {
+            $name['en'] = $stored;
+
+            return $name;
+        }
+
+        if (! is_array($stored)) {
+            return $name;
+        }
+
+        foreach (array_filter($stored) as $locale => $localizedValue) {
+            $name[$locale] = $localizedValue;
+        }
+
+        return $name;
     }
 }

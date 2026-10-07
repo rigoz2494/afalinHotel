@@ -28,7 +28,11 @@ const lightboxIndex = ref<number | null>(null);
                 {{ localized(hotel.section_headings.about, locale) }}
             </h2>
             <p class="mt-4 text-sm text-stone-300 sm:mt-5 sm:text-base">
-                {{ t('aboutBioOne', { hotel: hotel.hotel_name ?? '' }) }}
+                {{
+                    t('aboutBioOne', {
+                        hotel: localized(hotel.hotel_name, locale),
+                    })
+                }}
             </p>
             <p class="mt-3 text-sm text-stone-300 sm:mt-4 sm:text-base">
                 {{ t('aboutBioTwo') }}

@@ -11,12 +11,12 @@ class HotelSettingSeeder extends Seeder
     {
         // Hero slides are managed by HeroImageSeeder, which stores local files.
         $settings = [
-            'hotel_name' => 'Grand Meridian',
+            'hotel_name' => HotelSetting::DEFAULT_HOTEL_NAME,
             'tagline' => 'Where every stay becomes a story.',
             'promo_banner' => 'Special Offer: Book now and get a 5% discount on early bird reservations!',
             'contacts' => [
                 'phone' => '+1 555 010 0100',
-                'email' => 'reservations@grandmeridian.example',
+                'email' => 'reservations@afalinahotel.example',
                 'address' => '1 Seaside Avenue, Riviera',
             ],
             'section_headings' => HotelSetting::DEFAULT_SECTION_HEADINGS,

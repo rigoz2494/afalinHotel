@@ -25,7 +25,8 @@ class BilingualSectionHeadingsTest extends TestCase
 
         Livewire::test(ManageHotelSettings::class)
             ->fillForm([
-                'hotel_name' => 'Grand Meridian',
+                'hotel_name.en' => 'Afalina Hotel',
+                'hotel_name.ru' => 'Отель Афалина',
                 'section_headings.rooms.en' => 'Our Rooms',
                 'section_headings.rooms.ru' => 'Наши номера',
                 'section_headings.contact.en' => 'Get in Touch',
@@ -44,7 +45,7 @@ class BilingualSectionHeadingsTest extends TestCase
 
     public function test_the_api_sends_both_languages_for_every_section_with_defaults_filling_the_gaps(): void
     {
-        HotelSetting::factory()->create(['key' => 'hotel_name', 'value' => 'Grand Meridian']);
+        HotelSetting::factory()->create(['key' => 'hotel_name', 'value' => 'Afalina Hotel']);
         // Only one section, one locale, customised; everything else should default.
         HotelSetting::factory()->create([
             'key' => 'section_headings',

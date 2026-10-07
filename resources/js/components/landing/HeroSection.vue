@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Gift } from '@lucide/vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { useLocale } from '@/composables/useLocale';
+import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
 
 const props = defineProps<{ hotel: HotelSettings }>();
-const { t } = useLocale();
+const { t, locale } = useLocale();
 
 const activeSlide = ref(0);
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -59,7 +59,7 @@ onBeforeUnmount(() => {
             <h1
                 class="text-3xl font-semibold tracking-tight sm:text-5xl md:text-7xl"
             >
-                {{ hotel.hotel_name }}
+                {{ localized(hotel.hotel_name, locale) }}
             </h1>
             <p
                 class="mt-3 text-base text-white/85 sm:mt-6 sm:text-lg md:text-2xl"

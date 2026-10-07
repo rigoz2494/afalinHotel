@@ -47,7 +47,7 @@ class ManageHotelSettings extends Page
         $settings = HotelSetting::query()->pluck('value', 'key');
 
         $this->form->fill([
-            'hotel_name' => $settings->get('hotel_name'),
+            'hotel_name' => HotelSetting::defaultedHotelName($settings->get('hotel_name')),
             'tagline' => $settings->get('tagline'),
             'promo_banner' => $settings->get('promo_banner'),
             'hero_images' => $settings->get('hero_images', []),
@@ -64,10 +64,24 @@ class ManageHotelSettings extends Page
                 Section::make(__('Homepage hero'))
                     ->description(__('Controls the title, tagline, promo banner and background slideshow on the public homepage.'))
                     ->schema([
-                        TextInput::make('hotel_name')
+                        Tabs::make('hotel_name_locale')
                             ->label(__('Hotel name'))
-                            ->required()
-                            ->maxLength(100),
+                            ->tabs([
+                                Tab::make(__('English'))
+                                    ->schema([
+                                        TextInput::make('hotel_name.en')
+                                            ->label(__('Hotel name'))
+                                            ->required()
+                                            ->maxLength(100),
+                                    ]),
+                                Tab::make(__('Russian'))
+                                    ->schema([
+                                        TextInput::make('hotel_name.ru')
+                                            ->label(__('Hotel name'))
+                                            ->required()
+                                            ->maxLength(100),
+                                    ]),
+                            ]),
                         TextInput::make('tagline')
                             ->label(__('Tagline'))
                             ->maxLength(150),

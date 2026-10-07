@@ -26,7 +26,10 @@ class HotelSettingsResource extends JsonResource
             ->all();
 
         return [
-            'hotel_name' => $this->resource['hotel_name'] ?? null,
+            // Both "en" and "ru" are always sent, like section_headings
+            // below, so the guest's chosen language always shows the hotel's
+            // real name, never a blank or a generic placeholder.
+            'hotel_name' => HotelSetting::defaultedHotelName($this->resource['hotel_name'] ?? null),
             'tagline' => $this->resource['tagline'] ?? null,
             'promo_banner' => $this->resource['promo_banner'] ?? null,
             'hero_images' => $heroImages,

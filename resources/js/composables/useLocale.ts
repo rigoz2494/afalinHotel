@@ -30,12 +30,14 @@ export type LocaleContext = {
  */
 const translations = {
     // Navigation (header, mobile drawer, side dots)
+    // Short on purpose: these drive the compact navbar (see SiteHeader.vue),
+    // which has no room for the longer, admin-edited section headings.
     navHome: { en: 'Home', ru: 'Главная' },
     navRooms: { en: 'Rooms', ru: 'Номера' },
-    navPricing: { en: 'Pricing', ru: 'Цены' },
+    navPricing: { en: 'Prices', ru: 'Цены' },
     navAbout: { en: 'About Us', ru: 'О нас' },
-    navFaq: { en: 'FAQ', ru: 'Вопросы и ответы' },
-    navContact: { en: 'Contact', ru: 'Контакты' },
+    navFaq: { en: 'FAQ', ru: 'Вопросы' },
+    navContact: { en: 'Contacts', ru: 'Контакты' },
     localizationControls: {
         en: 'Localization controls',
         ru: 'Настройки языка и валюты',

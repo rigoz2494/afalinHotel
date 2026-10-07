@@ -15,14 +15,15 @@ class LandingPageTest extends TestCase
 
     public function test_landing_page_receives_hotel_rooms_and_pricing_props(): void
     {
-        HotelSetting::factory()->create(['key' => 'hotel_name', 'value' => 'Grand Meridian']);
+        HotelSetting::factory()->create(['key' => 'hotel_name', 'value' => ['en' => 'Afalina Hotel', 'ru' => 'Отель Афалина']]);
         Room::factory()->count(2)->create();
 
         $this->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Landing')
-                ->where('hotel.hotel_name', 'Grand Meridian')
+                ->where('hotel.hotel_name.en', 'Afalina Hotel')
+                ->where('hotel.hotel_name.ru', 'Отель Афалина')
                 ->has('rooms.data', 2)
                 ->has('pricing.rows.data', 2)
                 ->has('pricing.columns')
@@ -31,7 +32,6 @@ class LandingPageTest extends TestCase
 
     public function test_landing_page_serves_uploaded_hero_images_as_public_storage_urls(): void
     {
-        HotelSetting::factory()->create(['key' => 'hotel_name', 'value' => 'Grand Meridian']);
         HotelSetting::factory()->create(['key' => 'hero_images', 'value' => ['hero/lobby.jpg']]);
 
         $this->get(route('home'))

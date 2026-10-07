@@ -22,7 +22,8 @@ class ManageHotelSettingsTest extends TestCase
 
         Livewire::test(ManageHotelSettings::class)
             ->fillForm([
-                'hotel_name' => 'Test Hotel',
+                'hotel_name.en' => 'Test Hotel',
+                'hotel_name.ru' => 'Тестовый отель',
                 'hero_images' => [
                     UploadedFile::fake()->image('one.jpg'),
                     UploadedFile::fake()->image('two.jpg'),
@@ -53,7 +54,8 @@ class ManageHotelSettingsTest extends TestCase
 
         Livewire::test(ManageHotelSettings::class)
             ->fillForm([
-                'hotel_name' => 'Test Hotel',
+                'hotel_name.en' => 'Test Hotel',
+                'hotel_name.ru' => 'Тестовый отель',
                 'hero_images' => [UploadedFile::fake()->image('new.jpg')],
             ])
             ->call('save')

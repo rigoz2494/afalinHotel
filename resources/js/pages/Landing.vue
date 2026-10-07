@@ -46,8 +46,10 @@ const props = defineProps<{
     canonicalUrl?: string | null;
 }>();
 
-// Fall back to mock data until the database is seeded.
-const isHotelSeeded = Boolean(props.hotel?.hotel_name);
+// Fall back to mock data until the database is seeded. `tagline` is the
+// signal, not `hotel_name`: the latter is always present and truthy once
+// defaulted server-side (see HotelSettingsResource), even on a fresh install.
+const isHotelSeeded = Boolean(props.hotel?.tagline);
 const hotel = ref<HotelSettings>({
     ...mockHotel,
     ...Object.fromEntries(
@@ -84,32 +86,17 @@ provideHotelSettings(hotel);
 const { t, locale } = provideLocale();
 
 // Reactive, so the nav labels translate instantly when the locale changes.
-// "Home" has no section heading of its own (the hero shows the hotel name,
-// not an admin-set title), so it stays on the fixed UI dictionary; the other
-// five reuse the exact same admin-edited, bilingual heading shown in each
-// section, so the nav and the section titles can never say different things.
+// These are short, fixed UI-dictionary labels, not the admin-edited section
+// headings shown as each section's own on-page title — those can be as long
+// as the admin likes, which would overflow a compact navbar, so the nav
+// intentionally keeps its own short equivalents instead of reusing them.
 const navLinks = computed(() => [
     { id: 'hero', label: t('navHome') },
-    {
-        id: 'rooms',
-        label: localized(hotel.value.section_headings.rooms, locale.value),
-    },
-    {
-        id: 'pricing',
-        label: localized(hotel.value.section_headings.pricing, locale.value),
-    },
-    {
-        id: 'about',
-        label: localized(hotel.value.section_headings.about, locale.value),
-    },
-    {
-        id: 'faq',
-        label: localized(hotel.value.section_headings.faq, locale.value),
-    },
-    {
-        id: 'contact',
-        label: localized(hotel.value.section_headings.contact, locale.value),
-    },
+    { id: 'rooms', label: t('navRooms') },
+    { id: 'pricing', label: t('navPricing') },
+    { id: 'about', label: t('navAbout') },
+    { id: 'faq', label: t('navFaq') },
+    { id: 'contact', label: t('navContact') },
 ]);
 
 const scroller = ref<HTMLElement | null>(null);
@@ -131,15 +118,15 @@ const focusRoom = computed(() =>
           null)
         : null,
 );
-const hotelName = computed(() => hotel.value.hotel_name ?? '');
-// The browser tab/<title>: short, since app.ts's title() callback already
-// appends " - {hotel name}" to every page, room or not — repeating the name
-// here too would read as "Standard Room at Grand Meridian - Grand Meridian".
-const pageTitle = computed(() =>
-    focusRoom.value ? focusRoom.value.name : hotel.value.tagline || t('navHome'),
+// The hotel's own name, in the guest's chosen language — never a hardcoded
+// English fallback, so "Отель Афалина" shows for Russian guests everywhere
+// the brand appears: the <title>, the header logo and the OG/Twitter cards.
+const hotelName = computed(() =>
+    localized(hotel.value.hotel_name, locale.value),
 );
-// og:title/twitter:title: fully self-contained, since social platforms only
-// ever read these tags directly — there's no separate brand-suffix step.
+// Fully self-contained: used for the <title> tag as well as og:title and
+// twitter:title. app.ts's title() callback is a pass-through, not a brand
+// suffix, specifically so this can't double up into "Room at Hotel - Hotel".
 const seoTitle = computed(() =>
     focusRoom.value
         ? `${focusRoom.value.name} ${t('metaRoomTitleSuffix', { hotel: hotelName.value })}`
@@ -171,7 +158,7 @@ onMounted(() => {
 <template>
     <div>
         <Head>
-            <title>{{ pageTitle }}</title>
+            <title>{{ seoTitle }}</title>
             <meta name="description" :content="seoDescription" />
             <link v-if="canonicalUrl" rel="canonical" :href="canonicalUrl" />
 
@@ -194,7 +181,7 @@ onMounted(() => {
         </Head>
         <Preloader />
         <SiteHeader
-            :hotel-name="hotel.hotel_name"
+            :hotel-name="hotelName"
             :links="navLinks"
             :active-id="activeId"
             @navigate="scrollTo"

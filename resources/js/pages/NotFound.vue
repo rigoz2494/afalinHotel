@@ -4,7 +4,7 @@ import { Compass } from '@lucide/vue';
 </script>
 
 <template>
-    <Head title="Page not found" />
+    <Head title="Page not found - Afalina Hotel" />
 
     <div
         class="relative flex min-h-screen items-center justify-center overflow-hidden bg-stone-950 px-4 py-20 text-center text-stone-100 sm:px-6"

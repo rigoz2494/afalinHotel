@@ -1,5 +1,6 @@
 export type HotelSettings = {
-    hotel_name: string | null;
+    // Both languages are always present, like section_headings below.
+    hotel_name: { en: string; ru: string };
     tagline: string | null;
     promo_banner: string | null;
     hero_images: string[];

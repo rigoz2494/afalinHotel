@@ -57,7 +57,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/40 text-white backdrop-blur-md"
         >
             <div
-                class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6"
+                class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-4 sm:h-16 sm:gap-3 sm:px-6"
             >
                 <a
                     href="#hero"
@@ -69,15 +69,23 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                         alt=""
                         class="h-7 w-auto shrink-0 sm:h-10"
                     />
-                    <span class="truncate">{{ hotelName }}</span>
+                    <span class="max-w-[9rem] truncate sm:max-w-none">{{
+                        hotelName
+                    }}</span>
                 </a>
 
-                <nav class="hidden gap-1 text-sm md:flex md:gap-1.5">
+                <!-- min-w-0 lets this shrink below its content's width (the
+                flex default would otherwise force the whole header wider
+                than the viewport); overflow-x-auto is a last-resort safety
+                net if labels are ever still too long to fit even so. -->
+                <nav
+                    class="hidden min-w-0 flex-1 justify-center gap-1 overflow-x-auto text-sm md:flex md:gap-1.5"
+                >
                     <a
                         v-for="link in links"
                         :key="link.id"
                         :href="`#${link.id}`"
-                        class="rounded-full px-3 py-1.5 whitespace-nowrap transition md:px-4"
+                        class="shrink-0 rounded-full px-3 py-1.5 whitespace-nowrap transition md:px-4"
                         :class="
                             activeId === link.id
                                 ? 'bg-white text-slate-900'
@@ -90,7 +98,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 </nav>
 
                 <div
-                    class="hidden items-center gap-1.5 sm:flex"
+                    class="hidden shrink-0 items-center gap-1.5 sm:flex"
                     :aria-label="t('localizationControls')"
                 >
                     <LocaleSwitcher />
