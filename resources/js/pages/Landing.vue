@@ -1,0 +1,232 @@
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3';
+import { computed, onMounted, ref } from 'vue';
+import SiteHeader from '@/components/landing/SiteHeader.vue';
+import { useScrollSpy } from '@/composables/useScrollSpy';
+import BookingModal from '@/components/landing/BookingModal.vue';
+import ContactSection from '@/components/landing/ContactSection.vue';
+import AboutSection from '@/components/landing/AboutSection.vue';
+import FaqSection from '@/components/landing/FaqSection.vue';
+import FloatingActions from '@/components/landing/FloatingActions.vue';
+import HeroSection from '@/components/landing/HeroSection.vue';
+import Preloader from '@/components/landing/Preloader.vue';
+import PricingSection from '@/components/landing/PricingSection.vue';
+import RoomsSection from '@/components/landing/RoomsSection.vue';
+import SideNavDots from '@/components/landing/SideNavDots.vue';
+import {
+    faqItems as mockFaqItems,
+    mockHotel,
+    mockPricing,
+    mockRooms,
+    roomFallbackImages,
+} from '@/data/landingMock';
+import { provideCurrency } from '@/composables/useCurrency';
+import { provideHotelSettings } from '@/composables/useHotelSettings';
+import { localized, provideLocale } from '@/composables/useLocale';
+import type {
+    CurrencyOption,
+    FaqItem,
+    HotelSettings,
+    PricingTable,
+    Room,
+} from '@/types/landing';
+
+const props = defineProps<{
+    hotel: Partial<HotelSettings>;
+    currencies: CurrencyOption[];
+    rooms: { data: Room[] };
+    faqs: { data: FaqItem[] };
+    pricing: {
+        columns: PricingTable['columns'];
+        rows: { data: PricingTable['rows'] };
+    };
+    /** Set when this request came in through a room's own `/rooms/{slug}` URL. */
+    focusRoomSlug?: string | null;
+    /** The absolute URL of this exact request, for the <link rel="canonical"> tag. */
+    canonicalUrl?: string | null;
+}>();
+
+// Fall back to mock data until the database is seeded.
+const isHotelSeeded = Boolean(props.hotel?.hotel_name);
+const hotel = ref<HotelSettings>({
+    ...mockHotel,
+    ...Object.fromEntries(
+        Object.entries(props.hotel ?? {}).filter(([, value]) =>
+            Array.isArray(value) ? value.length > 0 : value,
+        ),
+    ),
+    // An empty banner in the database means "no promo", not "use the mock".
+    promo_banner: isHotelSeeded
+        ? (props.hotel.promo_banner ?? null)
+        : mockHotel.promo_banner,
+});
+const rooms = ref<Room[]>(
+    (props.rooms.data.length ? props.rooms.data : mockRooms).map(
+        (room, index) => ({
+            ...room,
+            images: room.images.length
+                ? room.images
+                : [roomFallbackImages[index % roomFallbackImages.length]],
+        }),
+    ),
+);
+const pricing = ref<PricingTable>(
+    props.pricing.rows.data.length
+        ? { columns: props.pricing.columns, rows: props.pricing.rows.data }
+        : mockPricing,
+);
+const faqs = ref<FaqItem[]>(
+    props.faqs.data.length ? props.faqs.data : mockFaqItems,
+);
+
+provideCurrency(() => props.currencies);
+provideHotelSettings(hotel);
+const { t, locale } = provideLocale();
+
+// Reactive, so the nav labels translate instantly when the locale changes.
+// "Home" has no section heading of its own (the hero shows the hotel name,
+// not an admin-set title), so it stays on the fixed UI dictionary; the other
+// five reuse the exact same admin-edited, bilingual heading shown in each
+// section, so the nav and the section titles can never say different things.
+const navLinks = computed(() => [
+    { id: 'hero', label: t('navHome') },
+    {
+        id: 'rooms',
+        label: localized(hotel.value.section_headings.rooms, locale.value),
+    },
+    {
+        id: 'pricing',
+        label: localized(hotel.value.section_headings.pricing, locale.value),
+    },
+    {
+        id: 'about',
+        label: localized(hotel.value.section_headings.about, locale.value),
+    },
+    {
+        id: 'faq',
+        label: localized(hotel.value.section_headings.faq, locale.value),
+    },
+    {
+        id: 'contact',
+        label: localized(hotel.value.section_headings.contact, locale.value),
+    },
+]);
+
+const scroller = ref<HTMLElement | null>(null);
+const { activeId, scrollTo } = useScrollSpy(
+    navLinks.value.map((link) => link.id),
+    scroller,
+);
+
+const showBackToTop = computed(() => activeId.value !== 'hero');
+const bookingModalOpen = ref(false);
+
+// SEO: the room this exact URL is about, if any. Its own name, description
+// and photo drive the <title>/meta description/og:image below, so each
+// room's `/rooms/{slug}` URL (see sitemap.xml) is distinct and indexable
+// rather than a copy of the homepage's tags.
+const focusRoom = computed(() =>
+    props.focusRoomSlug
+        ? (rooms.value.find((room) => room.slug === props.focusRoomSlug) ??
+          null)
+        : null,
+);
+const hotelName = computed(() => hotel.value.hotel_name ?? '');
+// The browser tab/<title>: short, since app.ts's title() callback already
+// appends " - {hotel name}" to every page, room or not — repeating the name
+// here too would read as "Standard Room at Grand Meridian - Grand Meridian".
+const pageTitle = computed(() =>
+    focusRoom.value ? focusRoom.value.name : hotel.value.tagline || t('navHome'),
+);
+// og:title/twitter:title: fully self-contained, since social platforms only
+// ever read these tags directly — there's no separate brand-suffix step.
+const seoTitle = computed(() =>
+    focusRoom.value
+        ? `${focusRoom.value.name} ${t('metaRoomTitleSuffix', { hotel: hotelName.value })}`
+        : `${hotelName.value}${hotel.value.tagline ? ` — ${hotel.value.tagline}` : ''}`,
+);
+const seoDescription = computed(
+    () =>
+        focusRoom.value?.description ||
+        hotel.value.tagline ||
+        t('metaDefaultDescription', { hotel: hotelName.value }),
+);
+const seoImage = computed(
+    () => focusRoom.value?.images[0] ?? hotel.value.hero_images[0] ?? null,
+);
+// Telegram, WhatsApp and most other apps read OpenGraph tags, not this
+// locale ref, for their link preview — it's only ever as fresh as the last
+// time the page was shared, not this guest's current language choice.
+const ogLocale = computed(() => (locale.value === 'ru' ? 'ru_RU' : 'en_US'));
+
+// A deep link to a room (see routes/web.php) opens the same single page
+// already scrolled to it, rather than a separate, empty-feeling room page.
+onMounted(() => {
+    if (focusRoom.value) {
+        scrollTo('rooms');
+    }
+});
+</script>
+
+<template>
+    <div>
+        <Head>
+            <title>{{ pageTitle }}</title>
+            <meta name="description" :content="seoDescription" />
+            <link v-if="canonicalUrl" rel="canonical" :href="canonicalUrl" />
+
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" :content="hotelName" />
+            <meta property="og:title" :content="seoTitle" />
+            <meta property="og:description" :content="seoDescription" />
+            <meta
+                v-if="canonicalUrl"
+                property="og:url"
+                :content="canonicalUrl"
+            />
+            <meta v-if="seoImage" property="og:image" :content="seoImage" />
+            <meta property="og:locale" :content="ogLocale" />
+
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" :content="seoTitle" />
+            <meta name="twitter:description" :content="seoDescription" />
+            <meta v-if="seoImage" name="twitter:image" :content="seoImage" />
+        </Head>
+        <Preloader />
+        <SiteHeader
+            :hotel-name="hotel.hotel_name"
+            :links="navLinks"
+            :active-id="activeId"
+            @navigate="scrollTo"
+        />
+        <main
+            ref="scroller"
+            class="h-screen snap-y snap-mandatory overflow-y-scroll scroll-smooth"
+        >
+            <HeroSection :hotel="hotel" />
+            <RoomsSection
+                :hotel="hotel"
+                :rooms="rooms"
+                :pricing="pricing"
+                :focus-slug="focusRoomSlug"
+            />
+            <PricingSection :hotel="hotel" :pricing="pricing" />
+            <AboutSection :hotel="hotel" />
+            <FaqSection :hotel="hotel" :faqs="faqs" />
+            <ContactSection :hotel="hotel" />
+        </main>
+
+        <SideNavDots
+            :links="navLinks"
+            :active-id="activeId"
+            @navigate="scrollTo"
+        />
+
+        <FloatingActions
+            :visible="showBackToTop"
+            @top="scrollTo('hero')"
+            @open-booking="bookingModalOpen = true"
+        />
+        <BookingModal v-model="bookingModalOpen" />
+    </div>
+</template>
