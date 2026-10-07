@@ -76,6 +76,10 @@ class RoomForm
                             ->label(__('Furniture & amenities'))
                             ->helperText(__('Press enter after each item, e.g. "Armchair", "Wardrobe".'))
                             ->columnSpanFull(),
+                        TagsInput::make('furniture_ru')
+                            ->label(__('Furniture & amenities (Russian)'))
+                            ->helperText(__('Shown to guests browsing the site in Russian. Left blank, the English tags above are shown instead.'))
+                            ->columnSpanFull(),
                         Toggle::make('has_tv')
                             ->label(__('Has TV')),
                         Toggle::make('has_air_conditioning')

@@ -4,12 +4,22 @@ namespace Database\Seeders;
 
 use App\Models\PricingPeriod;
 use App\Models\Room;
+use App\Services\TranslationService;
 use Illuminate\Database\Seeder;
 
 class RoomSeeder extends Seeder
 {
-    public function run(): void
+    public function run(TranslationService $translator): void
     {
+        // Several rooms share the same amenity labels (e.g. "Wardrobe"), so
+        // each distinct one is only ever sent to the translation service once.
+        $translatedFurniture = [];
+        $translateFurnitureList = function (array $furniture) use ($translator, &$translatedFurniture): array {
+            return array_map(function (string $item) use ($translator, &$translatedFurniture): string {
+                return $translatedFurniture[$item] ??= $translator->translateAuto($item)['ru'];
+            }, $furniture);
+        };
+
         // period order => PricingPeriod id, e.g. [1 => 3, 2 => 4, ...]
         $periodIds = PricingPeriod::query()->ordered()->pluck('id', 'sort_order');
 
@@ -45,6 +55,7 @@ class RoomSeeder extends Seeder
                 'has_tv' => true,
                 'has_air_conditioning' => true,
                 'furniture' => $furniture,
+                'furniture_ru' => $translateFurnitureList($furniture),
                 'images' => $galleries[$index],
                 'base_price' => $basePrice,
                 'sort_order' => $index,

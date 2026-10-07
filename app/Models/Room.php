@@ -23,6 +23,7 @@ class Room extends Model
         'has_tv',
         'has_air_conditioning',
         'furniture',
+        'furniture_ru',
         'images',
         'base_price',
         'discount_percentage',
@@ -37,6 +38,7 @@ class Room extends Model
     {
         return [
             'furniture' => 'array',
+            'furniture_ru' => 'array',
             'images' => 'array',
             'has_tv' => 'boolean',
             'has_air_conditioning' => 'boolean',

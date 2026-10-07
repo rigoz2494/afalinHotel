@@ -44,6 +44,16 @@ const initialIndex = props.focusSlug
 const activeIndex = ref(initialIndex);
 const imageIndex = ref(0);
 const activeRoom = computed(() => props.rooms[activeIndex.value]);
+// Falls back to the English list when no Russian translation has been set
+// yet for this room (not seeded, or admin-added without one) — the same
+// fallback FAQ and section headings use.
+const activeRoomFurniture = computed(() => {
+    const { furniture, furniture_ru: furnitureRu } = activeRoom.value.amenities;
+
+    return locale.value === 'ru' && furnitureRu?.length
+        ? furnitureRu
+        : furniture;
+});
 
 // The cheapest active month for this room, shown as the card's teaser price.
 // Falls back to the plain base price if there is no matching pricing row
@@ -314,7 +324,7 @@ const stepImage = (direction: 1 | -1): void => {
                 </p>
                 <ul class="flex flex-wrap gap-2">
                     <li
-                        v-for="item in activeRoom.amenities.furniture"
+                        v-for="item in activeRoomFurniture"
                         :key="item"
                         class="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-xs sm:px-3 sm:py-1 sm:text-sm"
                     >

@@ -102,6 +102,28 @@ class TranslationService
         ];
     }
 
+    /**
+     * Detects whether $text is already English or Russian — the same
+     * Cyrillic check {@see translateFaqFields()} uses — and returns both
+     * language variants, translating whichever one is missing. Used where
+     * there's always exactly one language to begin with and no "both" or
+     * "neither" ambiguity to guard against, e.g. seeding mock content.
+     *
+     * @return array{en: string, ru: string}
+     */
+    public function translateAuto(string $text): array
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return ['en' => '', 'ru' => ''];
+        }
+
+        return $this->containsCyrillic($text)
+            ? ['en' => $this->translate($text, 'ru', 'en'), 'ru' => $text]
+            : ['en' => $text, 'ru' => $this->translate($text, 'en', 'ru')];
+    }
+
     private function containsCyrillic(string $text): bool
     {
         return (bool) preg_match('/[\x{0400}-\x{04FF}]/u', $text);

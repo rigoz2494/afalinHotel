@@ -3,11 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Faq;
+use App\Services\TranslationService;
 use Illuminate\Database\Seeder;
 
 class FaqSeeder extends Seeder
 {
-    public function run(): void
+    public function run(TranslationService $translator): void
     {
         $faqs = [
             [
@@ -33,8 +34,16 @@ class FaqSeeder extends Seeder
         ];
 
         foreach ($faqs as $index => [$question, $answer]) {
-            Faq::updateOrCreate(['question' => $question], [
-                'answer' => $answer,
+            // Auto-translated into Russian at seed time, the same way the
+            // admin's "Auto-Translate" action does it by hand, so a fresh
+            // install never ships FAQ content in English only.
+            $translatedQuestion = $translator->translateAuto($question);
+            $translatedAnswer = $translator->translateAuto($answer);
+
+            Faq::updateOrCreate(['question' => $translatedQuestion['en']], [
+                'answer' => $translatedAnswer['en'],
+                'question_ru' => $translatedQuestion['ru'],
+                'answer_ru' => $translatedAnswer['ru'],
                 'sort_order' => $index,
                 'is_active' => true,
             ]);

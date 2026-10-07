@@ -182,4 +182,33 @@ class FaqTranslationTest extends TestCase
             ->callAction('translateFaq')
             ->assertNotified('Translation failed');
     }
+
+    public function test_translate_auto_detects_english_and_fills_in_the_russian_side(): void
+    {
+        Http::fake(['api.mymemory.translated.net/*' => Http::response([
+            'responseData' => ['translatedText' => 'Шкаф'],
+        ])]);
+
+        $result = app(TranslationService::class)->translateAuto('Wardrobe');
+
+        $this->assertSame(['en' => 'Wardrobe', 'ru' => 'Шкаф'], $result);
+    }
+
+    public function test_translate_auto_detects_russian_and_fills_in_the_english_side(): void
+    {
+        Http::fake(['api.mymemory.translated.net/*' => Http::response([
+            'responseData' => ['translatedText' => 'Wardrobe'],
+        ])]);
+
+        $result = app(TranslationService::class)->translateAuto('Шкаф');
+
+        $this->assertSame(['en' => 'Wardrobe', 'ru' => 'Шкаф'], $result);
+    }
+
+    public function test_translate_auto_returns_both_blank_for_blank_input(): void
+    {
+        $result = app(TranslationService::class)->translateAuto('   ');
+
+        $this->assertSame(['en' => '', 'ru' => ''], $result);
+    }
 }

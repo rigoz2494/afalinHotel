@@ -20,6 +20,9 @@ export type Room = {
         capacity: number;
         bed_type: string;
         furniture: string[];
+        // Null until set by the admin or by auto-translation at seed time;
+        // see the `localized()`-style fallback where this is displayed.
+        furniture_ru: string[] | null;
         has_tv: boolean;
         has_air_conditioning: boolean;
     };
