@@ -257,7 +257,7 @@ const stepImage = (direction: 1 | -1): void => {
         </div>
 
         <div
-            class="relative z-10 flex flex-1 flex-col justify-center gap-4 overflow-y-auto p-5 sm:gap-5 sm:p-8 lg:h-full lg:w-2/5 lg:p-14"
+            class="relative z-10 flex flex-1 flex-col justify-center gap-3 overflow-y-auto p-5 sm:gap-4 sm:p-8 lg:h-full lg:w-2/5 lg:gap-3 lg:p-10"
         >
             <div>
                 <p
@@ -295,7 +295,7 @@ const stepImage = (direction: 1 | -1): void => {
                         </button>
                     </div>
                 </div>
-                <h2 class="mt-2 text-2xl font-semibold sm:text-3xl lg:text-4xl">
+                <h2 class="mt-2 text-2xl font-semibold sm:text-3xl lg:text-3xl">
                     {{ activeRoomName }}
                 </h2>
                 <!-- Amenity tags: a fixed vocabulary, each one icon + a
@@ -314,11 +314,21 @@ const stepImage = (direction: 1 | -1): void => {
                         <component :is="item.icon" class="size-4 sm:size-4.5" />
                     </li>
                 </ul>
-                <p class="mt-2 text-sm text-white/70 sm:mt-3 sm:text-base">
+                <!--
+                    A fixed height, not just a minimum: `line-clamp-2` caps
+                    how tall this can grow and `min-h` guarantees it never
+                    shrinks below two lines either, so switching rooms can't
+                    shift the price/CTA row or the amenity grid below it,
+                    whichever room's description happens to be shorter or
+                    longer than another's.
+                -->
+                <p
+                    class="mt-2 line-clamp-2 min-h-[2.5rem] text-sm text-white/70 sm:mt-3 sm:min-h-[3rem] sm:text-base"
+                >
                     {{ activeRoomDescription }}
                 </p>
                 <div
-                    class="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4"
+                    class="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4 lg:mt-3"
                 >
                     <p
                         v-if="bestIsDeal"
@@ -361,11 +371,11 @@ const stepImage = (direction: 1 | -1): void => {
                 </div>
             </div>
 
-            <ul class="grid grid-cols-2 gap-3 sm:gap-4">
+            <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-3">
                 <li
                     v-for="item in amenityItems"
                     :key="item.label"
-                    class="flex items-center gap-2.5 rounded-lg bg-white/5 p-2.5 sm:gap-3 sm:p-3"
+                    class="flex items-center gap-2.5 rounded-lg bg-white/5 p-2.5 sm:gap-3 sm:p-3 lg:p-2.5"
                 >
                     <component
                         :is="item.icon"

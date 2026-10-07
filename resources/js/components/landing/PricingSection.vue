@@ -34,20 +34,22 @@ const { t, locale } = useLocale();
         ></div>
 
         <div
-            class="relative mx-auto grid w-full max-w-6xl items-center gap-8 sm:gap-10 lg:grid-cols-5"
+            class="relative mx-auto grid w-full max-w-6xl items-center gap-8 sm:gap-10 lg:grid-cols-5 lg:gap-6"
         >
             <div class="lg:col-span-2">
-                <Sparkles class="size-7 text-amber-300 sm:size-8" />
+                <Sparkles class="size-7 text-amber-300 sm:size-8 lg:size-6" />
                 <h2
-                    class="mt-3 text-3xl leading-tight font-semibold sm:mt-4 sm:text-4xl md:text-5xl"
+                    class="mt-3 text-3xl leading-tight font-semibold sm:mt-4 sm:text-4xl md:text-5xl lg:mt-2 lg:text-3xl"
                 >
                     {{ localized(hotel.section_headings.pricing, locale) }}
                 </h2>
-                <p class="mt-3 text-sm text-stone-300 sm:mt-4 sm:text-base">
+                <p
+                    class="mt-3 text-sm text-stone-300 sm:mt-4 sm:text-base lg:mt-2 lg:text-sm"
+                >
                     {{ t('pricingIntro') }}
                 </p>
                 <div
-                    class="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100 sm:mt-6 sm:p-4 sm:text-sm"
+                    class="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100 sm:mt-6 sm:p-4 sm:text-sm lg:mt-3 lg:p-3"
                 >
                     {{ t('directBookingPerk') }}
                 </div>
@@ -66,14 +68,14 @@ const { t, locale } = useLocale();
                         >
                             <tr class="border-b border-white/10">
                                 <th
-                                    class="px-4 py-3 font-medium sm:px-6 sm:py-4"
+                                    class="px-4 py-3 font-medium sm:px-6 sm:py-4 lg:py-2.5"
                                 >
                                     {{ t('roomColumn') }}
                                 </th>
                                 <th
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-4 py-3 text-center font-medium sm:px-6 sm:py-4"
+                                    class="px-4 py-3 text-center font-medium sm:px-6 sm:py-4 lg:py-2.5"
                                 >
                                     {{ column.label }}
                                 </th>
@@ -86,14 +88,14 @@ const { t, locale } = useLocale();
                                 class="transition hover:bg-white/5"
                             >
                                 <td
-                                    class="px-4 py-3 align-middle text-sm font-medium sm:px-6 sm:py-5 sm:text-base"
+                                    class="px-4 py-3 align-middle text-sm font-medium sm:px-6 sm:py-5 sm:text-base lg:py-3"
                                 >
                                     {{ localized(row.room_name, locale) }}
                                 </td>
                                 <td
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-2 py-2 align-top sm:px-3 sm:py-3"
+                                    class="px-2 py-2 align-top sm:px-3 sm:py-3 lg:py-2"
                                 >
                                     <!--
                                         A fixed min-height, not `h-full`: a percentage height
@@ -108,9 +110,12 @@ const { t, locale } = useLocale();
                                         below it, so every cell in the row — with or without a
                                         deal badge — ends up the same height, and `justify-between`
                                         can then reliably lock every button to the same line.
+                                        Shorter on desktop (lg:min-h-20): six real room rows need
+                                        to fit one viewport there, and the wider column means the
+                                        deal badge's content wraps far less often than on mobile.
                                     -->
                                     <div
-                                        class="flex min-h-24 flex-col items-start justify-between gap-1.5 sm:min-h-28"
+                                        class="flex min-h-24 flex-col items-start justify-between gap-1.5 sm:min-h-28 lg:min-h-20"
                                     >
                                         <!--
                                             Case C (override): a literal display value, e.g.
