@@ -62,20 +62,20 @@ const { t, locale } = useLocale();
                 <div
                     class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur"
                 >
-                    <table class="w-full min-w-[560px] text-left">
+                    <table class="w-full min-w-[640px] text-left">
                         <thead
-                            class="text-[10px] tracking-widest text-amber-300 uppercase sm:text-xs"
+                            class="text-[11px] tracking-widest text-amber-300 uppercase sm:text-xs"
                         >
                             <tr class="border-b border-white/10">
                                 <th
-                                    class="px-4 py-3 font-medium sm:px-6 sm:py-4 lg:py-2.5"
+                                    class="px-4 py-3.5 font-medium sm:px-6 sm:py-4 lg:py-2.5"
                                 >
                                     {{ t('roomColumn') }}
                                 </th>
                                 <th
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-4 py-3 text-center font-medium sm:px-6 sm:py-4 lg:py-2.5"
+                                    class="px-4 py-3.5 text-center font-medium sm:px-6 sm:py-4 lg:py-2.5"
                                 >
                                     {{ column.label }}
                                 </th>
@@ -88,14 +88,14 @@ const { t, locale } = useLocale();
                                 class="transition hover:bg-white/5"
                             >
                                 <td
-                                    class="px-4 py-3 align-middle text-sm font-medium sm:px-6 sm:py-5 sm:text-base lg:py-3"
+                                    class="px-4 py-4 align-middle text-base font-medium sm:px-6 sm:py-5 sm:text-base lg:py-3"
                                 >
                                     {{ localized(row.room_name, locale) }}
                                 </td>
                                 <td
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-2 py-2 align-top sm:px-3 sm:py-3 lg:py-2"
+                                    class="px-3 py-3 align-top sm:px-4 sm:py-3.5 lg:px-3 lg:py-2"
                                 >
                                     <!--
                                         A fixed min-height, not `h-full`: a percentage height
@@ -115,7 +115,7 @@ const { t, locale } = useLocale();
                                         deal badge's content wraps far less often than on mobile.
                                     -->
                                     <div
-                                        class="flex min-h-24 flex-col items-start justify-between gap-1.5 sm:min-h-28 lg:min-h-20"
+                                        class="flex min-h-28 flex-col items-start justify-between gap-2 sm:min-h-32 lg:min-h-20 lg:gap-1.5"
                                     >
                                         <!--
                                             Case C (override): a literal display value, e.g.
@@ -125,7 +125,7 @@ const { t, locale } = useLocale();
                                         -->
                                         <span
                                             v-if="isPriceOverride(row, column)"
-                                            class="text-sm text-stone-200 sm:text-base"
+                                            class="text-base text-stone-200 sm:text-lg lg:text-base"
                                             >{{ row.prices[column.id] }}</span
                                         >
                                         <!--
@@ -138,10 +138,10 @@ const { t, locale } = useLocale();
                                             v-else-if="isDeal(row, column)"
                                         >
                                             <div
-                                                class="flex flex-wrap items-center gap-1.5"
+                                                class="flex flex-wrap items-center gap-2 lg:gap-1.5"
                                             >
                                                 <span
-                                                    class="text-xs text-stone-400 line-through sm:text-sm"
+                                                    class="text-sm text-stone-400 line-through sm:text-base lg:text-sm"
                                                     >{{
                                                         format(
                                                             Number(
@@ -151,7 +151,7 @@ const { t, locale } = useLocale();
                                                     }}</span
                                                 >
                                                 <span
-                                                    class="font-semibold text-amber-300"
+                                                    class="text-base font-semibold text-amber-300 sm:text-lg lg:text-base"
                                                 >
                                                     {{
                                                         format(
@@ -163,7 +163,7 @@ const { t, locale } = useLocale();
                                                     }}
                                                 </span>
                                                 <span
-                                                    class="inline-flex items-center gap-0.5 rounded-full bg-amber-300 px-1.5 py-0.5 text-[9px] font-bold text-stone-900 sm:text-[10px]"
+                                                    class="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2 py-1 text-[11px] font-bold text-stone-900 sm:px-2.5 sm:py-1 sm:text-xs lg:gap-0.5 lg:px-1.5 lg:py-0.5 lg:text-[10px]"
                                                     :title="
                                                         t('percentOff', {
                                                             pct: percentOffBase(
@@ -174,7 +174,7 @@ const { t, locale } = useLocale();
                                                     "
                                                 >
                                                     <Percent
-                                                        class="size-2.5"
+                                                        class="size-3 lg:size-2.5"
                                                     />{{
                                                         percentOffBase(
                                                             row,
@@ -191,7 +191,7 @@ const { t, locale } = useLocale();
                                         -->
                                         <span
                                             v-else
-                                            class="text-sm text-stone-200 sm:text-base"
+                                            class="text-base text-stone-200 sm:text-lg lg:text-base"
                                             >{{
                                                 format(cellPrice(row, column))
                                             }}</span
@@ -213,7 +213,7 @@ const { t, locale } = useLocale();
                                                     ) === 0
                                                 "
                                                 type="button"
-                                                class="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200 sm:text-xs"
+                                                class="inline-flex items-center gap-1.5 rounded-full bg-amber-300 px-3.5 py-2 text-xs font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200 sm:px-4 sm:py-2 sm:text-sm lg:gap-1 lg:px-2.5 lg:py-1 lg:text-xs"
                                                 @click="
                                                     add(
                                                         row.room_id,
@@ -227,16 +227,18 @@ const { t, locale } = useLocale();
                                                 "
                                             >
                                                 {{ t('select') }}
-                                                <Plus class="size-3" />
+                                                <Plus
+                                                    class="size-3.5 sm:size-4 lg:size-3"
+                                                />
                                             </button>
                                             <div
                                                 v-else
-                                                class="flex items-center gap-1.5 rounded-full bg-white/10 p-1"
+                                                class="flex items-center gap-2 rounded-full bg-white/10 p-1.5 sm:gap-2 sm:p-1.5 lg:gap-1.5 lg:p-1"
                                             >
                                                 <button
                                                     type="button"
                                                     :aria-label="t('removeOne')"
-                                                    class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                                                    class="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:size-7 lg:size-5"
                                                     @click="
                                                         decrement(
                                                             row.room_id,
@@ -244,10 +246,12 @@ const { t, locale } = useLocale();
                                                         )
                                                     "
                                                 >
-                                                    <Minus class="size-2.5" />
+                                                    <Minus
+                                                        class="size-3.5 sm:size-3.5 lg:size-2.5"
+                                                    />
                                                 </button>
                                                 <span
-                                                    class="min-w-4 text-center text-[11px] font-semibold sm:text-xs"
+                                                    class="min-w-5 text-center text-sm font-semibold sm:min-w-5 sm:text-sm lg:min-w-4 lg:text-xs"
                                                 >
                                                     {{
                                                         quantityFor(
@@ -261,7 +265,7 @@ const { t, locale } = useLocale();
                                                     :aria-label="
                                                         t('addOneMore')
                                                     "
-                                                    class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200"
+                                                    class="flex size-7 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200 sm:size-7 lg:size-5"
                                                     @click="
                                                         add(
                                                             row.room_id,
@@ -277,7 +281,9 @@ const { t, locale } = useLocale();
                                                         )
                                                     "
                                                 >
-                                                    <Plus class="size-2.5" />
+                                                    <Plus
+                                                        class="size-3.5 sm:size-3.5 lg:size-2.5"
+                                                    />
                                                 </button>
                                             </div>
                                         </template>
