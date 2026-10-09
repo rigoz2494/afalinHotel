@@ -143,31 +143,35 @@ const submit = async (): Promise<void> => {
 };
 
 const inputClass =
-    'w-full rounded-lg border border-white/25 bg-black/35 px-4 py-2.5 text-sm text-white placeholder-white/60 outline-none focus:border-amber-300 sm:py-3 sm:text-base';
+    'w-full rounded-lg border border-white/25 bg-black/35 px-3.5 py-2 text-sm text-white placeholder-white/60 outline-none focus:border-amber-300 sm:px-4 sm:py-3 sm:text-base';
 </script>
 
 <template>
-    <div class="space-y-4">
+    <div class="space-y-3 sm:space-y-4">
         <div>
-            <p class="mb-2 text-xs tracking-widest text-amber-300 uppercase">
+            <p
+                class="mb-1.5 text-xs tracking-widest text-amber-300 uppercase sm:mb-2"
+            >
                 {{ t('selectedRooms') }}
             </p>
 
-            <ul v-if="items.length" class="space-y-2">
+            <ul v-if="items.length" class="space-y-1.5 sm:space-y-2">
                 <li
                     v-for="item in items"
                     :key="item.key"
-                    class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-3 py-2"
+                    class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2"
                 >
                     <div class="min-w-0">
-                        <p class="truncate text-sm font-medium">
+                        <p class="truncate text-xs font-medium sm:text-sm">
                             {{ item.roomName
                             }}<template v-if="item.period">
                                 ({{ item.period }})</template
                             >
                             - {{ format(item.basePrice) }}
                         </p>
-                        <p class="text-xs text-white/50">{{ t('perNight') }}</p>
+                        <p class="text-[11px] text-white/50 sm:text-xs">
+                            {{ t('perNight') }}
+                        </p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1.5">
                         <button
@@ -209,7 +213,7 @@ const inputClass =
             </ul>
             <p
                 v-else
-                class="rounded-lg border border-dashed border-white/15 px-3 py-4 text-center text-sm text-white/50"
+                class="rounded-lg border border-dashed border-white/15 px-3 py-2.5 text-center text-xs text-white/50 sm:py-4 sm:text-sm"
             >
                 {{ t('noRoomsSelected') }}
             </p>
@@ -226,7 +230,7 @@ const inputClass =
             </p>
         </div>
 
-        <form class="space-y-3" @submit.prevent="submit">
+        <form class="space-y-2.5 sm:space-y-3" @submit.prevent="submit">
             <input
                 v-model="form.name"
                 required
@@ -253,12 +257,12 @@ const inputClass =
                 :class="inputClass"
             ></textarea>
             <label
-                class="flex items-center gap-2.5 text-sm text-white/80 select-none"
+                class="flex items-center gap-2 text-xs text-white/80 select-none sm:gap-2.5 sm:text-sm"
             >
                 <input
                     v-model="wantsBalcony"
                     type="checkbox"
-                    class="size-4 rounded border-white/25 bg-black/35 text-amber-300 focus:ring-amber-300/50"
+                    class="size-3.5 rounded border-white/25 bg-black/35 text-amber-300 focus:ring-amber-300/50 sm:size-4"
                 />
                 {{ t('balconyPreference') }}
             </label>
@@ -273,21 +277,21 @@ const inputClass =
 
             <div v-if="additionalServices.length">
                 <p
-                    class="mb-2 text-xs tracking-widest text-amber-300 uppercase"
+                    class="mb-1.5 text-xs tracking-widest text-amber-300 uppercase sm:mb-2"
                 >
                     {{ t('addExtraServices') }}
                 </p>
-                <ul class="space-y-2">
+                <ul class="space-y-1.5 sm:space-y-2">
                     <li
                         v-for="service in additionalServices"
                         :key="service.id"
-                        class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-3 py-2"
+                        class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2"
                     >
                         <div class="min-w-0">
-                            <p class="truncate text-sm font-medium">
+                            <p class="truncate text-xs font-medium sm:text-sm">
                                 {{ localized(service.name, locale) }}
                             </p>
-                            <p class="text-xs text-white/50">
+                            <p class="text-[11px] text-white/50 sm:text-xs">
                                 {{ format(service.price) }}
                             </p>
                         </div>
@@ -296,7 +300,7 @@ const inputClass =
                                 v-if="serviceQuantityFor(service.id) === 0"
                                 type="button"
                                 :aria-label="t('addOneMore')"
-                                class="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-amber-300 hover:text-slate-900"
+                                class="flex size-6 items-center justify-center rounded-full bg-white/10 transition hover:bg-amber-300 hover:text-slate-900 sm:size-7"
                                 @click="
                                     addService(
                                         service.id,
@@ -305,28 +309,28 @@ const inputClass =
                                     )
                                 "
                             >
-                                <Plus class="size-3.5" />
+                                <Plus class="size-3 sm:size-3.5" />
                             </button>
                             <div
                                 v-else
-                                class="flex items-center gap-2 rounded-full bg-white/10 p-1.5"
+                                class="flex items-center gap-1.5 rounded-full bg-white/10 p-1 sm:gap-2 sm:p-1.5"
                             >
                                 <button
                                     type="button"
                                     :aria-label="t('removeOne')"
-                                    class="flex size-6 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                                    class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:size-6"
                                     @click="decrementService(service.id)"
                                 >
                                     <Minus class="size-3" />
                                 </button>
                                 <span
-                                    class="w-5 text-center text-sm font-semibold"
+                                    class="w-4 text-center text-xs font-semibold sm:w-5 sm:text-sm"
                                     >{{ serviceQuantityFor(service.id) }}</span
                                 >
                                 <button
                                     type="button"
                                     :aria-label="t('addOneMore')"
-                                    class="flex size-6 items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200"
+                                    class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200 sm:size-6"
                                     @click="
                                         addService(
                                             service.id,
@@ -346,11 +350,11 @@ const inputClass =
             <button
                 type="submit"
                 :disabled="status === 'sending'"
-                class="w-full rounded-full bg-amber-300 px-8 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-amber-200 disabled:opacity-60 sm:w-auto sm:py-3 sm:text-base"
+                class="w-full rounded-full bg-amber-300 px-6 py-2 text-xs font-medium text-slate-900 transition hover:bg-amber-200 disabled:opacity-60 sm:w-auto sm:px-8 sm:py-3 sm:text-base"
             >
                 {{ status === 'sending' ? t('sending') : t('sendRequest') }}
             </button>
-            <div v-if="hotelPhoneNumber" class="flex items-center gap-3 pt-1">
+            <div v-if="hotelPhoneNumber" class="flex items-center gap-3">
                 <div class="h-px flex-1 bg-white/15"></div>
                 <span class="text-xs tracking-widest text-white/40 uppercase">{{
                     t('orDivider')
@@ -360,27 +364,27 @@ const inputClass =
             <a
                 v-if="hotelPhoneNumber"
                 :href="hotelPhoneHref!"
-                class="relative flex items-center gap-3 overflow-hidden rounded-2xl border-2 border-amber-300/70 bg-amber-300/10 px-4 py-3.5 transition hover:bg-amber-300/20 sm:gap-4 sm:px-5 sm:py-4"
+                class="relative flex items-center gap-2.5 overflow-hidden rounded-2xl border-2 border-amber-300/70 bg-amber-300/10 px-3.5 py-2.5 transition hover:bg-amber-300/20 sm:gap-4 sm:px-5 sm:py-4"
             >
                 <span
                     class="pointer-events-none absolute inset-0 animate-pulse rounded-2xl ring-2 ring-amber-300/40"
                 ></span>
                 <span
-                    class="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-amber-300 text-slate-900 sm:size-12"
+                    class="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-300 text-slate-900 sm:size-12"
                 >
-                    <Phone class="size-5 sm:size-6" />
+                    <Phone class="size-4 sm:size-6" />
                 </span>
                 <span class="relative min-w-0 text-left">
                     <span
-                        class="block text-xs font-medium text-amber-200/90 sm:text-sm"
+                        class="block text-[11px] font-medium text-amber-200/90 sm:text-sm"
                         >{{ t('directCallPrefix') }}</span
                     >
                     <span
-                        class="block text-lg font-bold text-white sm:text-xl"
+                        class="block text-sm font-bold text-white sm:text-xl"
                         >{{ hotelPhoneNumber }}</span
                     >
                     <span
-                        class="mt-0.5 block text-xs text-white/60 sm:text-sm"
+                        class="mt-0.5 hidden text-xs text-white/60 sm:block sm:text-sm"
                         >{{ t('directCallSuffix') }}</span
                     >
                 </span>

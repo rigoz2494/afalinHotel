@@ -30,10 +30,6 @@ class CallbackRequestForm
                             ->label(__('Phone'))
                             ->tel()
                             ->disabled(),
-                        Textarea::make('message')
-                            ->label(__('Guest message'))
-                            ->disabled()
-                            ->columnSpanFull(),
                         Toggle::make('wants_balcony')
                             ->label(__('Wants a room with a balcony'))
                             ->disabled(),
@@ -41,18 +37,34 @@ class CallbackRequestForm
                             ->label(__('Room number browsed'))
                             ->helperText(__('From the Section 2 "View Available Rooms" modal — a preference, not a confirmed assignment.'))
                             ->disabled(),
-                        Textarea::make('special_requests')
-                            ->label(__('Special requests for check-in'))
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Placeholder::make('special_requests_translated')
-                            ->label(__('Translated request (Automatically):'))
-                            ->content(fn (?CallbackRequest $record): ?string => $record?->special_requests_translated)
-                            ->visible(fn (?CallbackRequest $record): bool => filled($record?->special_requests_translated))
-                            ->columnSpanFull(),
                         TextInput::make('ip_address')
                             ->label(__('IP address'))
                             ->disabled(),
+                    ]),
+
+                // One cohesive block for both free-text fields a guest can
+                // write in any language: the original right beside its
+                // automatic Russian translation, so a Russian-speaking
+                // manager never has to go hunting for the translated
+                // version in a separate place on the page.
+                Section::make(__('Translations'))
+                    ->description(__('Each guest field alongside its automatic Russian translation.'))
+                    ->columns(2)
+                    ->schema([
+                        Textarea::make('message')
+                            ->label(__('Guest message'))
+                            ->disabled(),
+                        Placeholder::make('message_translated')
+                            ->label(__('Translated message (Automatically):'))
+                            ->content(fn (?CallbackRequest $record): ?string => $record?->message_translated)
+                            ->visible(fn (?CallbackRequest $record): bool => filled($record?->message_translated)),
+                        Textarea::make('special_requests')
+                            ->label(__('Special requests for check-in'))
+                            ->disabled(),
+                        Placeholder::make('special_requests_translated')
+                            ->label(__('Translated request (Automatically):'))
+                            ->content(fn (?CallbackRequest $record): ?string => $record?->special_requests_translated)
+                            ->visible(fn (?CallbackRequest $record): bool => filled($record?->special_requests_translated)),
                     ]),
 
                 Section::make(__('Currency'))

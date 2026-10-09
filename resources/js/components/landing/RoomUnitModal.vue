@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
-import { CheckCircle2, ChevronLeft, ChevronRight, X } from '@lucide/vue';
+import {
+    CheckCircle2,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    X,
+} from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import ClientOnly from '@/components/ClientOnly.vue';
 import { useAmenityTags } from '@/composables/useAmenityTags';
@@ -168,31 +174,37 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                     class="block text-xs tracking-widest text-amber-300/80 uppercase"
                                 >
                                     {{ t('roomNumberSelectLabel') }}
-                                    <select
-                                        :value="selectedUnitId ?? ''"
-                                        class="mt-2 block w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm font-normal tracking-normal text-white normal-case outline-none focus:border-amber-300"
-                                        @change="
-                                            selectUnit(
-                                                Number(
-                                                    (
-                                                        $event.target as HTMLSelectElement
-                                                    ).value,
-                                                ) || null,
-                                            )
-                                        "
-                                    >
-                                        <option
-                                            v-for="unit in room.units"
-                                            :key="unit.id"
-                                            :value="unit.id"
+                                    <div class="relative mt-2">
+                                        <select
+                                            :value="selectedUnitId ?? ''"
+                                            class="block w-full appearance-none rounded-lg border border-white/15 bg-stone-950 px-3 py-2.5 pr-9 text-sm font-normal tracking-normal text-white normal-case transition outline-none hover:border-amber-300/50 focus:border-amber-300"
+                                            @change="
+                                                selectUnit(
+                                                    Number(
+                                                        (
+                                                            $event.target as HTMLSelectElement
+                                                        ).value,
+                                                    ) || null,
+                                                )
+                                            "
                                         >
-                                            {{
-                                                t('roomNumberOption', {
-                                                    number: unit.number,
-                                                })
-                                            }}
-                                        </option>
-                                    </select>
+                                            <option
+                                                v-for="unit in room.units"
+                                                :key="unit.id"
+                                                :value="unit.id"
+                                            >
+                                                {{
+                                                    t('roomNumberOption', {
+                                                        number: unit.number,
+                                                    })
+                                                }}
+                                            </option>
+                                        </select>
+                                        <ChevronDown
+                                            class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-amber-300/70"
+                                            aria-hidden="true"
+                                        />
+                                    </div>
                                 </label>
 
                                 <!-- Skeleton: soft, pulsing translucent

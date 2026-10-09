@@ -172,3 +172,24 @@ body {
 *::-webkit-scrollbar-thumb:hover {
     background-color: rgb(252 211 77 / 35%);
 }
+
+/*
+ * Every <select> on the landing page (currency, language, room number) is
+ * styled dark, but its open option list is a native browser popup that
+ * doesn't inherit those Tailwind classes — left alone, some browsers render
+ * it with their own light/white background while the <select>'s own
+ * dark-theme text color still applies, leaving each option invisible until
+ * the OS's own hover highlight gives it enough contrast to read.
+ * `color-scheme: dark` asks the browser to draw native controls (this
+ * option list included) from its dark palette instead of light by default;
+ * the explicit `option` rule below is the fallback for engines that don't
+ * fully honor `color-scheme` for a select's popup.
+ */
+select {
+    color-scheme: dark;
+}
+
+select option {
+    background-color: #0c0a09;
+    color: #ffffff;
+}

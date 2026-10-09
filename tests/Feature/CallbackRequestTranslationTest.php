@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /**
- * CallbackRequestObserver automatically fills in a Russian translation of a
- * guest's special_requests on save, via the same free TranslationService
- * the FAQ "Auto-Translate" action uses — but automatic, not a manual click,
- * and tolerant of failure since it must never block a real booking.
+ * CallbackRequestObserver automatically fills in a Russian translation of
+ * both a guest's message and their special_requests on save, via the same
+ * free TranslationService the FAQ "Auto-Translate" action uses — but
+ * automatic, not a manual click, and tolerant of failure since it must
+ * never block a real booking.
  */
 class CallbackRequestTranslationTest extends TestCase
 {
@@ -34,6 +35,43 @@ class CallbackRequestTranslationTest extends TestCase
             'Тихая сторона, пожалуйста.',
             CallbackRequest::first()->special_requests_translated,
         );
+    }
+
+    public function test_a_non_russian_message_is_also_automatically_translated_on_creation(): void
+    {
+        Http::fake(['api.mymemory.translated.net/*' => Http::response([
+            'responseData' => ['translatedText' => 'Благодарим, увидимся скоро.'],
+        ])]);
+
+        $this->postJson(route('api.v1.callback-requests.store'), [
+            'name' => 'Jane',
+            'phone' => '5550101234',
+            'message' => 'Thank you, see you soon.',
+        ])->assertCreated();
+
+        $this->assertSame(
+            'Благодарим, увидимся скоро.',
+            CallbackRequest::first()->message_translated,
+        );
+    }
+
+    public function test_the_message_and_special_request_are_translated_independently(): void
+    {
+        Http::fake(['api.mymemory.translated.net/*' => Http::sequence()
+            ->push(['responseData' => ['translatedText' => 'Переведённое сообщение.']])
+            ->push(['responseData' => ['translatedText' => 'Переведённый запрос.']])]);
+
+        $this->postJson(route('api.v1.callback-requests.store'), [
+            'name' => 'Jane',
+            'phone' => '5550101234',
+            'message' => 'Translated message.',
+            'special_requests' => 'Translated request.',
+        ])->assertCreated();
+
+        $booking = CallbackRequest::first();
+
+        $this->assertSame('Переведённое сообщение.', $booking->message_translated);
+        $this->assertSame('Переведённый запрос.', $booking->special_requests_translated);
     }
 
     public function test_a_special_request_already_in_russian_is_not_translated(): void
@@ -76,14 +114,15 @@ class CallbackRequestTranslationTest extends TestCase
         $this->assertNull(CallbackRequest::first()->special_requests_translated);
     }
 
-    public function test_the_admin_form_shows_the_translated_request_labeled_automatically(): void
+    public function test_the_admin_form_shows_both_translations_in_the_unified_box(): void
     {
-        // special_requests is already Russian here specifically so the
-        // observer sees nothing to translate and leaves this explicitly
-        // set special_requests_translated value alone — this test is about
-        // the admin form's display, not the observer's own behavior
-        // (covered above), so no Http::fake() should be needed for it.
+        // Both fields are already Russian here specifically so the observer
+        // sees nothing to translate and leaves these explicitly set
+        // *_translated values alone — this test is about the admin form's
+        // display, not the observer's own behavior (covered above).
         $callbackRequest = CallbackRequest::factory()->create([
+            'message' => 'Спасибо, скоро увидимся (оригинал).',
+            'message_translated' => 'Спасибо, скоро увидимся.',
             'special_requests' => 'Тихая сторона, пожалуйста (оригинал).',
             'special_requests_translated' => 'Тихая сторона, пожалуйста.',
         ]);
@@ -91,12 +130,15 @@ class CallbackRequestTranslationTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get("/admin/callback-requests/{$callbackRequest->id}/edit")
             ->assertOk()
+            ->assertSee('Спасибо, скоро увидимся.')
             ->assertSee('Тихая сторона, пожалуйста.');
     }
 
     public function test_the_admin_form_hides_the_translation_block_when_there_is_none(): void
     {
         $callbackRequest = CallbackRequest::factory()->create([
+            'message' => null,
+            'message_translated' => null,
             'special_requests' => null,
             'special_requests_translated' => null,
         ]);
