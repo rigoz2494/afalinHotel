@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\PricingPeriod;
 use App\Models\Room;
 use App\Services\PricingService;
 use Database\Seeders\PricingPeriodSeeder;
@@ -11,21 +10,23 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The seeder installs the six real room categories, each with a bilingual
- * name/description and a fixed set of amenity tags — no translation service
- * involved, since this content is hand-authored in both languages already.
+ * The seeder installs the five real room categories ("Room Types"), each
+ * with a bilingual name/description and a fixed set of amenity tags — no
+ * translation service involved, since this content is hand-authored in
+ * both languages already. "Дополнительное место" (Extra Bed Space) is an
+ * AdditionalService now, not a sixth room — see AdditionalServiceSeeder.
  */
 class RoomSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_seeds_exactly_the_six_real_categories(): void
+    public function test_it_seeds_exactly_the_five_real_categories(): void
     {
         $this->seed(RoomSeeder::class);
 
-        $this->assertSame(6, Room::query()->count());
+        $this->assertSame(5, Room::query()->count());
         $this->assertSame(
-            ['standard-double-room', 'twin-beds-standard-room', 'extended-triple-room', 'family-two-room-triple', 'luxury-two-room-triple', 'extra-bed-space'],
+            ['standard-double-room', 'twin-beds-standard-room', 'extended-triple-room', 'family-two-room-triple', 'luxury-two-room-triple'],
             Room::query()->ordered()->pluck('slug')->all(),
         );
     }
@@ -55,13 +56,6 @@ class RoomSeederTest extends TestCase
         $this->assertEmpty(array_diff($luxury->amenities, Room::AMENITY_TAGS));
     }
 
-    public function test_the_extra_bed_room_has_no_amenity_tags(): void
-    {
-        $this->seed(RoomSeeder::class);
-
-        $this->assertSame([], Room::query()->where('slug', 'extra-bed-space')->firstOrFail()->amenities);
-    }
-
     /**
      * The real target grid from the legacy pricing sheet: each room's rate
      * across the four seasons, reproduced either by the season modifier
@@ -74,21 +68,18 @@ class RoomSeederTest extends TestCase
         $this->seed(RoomSeeder::class);
 
         $table = app(PricingService::class)->table();
-        $periodIds = PricingPeriod::query()->ordered()->pluck('id')->all();
         $bySlug = Room::query()->ordered()->pluck('id', 'slug');
 
         $rowFor = fn (string $slug) => collect($table['rows'])->firstWhere('room_id', $bySlug[$slug]);
         $pricesFor = fn (string $slug) => array_values($rowFor($slug)['prices']);
 
         // Numeric overrides and plain modifier-computed cells alike come
-        // back as numbers (int or float); only the extra-bed row's literal
-        // "child/adult" text stays a string. assertEquals, not assertSame,
-        // so e.g. 4500 and 4500.0 aren't treated as a mismatch.
+        // back as numbers (int or float); assertEquals, not assertSame, so
+        // e.g. 4500 and 4500.0 aren't treated as a mismatch.
         $this->assertEquals([4500, 5500, 6000, 5500], $pricesFor('standard-double-room'));
         $this->assertEquals([4700, 5700, 6200, 5700], $pricesFor('twin-beds-standard-room'));
         $this->assertEquals([5500, 6500, 7500, 6500], $pricesFor('extended-triple-room'));
         $this->assertEquals([6500, 8500, 9500, 8500], $pricesFor('family-two-room-triple'));
         $this->assertEquals([7500, 9500, 11500, 9500], $pricesFor('luxury-two-room-triple'));
-        $this->assertSame(['600/900', '900/1300', '1000/1500', '900/1300'], $pricesFor('extra-bed-space'));
     }
 }

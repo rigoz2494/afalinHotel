@@ -21,6 +21,8 @@ class CallbackRequestFactory extends Factory
             'phone' => '+1 555 010 '.fake()->numerify('####'),
             'message' => fake()->optional()->sentence(),
             'wants_balcony' => fake()->boolean(),
+            'special_requests' => fake()->optional(0.3)->sentence(),
+            'room_number' => fake()->optional(0.4)->numerify('1##'),
             'status' => CallbackRequestStatus::New,
             'ip_address' => fake()->ipv4(),
         ];

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { Percent, Minus, Plus, Sparkles } from '@lucide/vue';
+import { useEventListener } from '@vueuse/core';
+import { Percent, Minus, Plus, Sparkles, X } from '@lucide/vue';
+import { ref } from 'vue';
+import ClientOnly from '@/components/ClientOnly.vue';
 import { useBookingBasket } from '@/composables/useBookingBasket';
 import { useCurrency } from '@/composables/useCurrency';
 import { localized, useLocale } from '@/composables/useLocale';
@@ -9,13 +12,29 @@ import {
     isPriceOverride,
     percentOffBase,
 } from '@/composables/usePricingDisplay';
-import type { HotelSettings, PricingTable } from '@/types/landing';
+import type {
+    AdditionalService,
+    HotelSettings,
+    PricingTable,
+} from '@/types/landing';
 
-defineProps<{ hotel: HotelSettings; pricing: PricingTable }>();
+defineProps<{
+    hotel: HotelSettings;
+    pricing: PricingTable;
+    additionalServices: AdditionalService[];
+}>();
 
 const { quantityFor, add, decrement } = useBookingBasket();
 const { format } = useCurrency();
 const { t, locale } = useLocale();
+
+const servicesOpen = ref(false);
+
+useEventListener('keydown', (event: KeyboardEvent) => {
+    if (servicesOpen.value && event.key === 'Escape') {
+        servicesOpen.value = false;
+    }
+});
 </script>
 
 <template>
@@ -118,10 +137,11 @@ const { t, locale } = useLocale();
                                         class="flex min-h-28 flex-col items-start justify-between gap-2 sm:min-h-32 lg:min-h-20 lg:gap-1.5"
                                     >
                                         <!--
-                                            Case C (override): a literal display value, e.g.
-                                            "900/1300" for a child/adult split rate — there's no
-                                            single number here to add to the basket, so this
-                                            row has no Select button, just the text itself.
+                                            Case C (override): the admin set a literal,
+                                            non-numeric price_override text instead of a
+                                            number — there's no single price here to add to
+                                            the basket, so this cell has no Select button,
+                                            just the text itself.
                                         -->
                                         <span
                                             v-if="isPriceOverride(row, column)"
@@ -293,7 +313,72 @@ const { t, locale } = useLocale();
                         </tbody>
                     </table>
                 </div>
+
+                <button
+                    type="button"
+                    class="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/50 px-5 py-2.5 text-sm font-semibold text-amber-200 transition hover:bg-amber-300/10"
+                    @click="servicesOpen = true"
+                >
+                    <Sparkles class="size-4" />
+                    {{ t('additionalServicesButton') }}
+                </button>
             </div>
         </div>
+
+        <ClientOnly>
+            <Teleport to="body">
+                <Transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="opacity-0"
+                    leave-active-class="transition duration-200 ease-in"
+                    leave-to-class="opacity-0"
+                >
+                    <div
+                        v-if="servicesOpen"
+                        class="fixed inset-0 z-[70] flex items-center justify-end bg-black/70 p-4 backdrop-blur-sm"
+                        role="dialog"
+                        aria-modal="true"
+                        :aria-label="t('additionalServicesTitle')"
+                        @click.self="servicesOpen = false"
+                    >
+                        <div
+                            class="relative max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
+                        >
+                            <button
+                                type="button"
+                                :aria-label="t('closeAdditionalServices')"
+                                class="absolute top-4 right-4 rounded-full bg-white/10 p-2 transition hover:bg-white/20"
+                                @click="servicesOpen = false"
+                            >
+                                <X class="size-5" />
+                            </button>
+                            <h3 class="text-xl font-semibold sm:text-2xl">
+                                {{ t('additionalServicesTitle') }}
+                            </h3>
+                            <p class="mt-2 text-sm text-stone-300">
+                                {{ t('additionalServicesIntro') }}
+                            </p>
+
+                            <ul class="mt-5 divide-y divide-white/10">
+                                <li
+                                    v-for="service in additionalServices"
+                                    :key="service.id"
+                                    class="flex items-center justify-between gap-4 py-3"
+                                >
+                                    <span class="text-sm text-stone-100">
+                                        {{ localized(service.name, locale) }}
+                                    </span>
+                                    <span
+                                        class="text-sm font-semibold text-amber-300"
+                                    >
+                                        {{ format(service.price) }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </Transition>
+            </Teleport>
+        </ClientOnly>
     </section>
 </template>

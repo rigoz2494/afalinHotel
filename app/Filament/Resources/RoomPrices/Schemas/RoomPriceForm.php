@@ -42,14 +42,14 @@ class RoomPriceForm
                     ]),
                 TextInput::make('discount_percentage')
                     ->label(__('Promotional discount'))
-                    ->helperText(__('An extra discount for this room in this month only, on top of the season modifier. Leave blank for none.'))
+                    ->helperText(__('An extra discount for this room in this month only, on top of the season modifier. A negative number (e.g. -15) is a markup instead of a discount. Leave blank for none.'))
                     ->numeric()
-                    ->minValue(0)
+                    ->minValue(-100)
                     ->maxValue(100)
                     ->suffix('%'),
                 TextInput::make('price_override')
                     ->label(__('Price override'))
-                    ->helperText(__('A literal price for this room in this month, replacing the formula outright — e.g. when the real rate doesn\'t follow the season modifier closely enough, or for a non-numeric display like "900/1300". Leave blank to use the formula.'))
+                    ->helperText(__('A literal price for this room in this month, replacing the formula outright — e.g. when the real rate doesn\'t follow the season modifier closely enough. Leave blank to use the formula.'))
                     ->maxLength(50)
                     ->columnSpanFull(),
             ]);

@@ -37,6 +37,12 @@ class RoomResource extends JsonResource
                 // not free text, so there's nothing here left to translate.
                 'tags' => $this->amenities ?? [],
             ],
+            // The specific, numbered physical rooms of this type, for the
+            // Section 2 "View Available Rooms" modal. Expects the room to
+            // have been loaded `with(['units' => fn ($q) => $q->active()...`
+            // — see RoomService::listActive() — rather than lazy-loading
+            // per room here.
+            'units' => RoomUnitResource::collection($this->whenLoaded('units')),
         ];
     }
 }

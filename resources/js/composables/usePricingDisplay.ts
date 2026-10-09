@@ -18,8 +18,8 @@ import type { PricingColumn, PricingRow } from '@/types/landing';
  * through next to the lower final price, with an "N% off" badge.
  */
 
-/** True for a cell that's a literal display override (e.g. "900/1300" for a
- * child/adult split rate) rather than a price to do arithmetic on. */
+/** True for a cell the admin set a literal, non-numeric price_override text
+ * on (RoomPrice::price_override) rather than a price to do arithmetic on. */
 export const isPriceOverride = (
     row: PricingRow,
     column: PricingColumn,

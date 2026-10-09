@@ -8,6 +8,7 @@ import { useCurrency } from '@/composables/useCurrency';
 import { useHotelSettings } from '@/composables/useHotelSettings';
 import { useLocale } from '@/composables/useLocale';
 import { formatPhoneInput, isPhoneComplete } from '@/composables/usePhoneMask';
+import { useRoomSelection } from '@/composables/useRoomSelection';
 
 const emit = defineEmits<{ submitted: [] }>();
 
@@ -15,6 +16,7 @@ const { items, add, decrement, removeItem, clear } = useBookingBasket();
 const { convert, format, formatConverted, selected } = useCurrency();
 const { t, locale } = useLocale();
 const hotel = useHotelSettings();
+const { selectedRoomNumber } = useRoomSelection();
 
 // The direct-call fallback: hidden if the admin hasn't set a phone number
 // in Site Settings yet, rather than showing a broken link.
@@ -27,6 +29,7 @@ const hotelPhoneHref = computed(() =>
 
 const form = reactive({ name: '', phone: '', message: '' });
 const wantsBalcony = ref(false);
+const specialRequests = ref('');
 const status = ref<'idle' | 'sending' | 'sent' | 'error'>('idle');
 const phoneError = ref<string | null>(null);
 
@@ -84,6 +87,8 @@ const submit = async (): Promise<void> => {
             body: JSON.stringify({
                 ...form,
                 wants_balcony: wantsBalcony.value,
+                special_requests: specialRequests.value || null,
+                room_number: selectedRoomNumber.value,
                 // The currency and its converted prices are locked into the booking.
                 currency: selected.value.code,
                 rooms: items.value.map((item) => ({
@@ -102,6 +107,7 @@ const submit = async (): Promise<void> => {
 
         Object.assign(form, { name: '', phone: '', message: '' });
         wantsBalcony.value = false;
+        specialRequests.value = '';
         clear();
         status.value = 'sent';
 
@@ -235,6 +241,14 @@ const inputClass =
                 />
                 {{ t('balconyPreference') }}
             </label>
+            <textarea
+                v-model="specialRequests"
+                rows="2"
+                maxlength="2000"
+                :placeholder="t('specialRequestsPlaceholder')"
+                :aria-label="t('specialRequestsLabel')"
+                :class="inputClass"
+            ></textarea>
             <button
                 type="submit"
                 :disabled="status === 'sending'"

@@ -12,6 +12,8 @@ class RoomService
      */
     public function listActive(): Collection
     {
-        return Room::query()->active()->ordered()->get();
+        return Room::query()->active()->ordered()
+            ->with(['units' => fn ($query) => $query->active()->ordered()])
+            ->get();
     }
 }

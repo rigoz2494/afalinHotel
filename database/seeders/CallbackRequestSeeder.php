@@ -46,11 +46,7 @@ class CallbackRequestSeeder extends Seeder
             return;
         }
 
-        // "Extra Bed Space" is a supplemental line item, not a bookable room
-        // on its own — it has no single per-night price (see RoomSeeder's
-        // price_override for it), so it's excluded from mock selections the
-        // same way the real booking form never offers a Select button for it.
-        $rooms = Room::query()->active()->ordered()->where('slug', '!=', 'extra-bed-space')->get();
+        $rooms = Room::query()->active()->ordered()->get();
         $periods = PricingPeriod::query()->active()->ordered()->get();
 
         if ($rooms->isEmpty() || $periods->isEmpty()) {
@@ -73,6 +69,8 @@ class CallbackRequestSeeder extends Seeder
                 'phone' => $this->randomPhone(),
                 'message' => fake()->optional(0.6)->sentence(),
                 'wants_balcony' => fake()->boolean(35),
+                'special_requests' => fake()->optional(0.25)->sentence(),
+                'room_number' => fake()->optional(0.3)->numerify('1##'),
                 'rooms' => $this->randomRoomSelection($rooms, $periods),
             ], ipAddress: null);
 

@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,
             PricingPeriodSeeder::class,
             RoomSeeder::class,
+            RoomUnitSeeder::class,
+            AdditionalServiceSeeder::class,
             FaqSeeder::class,
             CallbackRequestSeeder::class,
         ]);

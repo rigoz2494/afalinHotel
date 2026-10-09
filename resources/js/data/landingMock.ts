@@ -1,4 +1,5 @@
 import type {
+    AdditionalService,
     FaqItem,
     HotelSettings,
     PricingTable,
@@ -59,6 +60,36 @@ export const mockRooms: Room[] = [
             bed_type: 'King bed',
             tags: ['double_bed', 'table', 'nightstand', 'wardrobe', 'tv', 'ac'],
         },
+        units: [
+            {
+                id: 101,
+                number: '101',
+                images: [],
+                amenities: [
+                    'double_bed',
+                    'table',
+                    'nightstand',
+                    'wardrobe',
+                    'tv',
+                    'ac',
+                ],
+                has_balcony: false,
+            },
+            {
+                id: 102,
+                number: '102',
+                images: [unsplash('photo-1618773928121-c32242e63f39')],
+                amenities: [
+                    'double_bed',
+                    'table',
+                    'nightstand',
+                    'wardrobe',
+                    'tv',
+                    'ac',
+                ],
+                has_balcony: true,
+            },
+        ],
     },
     {
         id: 2,
@@ -87,6 +118,38 @@ export const mockRooms: Room[] = [
                 'ac',
             ],
         },
+        units: [
+            {
+                id: 201,
+                number: '201',
+                images: [],
+                amenities: [
+                    'double_bed',
+                    'sofa',
+                    'table',
+                    'wardrobe',
+                    'hanger',
+                    'tv',
+                    'ac',
+                ],
+                has_balcony: true,
+            },
+            {
+                id: 202,
+                number: '202',
+                images: [unsplash('photo-1590490360182-c33d57733427')],
+                amenities: [
+                    'double_bed',
+                    'sofa',
+                    'table',
+                    'wardrobe',
+                    'hanger',
+                    'tv',
+                    'ac',
+                ],
+                has_balcony: false,
+            },
+        ],
     },
     {
         id: 3,
@@ -118,6 +181,52 @@ export const mockRooms: Room[] = [
                 'safe_box',
             ],
         },
+        units: [
+            {
+                id: 301,
+                number: '301',
+                images: [unsplash('photo-1631049307264-da0ec9d70304')],
+                amenities: [
+                    'double_bed',
+                    'armchair',
+                    'sofa',
+                    'table',
+                    'wardrobe',
+                    'hanger',
+                    'tv',
+                    'ac',
+                    'fridge',
+                    'safe_box',
+                ],
+                has_balcony: true,
+            },
+        ],
+    },
+];
+
+export const mockAdditionalServices: AdditionalService[] = [
+    {
+        id: 1,
+        name: { en: 'Extra bed (child)', ru: 'Дополнительное место (ребёнок)' },
+        price: 800,
+    },
+    {
+        id: 2,
+        name: {
+            en: 'Extra bed (adult)',
+            ru: 'Дополнительное место (взрослый)',
+        },
+        price: 1200,
+    },
+    {
+        id: 3,
+        name: { en: 'Parking', ru: 'Парковка' },
+        price: 300,
+    },
+    {
+        id: 4,
+        name: { en: 'Breakfast', ru: 'Завтрак' },
+        price: 500,
     },
 ];
 

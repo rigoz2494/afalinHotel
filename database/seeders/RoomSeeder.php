@@ -21,14 +21,19 @@ class RoomSeeder extends Seeder
             [$photo('photo-1582719478250-c89cae4dc85b'), $photo('photo-1618773928121-c32242e63f39'), $photo('photo-1590490360182-c33d57733427')],
             [$photo('photo-1631049307264-da0ec9d70304'), $photo('photo-1582719478250-c89cae4dc85b'), $photo('photo-1522708323590-d24dbb6b0267')],
             [$photo('photo-1522708323590-d24dbb6b0267'), $photo('photo-1611892440504-42a792e24d32'), $photo('photo-1631049307264-da0ec9d70304')],
-            [$photo('photo-1618773928121-c32242e63f39'), $photo('photo-1590490360182-c33d57733427')],
         ];
 
-        // The six real room categories. Each one's rate for period 1 (the
-        // baseline season) is its own base_price; periods 2-4 come from
-        // PricingPeriodSeeder's modifier where that lands on the real rate
-        // exactly (true for room 1 only — see that seeder's own comment) and
-        // from an explicit `overrides` price otherwise.
+        // The five real room categories ("Room Types"). "Дополнительное
+        // место" (Extra Bed Space) used to be a sixth one here, as a
+        // supplemental line item rather than a real bookable room — it's
+        // now an AdditionalService instead (see AdditionalServiceSeeder),
+        // which is what it always really was.
+        //
+        // Each room's rate for period 1 (the baseline season) is its own
+        // base_price; periods 2-4 come from PricingPeriodSeeder's modifier
+        // where that lands on the real rate exactly (true for room 1 only —
+        // see that seeder's own comment) and from an explicit `overrides`
+        // price otherwise.
         $rooms = [
             [
                 'slug' => 'standard-double-room',
@@ -94,25 +99,6 @@ class RoomSeeder extends Seeder
                 'amenities' => ['double_bed', 'table', 'nightstand', 'chairs', 'armchair', 'sofa', 'wardrobe', 'hanger', 'tv', 'ac', 'fridge', 'safe_box'],
                 'base_price' => 7500,
                 'overrides' => [2 => '9500', 3 => '11500', 4 => '9500'],
-            ],
-            [
-                // Not a bookable room in the usual sense — a supplemental
-                // line item for an extra bed, priced per guest (child or
-                // adult), shown as its own row in the pricing table. Every
-                // period is overridden with the literal "child/adult" text,
-                // since there's no single number a season modifier could
-                // compute for it.
-                'slug' => 'extra-bed-space',
-                'name' => ['en' => 'Extra Bed Space', 'ru' => 'Дополнительное место'],
-                'description' => [
-                    'en' => 'An extra bed added to a room, for a child (600-1000) or an adult guest (900-1500), depending on the season.',
-                    'ru' => 'Оформление дополнительного спального места в номере для ребенка (600-1000) или взрослого гостя (900-1500).',
-                ],
-                'capacity' => 1,
-                'bed_type' => 'Extra bed',
-                'amenities' => [],
-                'base_price' => 600,
-                'overrides' => [1 => '600/900', 2 => '900/1300', 3 => '1000/1500', 4 => '900/1300'],
             ],
         ];
 

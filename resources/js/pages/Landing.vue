@@ -15,6 +15,7 @@ import RoomsSection from '@/components/landing/RoomsSection.vue';
 import SideNavDots from '@/components/landing/SideNavDots.vue';
 import {
     faqItems as mockFaqItems,
+    mockAdditionalServices,
     mockHotel,
     mockPricing,
     mockRooms,
@@ -24,6 +25,7 @@ import { provideCurrency } from '@/composables/useCurrency';
 import { provideHotelSettings } from '@/composables/useHotelSettings';
 import { localized, provideLocale } from '@/composables/useLocale';
 import type {
+    AdditionalService,
     CurrencyOption,
     FaqItem,
     HotelSettings,
@@ -36,6 +38,7 @@ const props = defineProps<{
     currencies: CurrencyOption[];
     rooms: { data: Room[] };
     faqs: { data: FaqItem[] };
+    additionalServices: { data: AdditionalService[] };
     pricing: {
         columns: PricingTable['columns'];
         rows: { data: PricingTable['rows'] };
@@ -79,6 +82,11 @@ const pricing = ref<PricingTable>(
 );
 const faqs = ref<FaqItem[]>(
     props.faqs.data.length ? props.faqs.data : mockFaqItems,
+);
+const additionalServices = ref<AdditionalService[]>(
+    props.additionalServices.data.length
+        ? props.additionalServices.data
+        : mockAdditionalServices,
 );
 
 provideCurrency(() => props.currencies);
@@ -199,7 +207,11 @@ onMounted(() => {
                 :pricing="pricing"
                 :focus-slug="focusRoomSlug"
             />
-            <PricingSection :hotel="hotel" :pricing="pricing" />
+            <PricingSection
+                :hotel="hotel"
+                :pricing="pricing"
+                :additional-services="additionalServices"
+            />
             <AboutSection :hotel="hotel" />
             <FaqSection :hotel="hotel" :faqs="faqs" />
             <ContactSection :hotel="hotel" />

@@ -46,6 +46,14 @@ class CallbackRequestsTable
                     ->color(fn (bool $state): string => $state ? 'warning' : 'gray')
                     ->tooltip(fn (bool $state): string => $state ? __('Wants a room with a balcony') : __('No balcony preference'))
                     ->sortable(),
+                TextColumn::make('room_number')
+                    ->label(__('Room #'))
+                    ->placeholder('—'),
+                IconColumn::make('special_requests')
+                    ->label(__('Requests'))
+                    ->icon(fn (?string $state): Heroicon => filled($state) ? Heroicon::OutlinedChatBubbleLeftRight : Heroicon::OutlinedMinus)
+                    ->color(fn (?string $state): string => filled($state) ? 'warning' : 'gray')
+                    ->tooltip(fn (?string $state): ?string => filled($state) ? $state : __('No special requests')),
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()

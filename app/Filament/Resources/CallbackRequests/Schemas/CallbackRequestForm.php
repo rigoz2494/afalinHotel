@@ -36,6 +36,14 @@ class CallbackRequestForm
                         Toggle::make('wants_balcony')
                             ->label(__('Wants a room with a balcony'))
                             ->disabled(),
+                        TextInput::make('room_number')
+                            ->label(__('Room number browsed'))
+                            ->helperText(__('From the Section 2 "View Available Rooms" modal — a preference, not a confirmed assignment.'))
+                            ->disabled(),
+                        Textarea::make('special_requests')
+                            ->label(__('Special requests for check-in'))
+                            ->disabled()
+                            ->columnSpanFull(),
                         TextInput::make('ip_address')
                             ->label(__('IP address'))
                             ->disabled(),

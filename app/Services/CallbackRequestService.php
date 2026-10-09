@@ -17,7 +17,7 @@ class CallbackRequestService
      * browser. The rules match the pricing table: the discount is applied in the
      * base currency and rounded, then the result is converted and rounded again.
      *
-     * @param  array{name: string, phone: string, message?: string|null, wants_balcony?: bool, currency?: string|null, rooms?: array<int, array{room_id: int, period: string|null, quantity: int}>}  $data
+     * @param  array{name: string, phone: string, message?: string|null, wants_balcony?: bool, special_requests?: string|null, room_number?: string|null, currency?: string|null, rooms?: array<int, array{room_id: int, period: string|null, quantity: int}>}  $data
      */
     public function create(array $data, ?string $ipAddress): CallbackRequest
     {
@@ -28,6 +28,8 @@ class CallbackRequestService
             'phone' => $data['phone'],
             'message' => $data['message'] ?? null,
             'wants_balcony' => $data['wants_balcony'] ?? false,
+            'special_requests' => $data['special_requests'] ?? null,
+            'room_number' => $data['room_number'] ?? null,
             'currency' => $currency->code,
             'exchange_rate' => $currency->exchange_rate,
             'rooms' => $this->priceRoomSelection($data['rooms'] ?? [], $currency),

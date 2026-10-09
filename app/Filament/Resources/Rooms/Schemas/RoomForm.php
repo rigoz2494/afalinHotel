@@ -76,9 +76,9 @@ class RoomForm
                             ->prefix(fn (): string => Currency::baseSymbol()),
                         TextInput::make('discount_percentage')
                             ->label(__('Fallback discount'))
-                            ->helperText(__('Used only when a month in Seasonal Prices has no discount of its own.'))
+                            ->helperText(__('Used only when a month in Seasonal Prices has no discount of its own. A negative number (e.g. -15) is a markup instead of a discount.'))
                             ->numeric()
-                            ->minValue(0)
+                            ->minValue(-100)
                             ->maxValue(100)
                             ->suffix('%'),
                     ]),

@@ -68,6 +68,17 @@ class Room extends Model
     }
 
     /**
+     * The specific, numbered physical rooms of this type (e.g. "101",
+     * "102"), each with its own photos and exact amenities — see RoomUnit.
+     *
+     * @return HasMany<RoomUnit, $this>
+     */
+    public function units(): HasMany
+    {
+        return $this->hasMany(RoomUnit::class);
+    }
+
+    /**
      * @param  Builder<Room>  $query
      */
     #[Scope]

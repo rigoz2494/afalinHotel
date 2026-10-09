@@ -1,30 +1,17 @@
 <script setup lang="ts">
 import {
-    Armchair,
     BedDouble,
-    BedSingle,
     ChevronLeft,
     ChevronRight,
-    DoorClosed,
-    Lamp,
-    Lock,
     Percent,
-    Refrigerator,
-    Shirt,
-    Snowflake,
-    Sofa,
-    Table2,
-    Tv,
     Users,
 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
+import RoomUnitModal from '@/components/landing/RoomUnitModal.vue';
 import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
+import { useAmenityTags } from '@/composables/useAmenityTags';
 import { useCurrency } from '@/composables/useCurrency';
-import {
-    localized,
-    useLocale,
-    type TranslationKey,
-} from '@/composables/useLocale';
+import { localized, useLocale } from '@/composables/useLocale';
 import {
     cellPrice,
     cheapestColumn,
@@ -44,40 +31,6 @@ const props = defineProps<{
 const { format } = useCurrency();
 const { t, locale } = useLocale();
 
-// Room::AMENITY_TAGS on the backend is the source of truth for which keys
-// are valid; this is purely presentational — one icon and one label key
-// per tag, so a new tag only ever needs adding in one place on each side.
-const AMENITY_ICONS: Record<string, typeof BedDouble> = {
-    double_bed: BedDouble,
-    twin_beds: BedSingle,
-    sofa: Sofa,
-    armchair: Armchair,
-    table: Table2,
-    nightstand: Lamp,
-    chairs: Armchair,
-    wardrobe: DoorClosed,
-    hanger: Shirt,
-    tv: Tv,
-    ac: Snowflake,
-    fridge: Refrigerator,
-    safe_box: Lock,
-};
-const AMENITY_LABEL_KEYS: Record<string, TranslationKey> = {
-    double_bed: 'amenityDoubleBed',
-    twin_beds: 'amenityTwinBeds',
-    sofa: 'amenitySofa',
-    armchair: 'amenityArmchair',
-    table: 'amenityTable',
-    nightstand: 'amenityNightstand',
-    chairs: 'amenityChairs',
-    wardrobe: 'amenityWardrobe',
-    hanger: 'amenityHanger',
-    tv: 'amenityTv',
-    ac: 'amenityAc',
-    fridge: 'amenityFridge',
-    safe_box: 'amenitySafeBox',
-};
-
 // Opens directly on the room this URL is about, instead of always the first
 // one — the deep link from sitemap.xml would otherwise land on the wrong room.
 const initialIndex = props.focusSlug
@@ -95,20 +48,11 @@ const activeRoomName = computed(() =>
 const activeRoomDescription = computed(() =>
     localized(activeRoom.value.description, locale.value),
 );
-// Each tag paired with its icon and label, in the fixed vocabulary order —
-// not the room's own (admin-chosen, unordered) array order — so every
-// room's badge row reads in the same, familiar sequence.
-const activeRoomAmenityTags = computed(() => {
-    const tags = new Set(activeRoom.value.amenities.tags);
+const activeRoomAmenityTags = computed(() =>
+    useAmenityTags(activeRoom.value.amenities.tags, t),
+);
 
-    return Object.keys(AMENITY_ICONS)
-        .filter((tag) => tags.has(tag))
-        .map((tag) => ({
-            tag,
-            icon: AMENITY_ICONS[tag],
-            label: t(AMENITY_LABEL_KEYS[tag]),
-        }));
-});
+const unitModalOpen = ref(false);
 
 // The cheapest active month for this room, shown as the card's teaser price.
 // Falls back to the plain base price if there is no matching pricing row
@@ -379,6 +323,15 @@ const stepImage = (direction: 1 | -1): void => {
                         {{ t('viewPricesAvailability') }}
                     </button>
                 </div>
+                <!-- Opens the modal below, listing this room type's own
+                specific numbered rooms. -->
+                <button
+                    type="button"
+                    class="mt-3 w-full rounded-full border border-amber-300/50 px-5 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-300/10 sm:mt-4 sm:w-auto sm:text-sm lg:mt-3"
+                    @click="unitModalOpen = true"
+                >
+                    {{ t('viewAvailableRooms') }}
+                </button>
             </div>
 
             <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-3">
@@ -400,5 +353,7 @@ const stepImage = (direction: 1 | -1): void => {
                 </li>
             </ul>
         </div>
+
+        <RoomUnitModal v-model="unitModalOpen" :room="activeRoom" />
     </section>
 </template>

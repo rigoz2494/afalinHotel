@@ -71,6 +71,18 @@ const translations = {
         en: 'View Prices & Availability',
         ru: 'Смотреть цены и наличие',
     },
+    viewAvailableRooms: {
+        en: 'View Available Rooms',
+        ru: 'Просмотр доступных номеров',
+    },
+    availableRoomsModalTitle: {
+        en: 'Available Rooms',
+        ru: 'Доступные номера',
+    },
+    roomNumberSelectLabel: { en: 'Room number', ru: 'Номер комнаты' },
+    roomNumberOption: { en: 'Room {number}', ru: 'Номер {number}' },
+    hasBalcony: { en: 'Has a balcony', ru: 'Есть балкон' },
+    noBalconyUnit: { en: 'No balcony', ru: 'Без балкона' },
     capacity: { en: 'Capacity', ru: 'Вместимость' },
     guestsCount: { en: '{n} guests', ru: '{n} гостей' },
     bed: { en: 'Bed', ru: 'Кровать' },
@@ -187,6 +199,32 @@ const translations = {
     balconyPreference: {
         en: 'Preference: room with a balcony',
         ru: 'Пожелание: номер с балконом',
+    },
+    specialRequestsLabel: {
+        en: 'Special requests for check-in',
+        ru: 'Особые пожелания к заселению',
+    },
+    specialRequestsPlaceholder: {
+        en: 'e.g. quiet side, separate blankets, early arrival',
+        ru: 'например: тихая сторона, отдельные одеяла, ранний заезд',
+    },
+
+    // Additional services (upsells), shown below the pricing matrix
+    additionalServicesButton: {
+        en: 'Additional Services',
+        ru: 'Дополнительные услуги',
+    },
+    additionalServicesTitle: {
+        en: 'Additional Services',
+        ru: 'Дополнительные услуги',
+    },
+    additionalServicesIntro: {
+        en: 'Flat prices, added on request — just let us know when you book.',
+        ru: 'Фиксированные цены, добавляются по запросу — просто сообщите нам при бронировании.',
+    },
+    closeAdditionalServices: {
+        en: 'Close additional services',
+        ru: 'Закрыть дополнительные услуги',
     },
 
     // Direct call

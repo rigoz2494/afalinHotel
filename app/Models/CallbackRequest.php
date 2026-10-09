@@ -12,7 +12,7 @@ class CallbackRequest extends Model
     /** @use HasFactory<CallbackRequestFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'phone', 'message', 'wants_balcony', 'rooms', 'currency', 'exchange_rate', 'status', 'ip_address'];
+    protected $fillable = ['name', 'phone', 'message', 'wants_balcony', 'special_requests', 'room_number', 'rooms', 'currency', 'exchange_rate', 'status', 'ip_address'];
 
     /**
      * @return array<string, string>
