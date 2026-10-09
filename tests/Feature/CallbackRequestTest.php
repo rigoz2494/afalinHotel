@@ -74,6 +74,29 @@ class CallbackRequestTest extends TestCase
         ], CallbackRequest::first()->rooms);
     }
 
+    public function test_a_promo_discount_still_applies_on_top_of_a_numeric_price_override(): void
+    {
+        $room = Room::factory()->create(['base_price' => 100, 'discount_percentage' => null]);
+        $period = PricingPeriod::factory()->create(['name' => 'Month 1', 'modifier_percentage' => 0]);
+        RoomPrice::factory()->create([
+            'room_id' => $room->id,
+            'pricing_period_id' => $period->id,
+            'price_override' => '5700',
+            'discount_percentage' => 10,
+        ]);
+
+        $this->postJson(route('api.v1.callback-requests.store'), [
+            'name' => 'Jane',
+            'phone' => '5550101234',
+            'rooms' => [
+                ['room_id' => $room->id, 'room_name' => 'Ignored', 'period' => 'Month 1', 'price' => 1, 'quantity' => 1],
+            ],
+        ])->assertCreated();
+
+        // The override ($5700) is the regular rate; the 10% promo applies on top of it.
+        $this->assertSame(5130, CallbackRequest::first()->rooms[0]['price']);
+    }
+
     public function test_invalid_room_entry_is_rejected(): void
     {
         $this->postJson(route('api.v1.callback-requests.store'), [

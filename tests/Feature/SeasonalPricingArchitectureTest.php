@@ -86,4 +86,40 @@ class SeasonalPricingArchitectureTest extends TestCase
         $this->assertSame(15, $row['monthly_discounts'][$withOverride->id]);
         $this->assertSame(5, $row['monthly_discounts'][$withoutOverride->id]);
     }
+
+    public function test_a_promo_discount_still_applies_on_top_of_a_numeric_price_override(): void
+    {
+        $period = PricingPeriod::factory()->create(['modifier_percentage' => 0]);
+        $room = Room::factory()->create(['base_price' => 100, 'discount_percentage' => null]);
+        RoomPrice::factory()->create([
+            'room_id' => $room->id,
+            'pricing_period_id' => $period->id,
+            'price_override' => '5700',
+            'discount_percentage' => 10,
+        ]);
+
+        $table = app(PricingService::class)->table();
+        $row = collect($table['rows'])->firstWhere('room_id', $room->id);
+
+        $this->assertSame(5700.0, $row['prices'][$period->id]);
+        $this->assertSame(10, $row['monthly_discounts'][$period->id]);
+    }
+
+    public function test_a_literal_non_numeric_price_override_still_gets_no_discount(): void
+    {
+        $period = PricingPeriod::factory()->create(['modifier_percentage' => 0]);
+        $room = Room::factory()->create(['base_price' => 100, 'discount_percentage' => null]);
+        RoomPrice::factory()->create([
+            'room_id' => $room->id,
+            'pricing_period_id' => $period->id,
+            'price_override' => '900/1300',
+            'discount_percentage' => 10,
+        ]);
+
+        $table = app(PricingService::class)->table();
+        $row = collect($table['rows'])->firstWhere('room_id', $room->id);
+
+        $this->assertSame('900/1300', $row['prices'][$period->id]);
+        $this->assertArrayNotHasKey($period->id, $row['monthly_discounts']);
+    }
 }

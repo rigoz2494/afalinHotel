@@ -126,9 +126,11 @@ class CallbackRequestService
             default => round($room->base_price * (1 + $period->modifier_percentage / 100)),
         };
 
-        // A room-specific promo override wins; otherwise the room's fallback discount applies.
-        // Doesn't stack with a price_override, which is already the final rate.
-        $discount = $period === null || $override?->price_override !== null
+        // A room-specific promo override wins; otherwise the room's fallback
+        // discount applies. A numeric price_override is still a real rate a
+        // discount can stack on top of — only "no period" leaves nothing to
+        // discount from.
+        $discount = $period === null
             ? null
             : ($override?->discount_percentage ?? $room->discount_percentage);
 

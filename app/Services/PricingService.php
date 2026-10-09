@@ -15,9 +15,11 @@ class PricingService
      * period's `modifier_percentage`, never entered by hand, unless a
      * RoomPrice row sets an explicit `price_override` for that cell — used
      * where the real rate doesn't fit that formula closely enough to leave
-     * to it. An optional promotional discount can still stack on top of the
-     * computed (not overridden) price, falling back to the room's own
-     * fallback discount.
+     * to it. An optional promotional discount can still stack on top of
+     * that price — computed or overridden — falling back to the room's own
+     * fallback discount, as long as the override is itself a number; a
+     * literal, non-numeric override (e.g. "900/1300") has no single price
+     * for a discount to apply to.
      *
      * @return array{columns: list<array{id: int, label: string}>, rows: list<array{room_id: int, room_name: array{en: string, ru: string}, prices: array<int, float|string>, base_price: float, monthly_discounts: array<int, float>}>}
      */
@@ -60,18 +62,20 @@ class PricingService
         foreach ($periods as $period) {
             $override = $overridesByPeriod->get($period->id);
 
-            if ($override?->price_override !== null) {
-                // A literal, final value — e.g. "900/1300" for a child/adult
-                // split rate, or just a plain number the formula can't reach
-                // exactly — not something a discount percentage multiplies.
-                $prices[$period->id] = is_numeric($override->price_override)
-                    ? (float) $override->price_override
-                    : $override->price_override;
+            if ($override?->price_override !== null && ! is_numeric($override->price_override)) {
+                // A literal, non-numeric value — e.g. "900/1300" for a
+                // child/adult split rate — has no single number for a
+                // discount percentage to multiply, so it's shown as-is.
+                $prices[$period->id] = $override->price_override;
 
                 continue;
             }
 
-            $prices[$period->id] = round($basePrice * (1 + $period->modifier_percentage / 100));
+            // A numeric price_override still replaces the formula result,
+            // but it's still a real price a promo discount can apply to.
+            $prices[$period->id] = $override?->price_override !== null
+                ? (float) $override->price_override
+                : round($basePrice * (1 + $period->modifier_percentage / 100));
 
             $promoPercentage = $override?->discount_percentage ?? $room->discount_percentage;
 

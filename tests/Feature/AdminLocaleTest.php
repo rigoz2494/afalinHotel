@@ -40,4 +40,19 @@ class AdminLocaleTest extends TestCase
 
         $this->assertSame('Cancelled', CallbackRequestStatus::Cancelled->getLabel());
     }
+
+    /**
+     * The actual EN/RU control a manager clicks — provided zero-config by
+     * bezhansalleh/filament-language-switch (configured in
+     * AppServiceProvider), which both renders this dropdown and sets
+     * `session('locale')` when clicked. Without this, a manager has no way
+     * to reach the Russian translations at all, even though they exist.
+     */
+    public function test_the_language_switcher_control_is_rendered_in_the_panel(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/admin/manage-hotel-settings')
+            ->assertOk()
+            ->assertSee('language-switch-trigger', escape: false);
+    }
 }
