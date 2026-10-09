@@ -92,7 +92,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                     @click.self="close"
                 >
                     <div
-                        class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
+                        class="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
                     >
                         <button
                             type="button"
@@ -106,133 +106,159 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                             {{ t('availableRoomsModalTitle') }}
                         </h2>
 
-                        <label
-                            class="mt-5 block text-xs tracking-widest text-amber-300/80 uppercase"
-                        >
-                            {{ t('roomNumberSelectLabel') }}
-                            <select
-                                :value="selectedUnitId ?? ''"
-                                class="mt-2 block w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm font-normal tracking-normal text-white normal-case outline-none focus:border-amber-300"
-                                @change="
-                                    selectUnit(
-                                        Number(
-                                            ($event.target as HTMLSelectElement)
-                                                .value,
-                                        ) || null,
-                                    )
-                                "
-                            >
-                                <option
-                                    v-for="unit in room.units"
-                                    :key="unit.id"
-                                    :value="unit.id"
-                                >
-                                    {{
-                                        t('roomNumberOption', {
-                                            number: unit.number,
-                                        })
-                                    }}
-                                </option>
-                            </select>
-                        </label>
-
-                        <!-- Skeleton: soft, pulsing translucent blocks in
-                        place of the image and the amenity badges, while
-                        isLoading is true. -->
-                        <div v-if="isLoading" class="mt-5 animate-pulse">
-                            <div
-                                class="aspect-video w-full rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-white/10"
-                            ></div>
-                            <div class="mt-4 flex gap-2">
+                        <div class="mt-5 grid gap-6 lg:grid-cols-5 lg:gap-8">
+                            <!-- Wide, luxury-sized photo column. -->
+                            <div class="lg:col-span-3">
                                 <div
-                                    v-for="n in 5"
-                                    :key="n"
-                                    class="size-9 rounded-full bg-gradient-to-br from-white/10 via-white/5 to-white/10"
+                                    v-if="isLoading"
+                                    class="aspect-video w-full animate-pulse rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-white/10 lg:aspect-4/3"
                                 ></div>
-                            </div>
-                            <div
-                                class="mt-4 h-4 w-2/3 rounded bg-gradient-to-r from-white/10 via-white/5 to-white/10"
-                            ></div>
-                        </div>
-
-                        <Transition
-                            v-else
-                            enter-active-class="transition duration-300 ease-out"
-                            enter-from-class="opacity-0"
-                        >
-                            <div v-if="selectedUnit" class="mt-5">
-                                <div
-                                    class="relative aspect-video w-full overflow-hidden rounded-xl bg-white/5"
+                                <Transition
+                                    v-else
+                                    enter-active-class="transition duration-300 ease-out"
+                                    enter-from-class="opacity-0"
                                 >
-                                    <img
-                                        v-if="selectedUnit.images.length"
-                                        :src="selectedUnit.images[imageIndex]"
-                                        :alt="
-                                            t('roomNumberOption', {
-                                                number: selectedUnit.number,
-                                            })
-                                        "
-                                        class="absolute inset-0 h-full w-full object-cover"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <template
-                                        v-if="selectedUnit.images.length > 1"
+                                    <div
+                                        v-if="selectedUnit"
+                                        class="relative aspect-video w-full overflow-hidden rounded-xl bg-white/5 lg:aspect-4/3"
                                     >
-                                        <button
-                                            type="button"
-                                            class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 backdrop-blur hover:bg-black/70"
-                                            :aria-label="t('previousPhoto')"
-                                            @click="stepImage(-1)"
+                                        <img
+                                            v-if="selectedUnit.images.length"
+                                            :src="
+                                                selectedUnit.images[imageIndex]
+                                            "
+                                            :alt="
+                                                t('roomNumberOption', {
+                                                    number: selectedUnit.number,
+                                                })
+                                            "
+                                            class="absolute inset-0 h-full w-full object-cover"
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                        <template
+                                            v-if="
+                                                selectedUnit.images.length > 1
+                                            "
                                         >
-                                            <ChevronLeft class="size-4" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 backdrop-blur hover:bg-black/70"
-                                            :aria-label="t('nextPhoto')"
-                                            @click="stepImage(1)"
+                                            <button
+                                                type="button"
+                                                class="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-black/50 p-2 backdrop-blur hover:bg-black/70"
+                                                :aria-label="t('previousPhoto')"
+                                                @click="stepImage(-1)"
+                                            >
+                                                <ChevronLeft class="size-5" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-black/50 p-2 backdrop-blur hover:bg-black/70"
+                                                :aria-label="t('nextPhoto')"
+                                                @click="stepImage(1)"
+                                            >
+                                                <ChevronRight class="size-5" />
+                                            </button>
+                                        </template>
+                                    </div>
+                                </Transition>
+                            </div>
+
+                            <!-- Selector + details column. -->
+                            <div class="lg:col-span-2">
+                                <label
+                                    class="block text-xs tracking-widest text-amber-300/80 uppercase"
+                                >
+                                    {{ t('roomNumberSelectLabel') }}
+                                    <select
+                                        :value="selectedUnitId ?? ''"
+                                        class="mt-2 block w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm font-normal tracking-normal text-white normal-case outline-none focus:border-amber-300"
+                                        @change="
+                                            selectUnit(
+                                                Number(
+                                                    (
+                                                        $event.target as HTMLSelectElement
+                                                    ).value,
+                                                ) || null,
+                                            )
+                                        "
+                                    >
+                                        <option
+                                            v-for="unit in room.units"
+                                            :key="unit.id"
+                                            :value="unit.id"
                                         >
-                                            <ChevronRight class="size-4" />
-                                        </button>
-                                    </template>
+                                            {{
+                                                t('roomNumberOption', {
+                                                    number: unit.number,
+                                                })
+                                            }}
+                                        </option>
+                                    </select>
+                                </label>
+
+                                <!-- Skeleton: soft, pulsing translucent
+                                blocks in place of the amenity badges and
+                                balcony line, while isLoading is true. -->
+                                <div
+                                    v-if="isLoading"
+                                    class="mt-4 animate-pulse"
+                                >
+                                    <div class="flex flex-wrap gap-2">
+                                        <div
+                                            v-for="n in 5"
+                                            :key="n"
+                                            class="size-9 rounded-full bg-gradient-to-br from-white/10 via-white/5 to-white/10"
+                                        ></div>
+                                    </div>
+                                    <div
+                                        class="mt-4 h-4 w-2/3 rounded bg-gradient-to-r from-white/10 via-white/5 to-white/10"
+                                    ></div>
                                 </div>
 
-                                <ul
-                                    v-if="amenityTags.length"
-                                    class="mt-4 flex flex-wrap gap-1.5"
+                                <Transition
+                                    v-else
+                                    enter-active-class="transition duration-300 ease-out"
+                                    enter-from-class="opacity-0"
                                 >
-                                    <li
-                                        v-for="item in amenityTags"
-                                        :key="item.tag"
-                                        :title="item.label"
-                                        :aria-label="item.label"
-                                        class="flex size-9 items-center justify-center rounded-full bg-white/10 text-amber-300"
-                                    >
-                                        <component
-                                            :is="item.icon"
-                                            class="size-4"
-                                        />
-                                    </li>
-                                </ul>
+                                    <div v-if="selectedUnit" class="mt-4">
+                                        <ul
+                                            v-if="amenityTags.length"
+                                            class="flex flex-wrap gap-1.5"
+                                        >
+                                            <li
+                                                v-for="item in amenityTags"
+                                                :key="item.tag"
+                                                :title="item.label"
+                                                :aria-label="item.label"
+                                                class="flex size-9 items-center justify-center rounded-full bg-white/10 text-amber-300"
+                                            >
+                                                <component
+                                                    :is="item.icon"
+                                                    class="size-4"
+                                                />
+                                            </li>
+                                        </ul>
 
-                                <p
-                                    class="mt-4 flex items-center gap-2 text-sm"
-                                    :class="
-                                        selectedUnit.has_balcony
-                                            ? 'text-amber-200'
-                                            : 'text-white/50'
-                                    "
-                                >
-                                    <CheckCircle2 class="size-4 shrink-0" />
-                                    {{
-                                        selectedUnit.has_balcony
-                                            ? t('hasBalcony')
-                                            : t('noBalconyUnit')
-                                    }}
-                                </p>
+                                        <p
+                                            class="mt-4 flex items-center gap-2 text-sm"
+                                            :class="
+                                                selectedUnit.has_balcony
+                                                    ? 'text-amber-200'
+                                                    : 'text-white/50'
+                                            "
+                                        >
+                                            <CheckCircle2
+                                                class="size-4 shrink-0"
+                                            />
+                                            {{
+                                                selectedUnit.has_balcony
+                                                    ? t('hasBalcony')
+                                                    : t('noBalconyUnit')
+                                            }}
+                                        </p>
+                                    </div>
+                                </Transition>
                             </div>
-                        </Transition>
+                        </div>
                     </div>
                 </div>
             </Transition>

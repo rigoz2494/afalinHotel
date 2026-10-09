@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\CallbackRequestStatus;
+use App\Models\AdditionalService;
 use App\Models\CallbackRequest;
 use App\Models\PricingPeriod;
 use App\Models\Room;
@@ -38,6 +39,23 @@ class CallbackRequestSeeder extends Seeder
         CallbackRequestStatus::Cancelled,
     ];
 
+    /**
+     * Genuinely Cyrillic (Faker's `ru_RU` locale has no localized text
+     * provider, so `fake('ru_RU')->sentence()` would still return Latin
+     * lorem-ipsum text), so CallbackRequestObserver never tries to
+     * translate one and fire a real HTTP request to the translation API
+     * while seeding.
+     *
+     * @var array<int, string>
+     */
+    private const array RUSSIAN_SPECIAL_REQUESTS = [
+        'Тихая сторона, пожалуйста.',
+        'Нужны отдельные одеяла.',
+        'Ранний заезд, если возможно.',
+        'Можно номер подальше от лифта?',
+        'Пожалуйста, детскую кроватку в номер.',
+    ];
+
     public function run(CallbackRequestService $callbackRequests): void
     {
         if (CallbackRequest::query()->exists()) {
@@ -48,6 +66,7 @@ class CallbackRequestSeeder extends Seeder
 
         $rooms = Room::query()->active()->ordered()->get();
         $periods = PricingPeriod::query()->active()->ordered()->get();
+        $services = AdditionalService::query()->active()->ordered()->get();
 
         if ($rooms->isEmpty() || $periods->isEmpty()) {
             $this->command?->warn('Rooms and pricing periods must be seeded before bookings.');
@@ -69,9 +88,10 @@ class CallbackRequestSeeder extends Seeder
                 'phone' => $this->randomPhone(),
                 'message' => fake()->optional(0.6)->sentence(),
                 'wants_balcony' => fake()->boolean(35),
-                'special_requests' => fake()->optional(0.25)->sentence(),
+                'special_requests' => fake()->optional(0.25)->randomElement(self::RUSSIAN_SPECIAL_REQUESTS),
                 'room_number' => fake()->optional(0.3)->numerify('1##'),
                 'rooms' => $this->randomRoomSelection($rooms, $periods),
+                'services' => $this->randomServiceSelection($services),
             ], ipAddress: null);
 
             $request->forceFill([
@@ -119,5 +139,21 @@ class CallbackRequestSeeder extends Seeder
         }
 
         return $selection;
+    }
+
+    /**
+     * @param  Collection<int, AdditionalService>  $services
+     * @return array<int, array{service_id: int, quantity: int}>
+     */
+    private function randomServiceSelection($services): array
+    {
+        if ($services->isEmpty() || ! fake()->boolean(40)) {
+            return [];
+        }
+
+        return [[
+            'service_id' => $services->random()->id,
+            'quantity' => random_int(1, 2),
+        ]];
     }
 }

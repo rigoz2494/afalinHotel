@@ -226,11 +226,17 @@ const translations = {
         en: 'Close additional services',
         ru: 'Закрыть дополнительные услуги',
     },
+    addExtraServices: { en: 'Add extra services', ru: 'Добавить услуги' },
+    noServicesAdded: {
+        en: 'None added — optional',
+        ru: 'Не выбрано — по желанию',
+    },
 
     // Direct call
+    orDivider: { en: 'or', ru: 'или' },
     directCallPrefix: {
-        en: 'Or call us at',
-        ru: 'Или позвоните нам по номеру',
+        en: 'Call us at',
+        ru: 'Позвоните нам по номеру',
     },
     directCallSuffix: {
         en: "and we'll discuss everything you need.",

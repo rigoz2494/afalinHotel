@@ -124,6 +124,31 @@ class TranslationService
             : ['en' => $text, 'ru' => $this->translate($text, 'en', 'ru')];
     }
 
+    /**
+     * Translates a guest's own free-text comment into Russian for the admin
+     * dashboard — unlike {@see translateFaqFields()}, the source language
+     * isn't known to be English or Russian (a guest could write in German,
+     * French, ...), so this asks the API to detect it. Returns null for
+     * blank input, text already in Russian (nothing to add), or whenever
+     * the translation service itself fails — this is a convenience shown
+     * alongside the original text, never something that should block
+     * saving the guest's actual request.
+     */
+    public function translateToRussian(?string $text): ?string
+    {
+        $text = trim((string) $text);
+
+        if ($text === '' || $this->containsCyrillic($text)) {
+            return null;
+        }
+
+        try {
+            return $this->translate($text, 'autodetect', 'ru');
+        } catch (TranslationException) {
+            return null;
+        }
+    }
+
     private function containsCyrillic(string $text): bool
     {
         return (bool) preg_match('/[\x{0400}-\x{04FF}]/u', $text);

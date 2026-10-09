@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CallbackRequests\Tables;
 
 use App\Enums\CallbackRequestStatus;
 use App\Models\CallbackRequest;
+use App\Models\Currency;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -53,7 +54,16 @@ class CallbackRequestsTable
                     ->label(__('Requests'))
                     ->icon(fn (?string $state): Heroicon => filled($state) ? Heroicon::OutlinedChatBubbleLeftRight : Heroicon::OutlinedMinus)
                     ->color(fn (?string $state): string => filled($state) ? 'warning' : 'gray')
-                    ->tooltip(fn (?string $state): ?string => filled($state) ? $state : __('No special requests')),
+                    // Prefer the automatic Russian translation in the
+                    // tooltip when there is one, since that's the version
+                    // a Russian-speaking manager can actually read.
+                    ->tooltip(fn (CallbackRequest $record): ?string => $record->special_requests_translated
+                        ?? $record->special_requests
+                        ?? __('No special requests')),
+                TextColumn::make('total_price')
+                    ->label(__('Total'))
+                    ->formatStateUsing(fn (CallbackRequest $record): string => Currency::symbolFor($record->currency).number_format((float) $record->total_price, 2))
+                    ->sortable(),
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()

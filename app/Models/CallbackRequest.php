@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use App\Enums\CallbackRequestStatus;
+use App\Observers\CallbackRequestObserver;
 use Database\Factories\CallbackRequestFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[ObservedBy([CallbackRequestObserver::class])]
 class CallbackRequest extends Model
 {
     /** @use HasFactory<CallbackRequestFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'phone', 'message', 'wants_balcony', 'special_requests', 'room_number', 'rooms', 'currency', 'exchange_rate', 'status', 'ip_address'];
+    protected $fillable = ['name', 'phone', 'message', 'wants_balcony', 'special_requests', 'special_requests_translated', 'room_number', 'rooms', 'services', 'total_price', 'currency', 'exchange_rate', 'status', 'ip_address'];
 
     /**
      * @return array<string, string>
@@ -23,6 +26,8 @@ class CallbackRequest extends Model
             'status' => CallbackRequestStatus::class,
             'wants_balcony' => 'boolean',
             'rooms' => 'array',
+            'services' => 'array',
+            'total_price' => 'float',
             'exchange_rate' => 'float',
         ];
     }

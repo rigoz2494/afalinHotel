@@ -21,13 +21,16 @@ class StoreCallbackRequestRequest extends FormRequest
             // noted while browsing the Section 2 modal, like wants_balcony.
             'room_number' => ['nullable', 'string', 'max:20'],
             'currency' => ['nullable', 'string', 'size:3'],
+            // IDs and a quantity only — no price field exists here at all,
+            // so there is nothing for a tampered payload to lie about; the
+            // server looks up every price itself (see CallbackRequestService).
             'rooms' => ['nullable', 'array', 'max:20'],
             'rooms.*.room_id' => ['required', 'integer'],
-            'rooms.*.room_name' => ['required', 'string', 'max:150'],
             'rooms.*.period' => ['nullable', 'string', 'max:100'],
-            // Informational only: the server recalculates every price.
-            'rooms.*.price' => ['nullable', 'numeric', 'min:0'],
             'rooms.*.quantity' => ['required', 'integer', 'min:1', 'max:10'],
+            'services' => ['nullable', 'array', 'max:20'],
+            'services.*.service_id' => ['required', 'integer'],
+            'services.*.quantity' => ['required', 'integer', 'min:1', 'max:10'],
         ];
     }
 }

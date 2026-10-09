@@ -21,6 +21,7 @@ import {
     mockRooms,
     roomFallbackImages,
 } from '@/data/landingMock';
+import { provideAdditionalServices } from '@/composables/useAdditionalServices';
 import { provideCurrency } from '@/composables/useCurrency';
 import { provideHotelSettings } from '@/composables/useHotelSettings';
 import { localized, provideLocale } from '@/composables/useLocale';
@@ -91,6 +92,7 @@ const additionalServices = ref<AdditionalService[]>(
 
 provideCurrency(() => props.currencies);
 provideHotelSettings(hotel);
+provideAdditionalServices(additionalServices);
 const { t, locale } = provideLocale();
 
 // Reactive, so the nav labels translate instantly when the locale changes.

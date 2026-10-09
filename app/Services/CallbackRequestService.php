@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CallbackRequestStatus;
+use App\Models\AdditionalService;
 use App\Models\CallbackRequest;
 use App\Models\Currency;
 use App\Models\PricingPeriod;
@@ -14,14 +15,22 @@ class CallbackRequestService
 {
     /**
      * Every price is derived from the database here, never trusted from the
-     * browser. The rules match the pricing table: the discount is applied in the
-     * base currency and rounded, then the result is converted and rounded again.
+     * browser — the client sends only IDs, quantities and a period name.
+     * The rules match the pricing table: the discount is applied in the
+     * base currency and rounded, then the result is converted and rounded
+     * again. `total_price` is the one authoritative sum of every room and
+     * service line, in the guest's chosen currency, so nothing downstream
+     * (the admin dashboard, a future invoice) has to re-add the lines by
+     * hand and risk disagreeing with what was actually calculated.
      *
-     * @param  array{name: string, phone: string, message?: string|null, wants_balcony?: bool, special_requests?: string|null, room_number?: string|null, currency?: string|null, rooms?: array<int, array{room_id: int, period: string|null, quantity: int}>}  $data
+     * @param  array{name: string, phone: string, message?: string|null, wants_balcony?: bool, special_requests?: string|null, room_number?: string|null, currency?: string|null, rooms?: array<int, array{room_id: int, period: string|null, quantity: int}>, services?: array<int, array{service_id: int, quantity: int}>}  $data
      */
     public function create(array $data, ?string $ipAddress): CallbackRequest
     {
         $currency = $this->resolveCurrency($data['currency'] ?? null);
+
+        $rooms = $this->priceRoomSelection($data['rooms'] ?? [], $currency);
+        $services = $this->priceServiceSelection($data['services'] ?? [], $currency);
 
         return CallbackRequest::create([
             'name' => $data['name'],
@@ -30,12 +39,29 @@ class CallbackRequestService
             'wants_balcony' => $data['wants_balcony'] ?? false,
             'special_requests' => $data['special_requests'] ?? null,
             'room_number' => $data['room_number'] ?? null,
+            // A plain marker inside the record of which currency the guest
+            // had selected on the frontend — not an extra column, since
+            // `currency` below already is that value; this just makes it
+            // unmistakable at a glance in the admin dashboard.
             'currency' => $currency->code,
             'exchange_rate' => $currency->exchange_rate,
-            'rooms' => $this->priceRoomSelection($data['rooms'] ?? [], $currency),
+            'rooms' => $rooms,
+            'services' => $services,
+            'total_price' => $this->sumLines($rooms) + $this->sumLines($services),
             'status' => CallbackRequestStatus::New,
             'ip_address' => $ipAddress,
         ]);
+    }
+
+    /**
+     * @param  array<int, array{price: float, quantity: int}>  $lines
+     */
+    private function sumLines(array $lines): float
+    {
+        return array_sum(array_map(
+            fn (array $line): float => $line['price'] * $line['quantity'],
+            $lines,
+        ));
     }
 
     private function resolveCurrency(?string $code): Currency
@@ -146,6 +172,45 @@ class CallbackRequestService
             'currency' => $currency->code,
             'base_price' => (float) $basePrice,
             'price' => (float) round($basePrice * $currency->exchange_rate),
+            'quantity' => (int) $line['quantity'],
+        ];
+    }
+
+    /**
+     * @param  array<int, array{service_id: int, quantity: int}>  $selection
+     * @return array<int, array{service_id: int, name: string, currency: string, base_price: float, price: float, quantity: int}>
+     */
+    private function priceServiceSelection(array $selection, Currency $currency): array
+    {
+        $priced = [];
+
+        foreach ($selection as $index => $line) {
+            $priced[] = $this->priceServiceLine($index, $line, $currency);
+        }
+
+        return $priced;
+    }
+
+    /**
+     * @param  array{service_id: int, quantity: int}  $line
+     * @return array{service_id: int, name: string, currency: string, base_price: float, price: float, quantity: int}
+     */
+    private function priceServiceLine(int $index, array $line, Currency $currency): array
+    {
+        $service = AdditionalService::query()->active()->find($line['service_id']);
+
+        if ($service === null) {
+            throw ValidationException::withMessages([
+                "services.{$index}.service_id" => 'This service is not available.',
+            ]);
+        }
+
+        return [
+            'service_id' => $service->id,
+            'name' => $service->name['en'] ?? $service->name['ru'] ?? '',
+            'currency' => $currency->code,
+            'base_price' => (float) $service->price,
+            'price' => (float) round($service->price * $currency->exchange_rate),
             'quantity' => (int) $line['quantity'],
         ];
     }

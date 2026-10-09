@@ -327,6 +327,10 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 
         <ClientOnly>
             <Teleport to="body">
+                <!-- A uniform, full-viewport dim — a separate element from
+                the drawer panel below, not a flex wrapper around it, so the
+                dimming never reads as a floating box with empty space
+                around it. -->
                 <Transition
                     enter-active-class="transition duration-300 ease-out"
                     enter-from-class="opacity-0"
@@ -335,47 +339,57 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 >
                     <div
                         v-if="servicesOpen"
-                        class="fixed inset-0 z-[70] flex items-center justify-end bg-black/70 p-4 backdrop-blur-sm"
+                        class="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm"
+                        @click="servicesOpen = false"
+                    ></div>
+                </Transition>
+
+                <!-- The drawer itself: full height, flush to the right
+                edge — a true slide-over, not a card floating near the edge. -->
+                <Transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="translate-x-full"
+                    leave-active-class="transition duration-200 ease-in"
+                    leave-to-class="translate-x-full"
+                >
+                    <div
+                        v-if="servicesOpen"
+                        class="fixed inset-y-0 right-0 z-[71] flex h-full w-full max-w-md flex-col overflow-y-auto bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
                         role="dialog"
                         aria-modal="true"
                         :aria-label="t('additionalServicesTitle')"
-                        @click.self="servicesOpen = false"
                     >
-                        <div
-                            class="relative max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
+                        <button
+                            type="button"
+                            :aria-label="t('closeAdditionalServices')"
+                            class="absolute top-4 right-4 rounded-full bg-white/10 p-2 transition hover:bg-white/20"
+                            @click="servicesOpen = false"
                         >
-                            <button
-                                type="button"
-                                :aria-label="t('closeAdditionalServices')"
-                                class="absolute top-4 right-4 rounded-full bg-white/10 p-2 transition hover:bg-white/20"
-                                @click="servicesOpen = false"
-                            >
-                                <X class="size-5" />
-                            </button>
-                            <h3 class="text-xl font-semibold sm:text-2xl">
-                                {{ t('additionalServicesTitle') }}
-                            </h3>
-                            <p class="mt-2 text-sm text-stone-300">
-                                {{ t('additionalServicesIntro') }}
-                            </p>
+                            <X class="size-5" />
+                        </button>
+                        <h3 class="text-xl font-semibold sm:text-2xl">
+                            {{ t('additionalServicesTitle') }}
+                        </h3>
+                        <p class="mt-2 text-sm text-stone-300">
+                            {{ t('additionalServicesIntro') }}
+                        </p>
 
-                            <ul class="mt-5 divide-y divide-white/10">
-                                <li
-                                    v-for="service in additionalServices"
-                                    :key="service.id"
-                                    class="flex items-center justify-between gap-4 py-3"
+                        <ul class="mt-5 divide-y divide-white/10">
+                            <li
+                                v-for="service in additionalServices"
+                                :key="service.id"
+                                class="flex items-center justify-between gap-4 py-3"
+                            >
+                                <span class="text-sm text-stone-100">
+                                    {{ localized(service.name, locale) }}
+                                </span>
+                                <span
+                                    class="text-sm font-semibold text-amber-300"
                                 >
-                                    <span class="text-sm text-stone-100">
-                                        {{ localized(service.name, locale) }}
-                                    </span>
-                                    <span
-                                        class="text-sm font-semibold text-amber-300"
-                                    >
-                                        {{ format(service.price) }}
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
+                                    {{ format(service.price) }}
+                                </span>
+                            </li>
+                        </ul>
                     </div>
                 </Transition>
             </Teleport>
