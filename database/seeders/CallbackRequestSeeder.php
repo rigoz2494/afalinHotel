@@ -5,11 +5,13 @@ namespace Database\Seeders;
 use App\Enums\CallbackRequestStatus;
 use App\Models\AdditionalService;
 use App\Models\CallbackRequest;
+use App\Models\Currency;
 use App\Models\PricingPeriod;
 use App\Models\Room;
 use App\Services\CallbackRequestService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection as BaseCollection;
 
 /**
  * Mock booking requests spread across the last 30 days, so the dashboard's
@@ -40,15 +42,29 @@ class CallbackRequestSeeder extends Seeder
     ];
 
     /**
-     * Genuinely Cyrillic (Faker's `ru_RU` locale has no localized text
-     * provider, so `fake('ru_RU')->sentence()` would still return Latin
-     * lorem-ipsum text), so CallbackRequestObserver never tries to
-     * translate one and fire a real HTTP request to the translation API
-     * while seeding.
+     * Real, meaningful requests a guest might actually write — in whichever
+     * language they'd naturally use — not Faker's Latin lorem-ipsum, which
+     * the translation engine can't meaningfully translate and which made
+     * the admin's auto-translate block look broken. The mix of languages
+     * lets CallbackRequestObserver's automatic Russian translation actually
+     * be exercised (and verified) on a real seed, not just in a test that
+     * fakes the HTTP call.
      *
      * @var array<int, string>
      */
-    private const array RUSSIAN_SPECIAL_REQUESTS = [
+    private const array SPECIAL_REQUESTS = [
+        // English
+        'We are arriving late, please prepare extra towels.',
+        'Could we have a crib for our baby, please?',
+        "We'd like a wake-up call at 7 AM.",
+        'Is it possible to check out a bit later than usual?',
+        'We would appreciate a room away from the elevator.',
+        // German
+        'Benötige ein ruhiges Zimmer mit Balkon.',
+        'Bitte ein zusätzliches Kissen bereitstellen.',
+        'Wir kommen mit einem kleinen Hund, ist das möglich?',
+        'Können wir einen Tisch im Restaurant reservieren?',
+        // Russian
         'Тихая сторона, пожалуйста.',
         'Нужны отдельные одеяла.',
         'Ранний заезд, если возможно.',
@@ -67,6 +83,7 @@ class CallbackRequestSeeder extends Seeder
         $rooms = Room::query()->active()->ordered()->get();
         $periods = PricingPeriod::query()->active()->ordered()->get();
         $services = AdditionalService::query()->active()->ordered()->get();
+        $currencyCodes = Currency::query()->active()->pluck('code');
 
         if ($rooms->isEmpty() || $periods->isEmpty()) {
             $this->command?->warn('Rooms and pricing periods must be seeded before bookings.');
@@ -88,8 +105,9 @@ class CallbackRequestSeeder extends Seeder
                 'phone' => $this->randomPhone(),
                 'message' => fake()->optional(0.6)->sentence(),
                 'wants_balcony' => fake()->boolean(35),
-                'special_requests' => fake()->optional(0.25)->randomElement(self::RUSSIAN_SPECIAL_REQUESTS),
+                'special_requests' => fake()->optional(0.4)->randomElement(self::SPECIAL_REQUESTS),
                 'room_number' => fake()->optional(0.3)->numerify('1##'),
+                'currency' => $this->randomCurrencyCode($currencyCodes),
                 'rooms' => $this->randomRoomSelection($rooms, $periods),
                 'services' => $this->randomServiceSelection($services),
             ], ipAddress: null);
@@ -100,6 +118,24 @@ class CallbackRequestSeeder extends Seeder
                 'updated_at' => $createdAt,
             ])->save();
         }
+    }
+
+    /**
+     * Mostly the hotel's own ruble rate, with a smaller share of guests
+     * paying in whichever other currencies are actually active — so
+     * CallbackRequestService converts each one through its real
+     * exchange_rate coefficient rather than everything landing in a single
+     * currency. Falls back to the account's base currency (null) if none of
+     * the preferred codes are currently active.
+     *
+     * @param  BaseCollection<int, string>  $availableCodes
+     */
+    private function randomCurrencyCode(BaseCollection $availableCodes): ?string
+    {
+        $weighted = collect(['RUB', 'RUB', 'RUB', 'RUB', 'RUB', 'RUB', 'RUB', 'USD', 'USD', 'UAH'])
+            ->filter(fn (string $code): bool => $availableCodes->contains($code));
+
+        return $weighted->isNotEmpty() ? $weighted->random() : null;
     }
 
     private function randomGuestName(): string

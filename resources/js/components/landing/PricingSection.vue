@@ -332,9 +332,9 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 dimming never reads as a floating box with empty space
                 around it. -->
                 <Transition
-                    enter-active-class="transition duration-300 ease-out"
+                    enter-active-class="transition-opacity duration-500 ease-in-out"
                     enter-from-class="opacity-0"
-                    leave-active-class="transition duration-200 ease-in"
+                    leave-active-class="transition-opacity duration-500 ease-in-out"
                     leave-to-class="opacity-0"
                 >
                     <div
@@ -345,12 +345,14 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 </Transition>
 
                 <!-- The drawer itself: full height, flush to the right
-                edge — a true slide-over, not a card floating near the edge. -->
+                edge — a true slide-over, not a card floating near the
+                edge — gliding in with a soft fade and scale so it carries
+                some visual weight instead of just snapping into place. -->
                 <Transition
-                    enter-active-class="transition duration-300 ease-out"
-                    enter-from-class="translate-x-full"
-                    leave-active-class="transition duration-200 ease-in"
-                    leave-to-class="translate-x-full"
+                    enter-active-class="transition-all duration-500 ease-in-out"
+                    enter-from-class="translate-x-full scale-95 opacity-0"
+                    leave-active-class="transition-all duration-500 ease-in-out"
+                    leave-to-class="translate-x-full scale-95 opacity-0"
                 >
                     <div
                         v-if="servicesOpen"
