@@ -98,7 +98,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                     @click.self="close"
                 >
                     <div
-                        class="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
+                        class="relative max-h-[90vh] w-full max-w-7xl overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
                     >
                         <button
                             type="button"
@@ -128,6 +128,29 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                         v-if="selectedUnit"
                                         class="relative aspect-video w-full overflow-hidden rounded-xl bg-white/5 lg:aspect-4/3"
                                     >
+                                        <!--
+                                            A room photo is landscape, but a
+                                            bathroom shot is often tall and
+                                            narrow — forcing it to `object-cover`
+                                            inside this fixed-ratio frame crops
+                                            off its most important structural
+                                            edges. A blurred copy of the same
+                                            photo fills the frame behind an
+                                            `object-contain` foreground copy
+                                            instead, so the whole photo always
+                                            stays visible, whatever its shape.
+                                        -->
+                                        <img
+                                            v-if="selectedUnit.images.length"
+                                            :src="
+                                                selectedUnit.images[imageIndex]
+                                            "
+                                            alt=""
+                                            aria-hidden="true"
+                                            loading="lazy"
+                                            decoding="async"
+                                            class="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-2xl"
+                                        />
                                         <img
                                             v-if="selectedUnit.images.length"
                                             :src="
@@ -138,7 +161,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                     number: selectedUnit.number,
                                                 })
                                             "
-                                            class="absolute inset-0 h-full w-full object-cover"
+                                            class="absolute inset-0 h-full w-full object-contain"
                                             loading="lazy"
                                             decoding="async"
                                         />

@@ -3,6 +3,8 @@
 namespace App\Filament\Widgets;
 
 use App\Models\CallbackRequest;
+use App\Models\HotelSetting;
+use App\Models\Room;
 use Filament\Widgets\ChartWidget;
 
 class PopularRoomsChart extends ChartWidget
@@ -30,25 +32,39 @@ class PopularRoomsChart extends ChartWidget
 
     protected function getData(): array
     {
-        $quantityByRoom = CallbackRequest::query()
+        // Grouped by room_id, not the snapshotted room_name: that snapshot
+        // is always English (see CallbackRequestService::priceLine()'s own
+        // comment on it — a booking record isn't bilingual), so there's no
+        // Russian text to "extract" from it no matter how it's read. The
+        // room's own, live, bilingual name is looked up separately below.
+        $quantityByRoomId = CallbackRequest::query()
             ->where('created_at', '>=', now()->subDays(self::DAYS))
             ->get(['rooms'])
             ->flatMap(fn (CallbackRequest $request): array => $request->rooms ?? [])
-            ->groupBy(fn (array $room): string => $room['room_name'] ?? __('Unknown'))
+            ->groupBy(fn (array $room): int => (int) ($room['room_id'] ?? 0))
             ->map(fn ($rooms) => $rooms->sum(fn (array $room): int => (int) ($room['quantity'] ?? 1)))
             ->sortDesc();
+
+        $roomNames = Room::query()
+            ->whereIn('id', $quantityByRoomId->keys())
+            ->get()
+            ->mapWithKeys(fn (Room $room): array => [$room->id => HotelSetting::adminLabel($room->name)]);
 
         return [
             'datasets' => [
                 [
                     'label' => __('Times requested'),
-                    'data' => $quantityByRoom->values()->all(),
+                    'data' => $quantityByRoomId->values()->all(),
                     'backgroundColor' => [
                         '#f59e0b', '#38bdf8', '#34d399', '#f472b6', '#a78bfa', '#fb923c',
                     ],
                 ],
             ],
-            'labels' => $quantityByRoom->keys()->all(),
+            // A room deleted since the booking was made falls back to
+            // "Unknown" rather than disappearing from the chart entirely.
+            'labels' => $quantityByRoomId->keys()
+                ->map(fn (int $roomId): string => $roomNames[$roomId] ?? __('Unknown'))
+                ->all(),
         ];
     }
 

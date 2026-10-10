@@ -4,10 +4,14 @@ namespace App\Observers;
 
 use App\Models\CallbackRequest;
 use App\Services\TranslationService;
+use App\Services\WebhookDispatchService;
 
 class CallbackRequestObserver
 {
-    public function __construct(private TranslationService $translator) {}
+    public function __construct(
+        private TranslationService $translator,
+        private WebhookDispatchService $webhooks,
+    ) {}
 
     /**
      * A guest's message or special request could be written in any
@@ -36,6 +40,8 @@ class CallbackRequestObserver
         if ($updates !== []) {
             $callbackRequest->updateQuietly($updates);
         }
+
+        $this->webhooks->dispatch($callbackRequest);
     }
 
     /**

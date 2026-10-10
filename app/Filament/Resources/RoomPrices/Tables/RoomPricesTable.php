@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomPrices\Tables;
 
+use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Models\RoomPrice;
 use Filament\Actions\BulkActionGroup;
@@ -23,7 +24,7 @@ class RoomPricesTable
                     // the identical comment in RoomsTable.php — the latter
                     // gets called once per array element, not with the
                     // {en, ru} pair itself, for an array-cast attribute.
-                    ->getStateUsing(fn (RoomPrice $record): string => $record->room->name['en'] ?? $record->room->name['ru'] ?? '—')
+                    ->getStateUsing(fn (RoomPrice $record): string => HotelSetting::adminLabel($record->room->name))
                     ->sortable(),
                 TextColumn::make('price_override')
                     ->label(__('Price override'))
@@ -50,7 +51,7 @@ class RoomPricesTable
                     // string, so `relationship()`'s title-attribute shortcut
                     // can't pluck it directly — the options are built by hand.
                     ->options(fn (): array => Room::query()->ordered()->get()
-                        ->mapWithKeys(fn (Room $room): array => [$room->id => $room->name['en'] ?? $room->name['ru'] ?? '—'])
+                        ->mapWithKeys(fn (Room $room): array => [$room->id => HotelSetting::adminLabel($room->name)])
                         ->all())
                     ->searchable()
                     ->preload(),

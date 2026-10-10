@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AdditionalServices\Tables;
 
 use App\Models\AdditionalService;
 use App\Models\Currency;
+use App\Models\HotelSetting;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -21,7 +22,7 @@ class AdditionalServicesTable
                 TextColumn::make('name')
                     ->label(__('Name'))
                     // See the identical comment in RoomsTable.php.
-                    ->getStateUsing(fn (AdditionalService $record): string => $record->name['en'] ?? $record->name['ru'] ?? '—')
+                    ->getStateUsing(fn (AdditionalService $record): string => HotelSetting::adminLabel($record->name))
                     ->sortable(),
                 TextColumn::make('price')
                     ->label(__('Price'))

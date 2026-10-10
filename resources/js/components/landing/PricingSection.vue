@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
-import { Percent, Minus, Plus, Sparkles, X } from '@lucide/vue';
-import { ref } from 'vue';
+import { ChevronDown, Percent, Minus, Plus, Sparkles, X } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import ClientOnly from '@/components/ClientOnly.vue';
 import { useBookingBasket } from '@/composables/useBookingBasket';
 import { useCurrency } from '@/composables/useCurrency';
@@ -18,7 +18,7 @@ import type {
     PricingTable,
 } from '@/types/landing';
 
-defineProps<{
+const props = defineProps<{
     hotel: HotelSettings;
     pricing: PricingTable;
     additionalServices: AdditionalService[];
@@ -30,6 +30,17 @@ const { t, locale } = useLocale();
 
 const servicesOpen = ref(false);
 
+// Mobile/tablet (below lg) show one season at a time, picked here, instead
+// of every column squeezed into the same cramped row — `selectedColumn`
+// falls back to the first season whenever nothing's been picked yet.
+const selectedPeriodId = ref<number | null>(null);
+const selectedColumn = computed(
+    () =>
+        props.pricing.columns.find(
+            (column) => column.id === selectedPeriodId.value,
+        ) ?? props.pricing.columns[0],
+);
+
 useEventListener('keydown', (event: KeyboardEvent) => {
     if (servicesOpen.value && event.key === 'Escape') {
         servicesOpen.value = false;
@@ -40,7 +51,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 <template>
     <section
         id="pricing"
-        class="relative flex min-h-screen snap-start items-center overflow-hidden bg-stone-950 px-4 py-20 text-stone-100 sm:px-6 lg:h-screen lg:py-0 lg:pt-16"
+        class="relative flex h-screen max-h-screen snap-start items-stretch overflow-hidden bg-stone-950 px-4 pt-14 pb-5 text-stone-100 sm:px-6 sm:pt-16 sm:pb-8 lg:pt-10 lg:pb-4"
     >
         <div
             class="absolute inset-0 scale-110 bg-cover bg-center opacity-20 blur-sm"
@@ -52,49 +63,254 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950/90 to-amber-950/70"
         ></div>
 
+        <!--
+            A strict-height flex column at every size, not just desktop:
+            intro/heading hugs the top, and the grid/cards plus the
+            "Additional Services" button below them share the remaining
+            space (`min-h-0 flex-1 overflow-y-auto`), so that whole group
+            compresses or scrolls internally to whatever room is left
+            rather than ever pushing the section past one screen's height.
+        -->
         <div
-            class="relative mx-auto grid w-full max-w-6xl items-center gap-8 sm:gap-10 lg:grid-cols-5 lg:gap-6"
+            class="relative mx-auto flex h-full w-full max-w-6xl flex-col gap-3 sm:gap-4 lg:gap-2"
         >
-            <div class="lg:col-span-2">
-                <Sparkles class="size-7 text-amber-300 sm:size-8 lg:size-6" />
+            <div>
+                <Sparkles class="size-5 text-amber-300 sm:size-7 lg:size-6" />
                 <h2
-                    class="mt-3 text-3xl leading-tight font-semibold sm:mt-4 sm:text-4xl md:text-5xl lg:mt-2 lg:text-3xl"
+                    class="mt-1.5 text-xl leading-tight font-semibold sm:mt-3 sm:text-3xl md:text-5xl lg:mt-1 lg:text-3xl"
                 >
                     {{ localized(hotel.section_headings.pricing, locale) }}
                 </h2>
                 <p
-                    class="mt-3 text-sm text-stone-300 sm:mt-4 sm:text-base lg:mt-2 lg:text-sm"
+                    class="mt-1 text-xs text-stone-300 sm:mt-3 sm:text-base lg:mt-1 lg:text-sm"
                 >
                     {{ t('pricingIntro') }}
                 </p>
                 <div
-                    class="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100 sm:mt-6 sm:p-4 sm:text-sm lg:mt-3 lg:p-3"
+                    class="mt-2 rounded-xl border border-amber-300/30 bg-amber-300/10 p-2 text-[11px] text-amber-100 sm:mt-4 sm:p-4 sm:text-sm lg:mt-2 lg:p-2"
                 >
                     {{ t('directBookingPerk') }}
                 </div>
             </div>
 
-            <div class="lg:col-span-3">
-                <p class="mb-2 text-xs text-stone-400 sm:hidden">
-                    {{ t('swipeHint') }}
-                </p>
+            <div class="min-h-0 flex-1 overflow-y-auto">
+                <!--
+                    Mobile/tablet (below lg): no horizontal multi-column
+                    table at all — a single period picked here, and one
+                    compact card per room type below, each with exactly
+                    that period's price. Forcing every season and every
+                    room into one cramped grid is what made this unreadable
+                    on a phone; one season at a time, one card per room,
+                    is the fix.
+                -->
+                <div v-if="selectedColumn" class="lg:hidden">
+                    <label
+                        class="block text-xs tracking-widest text-amber-300/80 uppercase"
+                    >
+                        {{ t('selectPeriodLabel') }}
+                        <div class="relative mt-1.5">
+                            <select
+                                :value="selectedColumn?.id ?? ''"
+                                class="block w-full appearance-none rounded-lg border border-white/15 bg-stone-950 px-3 py-2 pr-9 text-sm font-normal tracking-normal text-white normal-case transition outline-none hover:border-amber-300/50 focus:border-amber-300"
+                                @change="
+                                    selectedPeriodId =
+                                        Number(
+                                            ($event.target as HTMLSelectElement)
+                                                .value,
+                                        ) || null
+                                "
+                            >
+                                <option
+                                    v-for="column in pricing.columns"
+                                    :key="column.id"
+                                    :value="column.id"
+                                >
+                                    {{ column.label }}
+                                </option>
+                            </select>
+                            <ChevronDown
+                                class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-amber-300/70"
+                                aria-hidden="true"
+                            />
+                        </div>
+                    </label>
+
+                    <ul class="mt-3 space-y-2">
+                        <li
+                            v-for="row in pricing.rows"
+                            :key="row.room_id"
+                            class="rounded-xl border border-white/10 bg-white/5 p-3"
+                        >
+                            <p class="truncate text-sm font-semibold">
+                                {{ localized(row.room_name, locale) }}
+                            </p>
+
+                            <div
+                                class="mt-3 flex items-center justify-between gap-3"
+                            >
+                                <!--
+                                    Case C (override): the admin set a literal,
+                                    non-numeric price_override text instead of a
+                                    number — there's no single price here to add to
+                                    the basket, so this card has no Select button,
+                                    just the text itself.
+                                -->
+                                <span
+                                    v-if="isPriceOverride(row, selectedColumn)"
+                                    class="text-base text-stone-200"
+                                    >{{ row.prices[selectedColumn.id] }}</span
+                                >
+                                <!--
+                                    Case B (deal): the final price is below the room's
+                                    base price. Show the base price struck through next
+                                    to the lower final price, with an offer badge.
+                                -->
+                                <div
+                                    v-else-if="isDeal(row, selectedColumn)"
+                                    class="flex min-w-0 flex-wrap items-center gap-1.5"
+                                >
+                                    <span
+                                        class="text-xs text-stone-400 line-through"
+                                        >{{
+                                            format(Number(row.base_price))
+                                        }}</span
+                                    >
+                                    <span
+                                        class="text-base font-semibold text-amber-300"
+                                    >
+                                        {{
+                                            format(
+                                                cellPrice(row, selectedColumn),
+                                            )
+                                        }}
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center gap-0.5 rounded-full bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-stone-900"
+                                        :title="
+                                            t('percentOff', {
+                                                pct: percentOffBase(
+                                                    row,
+                                                    selectedColumn,
+                                                ),
+                                            })
+                                        "
+                                    >
+                                        <Percent class="size-2.5" />{{
+                                            percentOffBase(row, selectedColumn)
+                                        }}
+                                    </span>
+                                </div>
+                                <!--
+                                    Case A (flat): the final price is at or above the
+                                    base price — a peak-season rate, with no promo.
+                                -->
+                                <span v-else class="text-base text-stone-200">
+                                    {{ format(cellPrice(row, selectedColumn)) }}
+                                </span>
+
+                                <!--
+                                    An override cell (Case C above) has no single
+                                    price to add to the basket, so it gets no
+                                    Select/stepper control at all — just the text.
+                                -->
+                                <template
+                                    v-if="!isPriceOverride(row, selectedColumn)"
+                                >
+                                    <button
+                                        v-if="
+                                            quantityFor(
+                                                row.room_id,
+                                                selectedColumn.label,
+                                            ) === 0
+                                        "
+                                        type="button"
+                                        class="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-300 px-4 py-2 text-xs font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200"
+                                        @click="
+                                            add(
+                                                row.room_id,
+                                                localized(
+                                                    row.room_name,
+                                                    locale,
+                                                ),
+                                                selectedColumn.label,
+                                                cellPrice(row, selectedColumn),
+                                            )
+                                        "
+                                    >
+                                        {{ t('select') }}
+                                        <Plus class="size-3.5" />
+                                    </button>
+                                    <div
+                                        v-else
+                                        class="flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 p-1"
+                                    >
+                                        <button
+                                            type="button"
+                                            :aria-label="t('removeOne')"
+                                            class="flex size-6 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                                            @click="
+                                                decrement(
+                                                    row.room_id,
+                                                    selectedColumn.label,
+                                                )
+                                            "
+                                        >
+                                            <Minus class="size-3" />
+                                        </button>
+                                        <span
+                                            class="min-w-4 text-center text-sm font-semibold"
+                                        >
+                                            {{
+                                                quantityFor(
+                                                    row.room_id,
+                                                    selectedColumn.label,
+                                                )
+                                            }}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            :aria-label="t('addOneMore')"
+                                            class="flex size-6 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200"
+                                            @click="
+                                                add(
+                                                    row.room_id,
+                                                    localized(
+                                                        row.room_name,
+                                                        locale,
+                                                    ),
+                                                    selectedColumn.label,
+                                                    cellPrice(
+                                                        row,
+                                                        selectedColumn,
+                                                    ),
+                                                )
+                                            "
+                                        >
+                                            <Plus class="size-3" />
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Desktop (lg+): the full season × room matrix, unchanged. -->
                 <div
-                    class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur"
+                    class="hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur lg:block"
                 >
-                    <table class="w-full min-w-[640px] text-left">
+                    <table class="w-full text-left">
                         <thead
-                            class="text-[11px] tracking-widest text-amber-300 uppercase sm:text-xs"
+                            class="text-xs tracking-widest text-amber-300 uppercase"
                         >
                             <tr class="border-b border-white/10">
-                                <th
-                                    class="px-4 py-3.5 font-medium sm:px-6 sm:py-4 lg:py-2.5"
-                                >
+                                <th class="px-6 py-1.5 font-medium">
                                     {{ t('roomColumn') }}
                                 </th>
                                 <th
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-4 py-3.5 text-center font-medium sm:px-6 sm:py-4 lg:py-2.5"
+                                    class="px-6 py-1.5 text-center font-medium"
                                 >
                                     {{ column.label }}
                                 </th>
@@ -107,34 +323,27 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                 class="transition hover:bg-white/5"
                             >
                                 <td
-                                    class="px-4 py-4 align-middle text-base font-medium sm:px-6 sm:py-5 sm:text-base lg:py-3"
+                                    class="px-6 py-2 align-middle text-base font-medium"
                                 >
                                     {{ localized(row.room_name, locale) }}
                                 </td>
                                 <td
                                     v-for="column in pricing.columns"
                                     :key="column.id"
-                                    class="px-3 py-3 align-top sm:px-4 sm:py-3.5 lg:px-3 lg:py-2"
+                                    class="px-3 py-1.5 align-top"
                                 >
                                     <!--
-                                        A fixed min-height, not `h-full`: a percentage height
-                                        on a flex child doesn't reliably resolve against a
-                                        <td>'s row-equalized height across browsers, which is
-                                        why the "Select" button used to sit right under the
-                                        price content (jumping up or down depending on whether
-                                        a deal badge pushed that content taller) instead of
-                                        staying pinned to the bottom. Tall enough for the
-                                        deal case (struck-through price + final price + badge,
-                                        possibly wrapped to two lines) plus the button/stepper
-                                        below it, so every cell in the row — with or without a
-                                        deal badge — ends up the same height, and `justify-between`
-                                        can then reliably lock every button to the same line.
-                                        Shorter on desktop (lg:min-h-20): six real room rows need
-                                        to fit one viewport there, and the wider column means the
-                                        deal badge's content wraps far less often than on mobile.
+                                        A fixed min-height (`min-h-16`), not `h-full`: a
+                                        percentage height on a flex child doesn't reliably
+                                        resolve against a <td>'s row-equalized height across
+                                        browsers. Tall enough for the deal case (struck-through
+                                        price + final price + badge, possibly wrapped to two
+                                        lines) plus the button/stepper below it, so every cell
+                                        in the row ends up the same height, and `justify-between`
+                                        reliably locks every button to the same line.
                                     -->
                                     <div
-                                        class="flex min-h-28 flex-col items-start justify-between gap-2 sm:min-h-32 lg:min-h-20 lg:gap-1.5"
+                                        class="flex min-h-16 flex-col items-start justify-between gap-1"
                                     >
                                         <!--
                                             Case C (override): the admin set a literal,
@@ -145,7 +354,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                         -->
                                         <span
                                             v-if="isPriceOverride(row, column)"
-                                            class="text-base text-stone-200 sm:text-lg lg:text-base"
+                                            class="text-base text-stone-200"
                                             >{{ row.prices[column.id] }}</span
                                         >
                                         <!--
@@ -158,10 +367,10 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                             v-else-if="isDeal(row, column)"
                                         >
                                             <div
-                                                class="flex flex-wrap items-center gap-2 lg:gap-1.5"
+                                                class="flex flex-wrap items-center gap-1.5"
                                             >
                                                 <span
-                                                    class="text-sm text-stone-400 line-through sm:text-base lg:text-sm"
+                                                    class="text-sm text-stone-400 line-through"
                                                     >{{
                                                         format(
                                                             Number(
@@ -171,7 +380,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                     }}</span
                                                 >
                                                 <span
-                                                    class="text-base font-semibold text-amber-300 sm:text-lg lg:text-base"
+                                                    class="text-base font-semibold text-amber-300"
                                                 >
                                                     {{
                                                         format(
@@ -183,7 +392,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                     }}
                                                 </span>
                                                 <span
-                                                    class="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2 py-1 text-[11px] font-bold text-stone-900 sm:px-2.5 sm:py-1 sm:text-xs lg:gap-0.5 lg:px-1.5 lg:py-0.5 lg:text-[10px]"
+                                                    class="inline-flex items-center gap-0.5 rounded-full bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-stone-900"
                                                     :title="
                                                         t('percentOff', {
                                                             pct: percentOffBase(
@@ -194,7 +403,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                     "
                                                 >
                                                     <Percent
-                                                        class="size-3 lg:size-2.5"
+                                                        class="size-2.5"
                                                     />{{
                                                         percentOffBase(
                                                             row,
@@ -211,7 +420,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                         -->
                                         <span
                                             v-else
-                                            class="text-base text-stone-200 sm:text-lg lg:text-base"
+                                            class="text-base text-stone-200"
                                             >{{
                                                 format(cellPrice(row, column))
                                             }}</span
@@ -233,7 +442,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                     ) === 0
                                                 "
                                                 type="button"
-                                                class="inline-flex items-center gap-1.5 rounded-full bg-amber-300 px-3.5 py-2 text-xs font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200 sm:px-4 sm:py-2 sm:text-sm lg:gap-1 lg:px-2.5 lg:py-1 lg:text-xs"
+                                                class="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-300 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-stone-900 transition hover:bg-amber-200"
                                                 @click="
                                                     add(
                                                         row.room_id,
@@ -247,18 +456,16 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                 "
                                             >
                                                 {{ t('select') }}
-                                                <Plus
-                                                    class="size-3.5 sm:size-4 lg:size-3"
-                                                />
+                                                <Plus class="size-3" />
                                             </button>
                                             <div
                                                 v-else
-                                                class="flex items-center gap-2 rounded-full bg-white/10 p-1.5 sm:gap-2 sm:p-1.5 lg:gap-1.5 lg:p-1"
+                                                class="flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 p-1"
                                             >
                                                 <button
                                                     type="button"
                                                     :aria-label="t('removeOne')"
-                                                    class="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:size-7 lg:size-5"
+                                                    class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
                                                     @click="
                                                         decrement(
                                                             row.room_id,
@@ -266,12 +473,10 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                         )
                                                     "
                                                 >
-                                                    <Minus
-                                                        class="size-3.5 sm:size-3.5 lg:size-2.5"
-                                                    />
+                                                    <Minus class="size-2.5" />
                                                 </button>
                                                 <span
-                                                    class="min-w-5 text-center text-sm font-semibold sm:min-w-5 sm:text-sm lg:min-w-4 lg:text-xs"
+                                                    class="min-w-4 text-center text-xs font-semibold"
                                                 >
                                                     {{
                                                         quantityFor(
@@ -285,7 +490,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                     :aria-label="
                                                         t('addOneMore')
                                                     "
-                                                    class="flex size-7 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200 sm:size-7 lg:size-5"
+                                                    class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-stone-900 transition hover:bg-amber-200"
                                                     @click="
                                                         add(
                                                             row.room_id,
@@ -301,9 +506,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                         )
                                                     "
                                                 >
-                                                    <Plus
-                                                        class="size-3.5 sm:size-3.5 lg:size-2.5"
-                                                    />
+                                                    <Plus class="size-2.5" />
                                                 </button>
                                             </div>
                                         </template>
@@ -314,14 +517,21 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                     </table>
                 </div>
 
-                <button
-                    type="button"
-                    class="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/50 px-5 py-2.5 text-sm font-semibold text-amber-200 transition hover:bg-amber-300/10"
-                    @click="servicesOpen = true"
-                >
-                    <Sparkles class="size-4" />
-                    {{ t('additionalServicesButton') }}
-                </button>
+                <!-- Directly beneath the grid/cards, centered — a sibling
+                inside this same scrollable area rather than a separate flex
+                item of the outer column, so its position tracks the
+                table/cards' own height instead of always sitting pinned to
+                the section's bottom edge regardless of how tall they are. -->
+                <div class="mt-3 flex justify-center lg:mt-2">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-1.5 rounded-full border border-amber-300/50 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-300/10 sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm lg:py-1.5"
+                        @click="servicesOpen = true"
+                    >
+                        <Sparkles class="size-3.5 sm:size-4" />
+                        {{ t('additionalServicesButton') }}
+                    </button>
+                </div>
             </div>
         </div>
 

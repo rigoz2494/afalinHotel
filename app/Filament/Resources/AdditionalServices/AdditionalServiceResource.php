@@ -21,7 +21,7 @@ class AdditionalServiceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 4;
 
     public static function getModelLabel(): string
     {
@@ -40,7 +40,7 @@ class AdditionalServiceResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('Landing page');
+        return __('Inventory Management');
     }
 
     public static function form(Schema $schema): Schema

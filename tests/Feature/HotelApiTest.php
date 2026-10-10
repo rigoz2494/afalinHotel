@@ -19,7 +19,8 @@ class HotelApiTest extends TestCase
 
         $this->getJson(route('api.v1.hotel.show'))
             ->assertOk()
-            ->assertJsonPath('data.tagline', 'Welcome')
+            ->assertJsonPath('data.tagline.en', 'Welcome')
+            ->assertJsonPath('data.tagline.ru', null)
             ->assertJsonPath('data.promo_banner', null);
     }
 

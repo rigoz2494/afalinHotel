@@ -41,7 +41,7 @@ class CallbackRequestResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('Leads');
+        return __('Bookings & Leads');
     }
 
     public static function form(Schema $schema): Schema

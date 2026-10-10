@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Rooms\Schemas;
 
 use App\Models\Currency;
+use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Services\ImageOptimizer;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -28,42 +30,67 @@ class RoomForm
                 Section::make(__('Room details'))
                     ->columns(2)
                     ->schema([
-                        Tabs::make('name_and_description_locale')
-                            ->columnSpanFull()
-                            ->tabs([
-                                Tab::make(__('English'))
-                                    ->columns(2)
-                                    ->schema([
-                                        TextInput::make('name.en')
-                                            ->label(__('Name'))
-                                            ->required()
-                                            ->maxLength(100)
-                                            ->live(onBlur: true)
-                                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
-                                        Textarea::make('description.en')
-                                            ->label(__('Description'))
-                                            ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
-                                            ->placeholder(__('e.g. A bright, quiet room with a king bed and a view of the garden.'))
-                                            ->required()
-                                            ->rows(3)
-                                            ->columnSpanFull(),
+                        ...((($restricted = HotelSetting::restrictedLocale()) !== null)
+                            ? [
+                                TextInput::make("name.{$restricted}")
+                                    ->label(__('Name'))
+                                    ->required()
+                                    ->maxLength(100)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                Textarea::make("description.{$restricted}")
+                                    ->label(__('Description'))
+                                    ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
+                                    ->placeholder(__('e.g. A bright, quiet room with a king bed and a view of the garden.'))
+                                    ->required()
+                                    ->rows(3)
+                                    ->columnSpanFull(),
+                                // Not shown, but still part of the form state —
+                                // without these, saving while restricted would
+                                // wipe out whatever the hidden language already had.
+                                Hidden::make('name.'.($restricted === 'en' ? 'ru' : 'en')),
+                                Hidden::make('description.'.($restricted === 'en' ? 'ru' : 'en')),
+                            ]
+                            : [
+                                Tabs::make('name_and_description_locale')
+                                    ->columnSpanFull()
+                                    ->tabs([
+                                        Tab::make(__('English'))
+                                            ->columns(2)
+                                            ->schema([
+                                                TextInput::make('name.en')
+                                                    ->label(__('Name'))
+                                                    ->required()
+                                                    ->maxLength(100)
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                                Textarea::make('description.en')
+                                                    ->label(__('Description'))
+                                                    ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
+                                                    ->placeholder(__('e.g. A bright, quiet room with a king bed and a view of the garden.'))
+                                                    ->required()
+                                                    ->rows(3)
+                                                    ->columnSpanFull(),
+                                            ]),
+                                        Tab::make(__('Russian'))
+                                            ->columns(2)
+                                            ->schema([
+                                                TextInput::make('name.ru')
+                                                    ->label(__('Name'))
+                                                    ->required()
+                                                    ->maxLength(100),
+                                                Textarea::make('description.ru')
+                                                    ->label(__('Description'))
+                                                    ->required()
+                                                    ->rows(3)
+                                                    ->columnSpanFull(),
+                                            ]),
                                     ]),
-                                Tab::make(__('Russian'))
-                                    ->columns(2)
-                                    ->schema([
-                                        TextInput::make('name.ru')
-                                            ->label(__('Name'))
-                                            ->required()
-                                            ->maxLength(100),
-                                        Textarea::make('description.ru')
-                                            ->label(__('Description'))
-                                            ->required()
-                                            ->rows(3)
-                                            ->columnSpanFull(),
-                                    ]),
-                            ]),
+                            ]
+                        ),
                         TextInput::make('slug')
                             ->label(__('Slug'))
+                            ->helperText(__('Generated automatically from the name. This is the unique web address of this room\'s page in the browser. Only edit it by hand in rare cases.'))
                             ->required()
                             ->maxLength(100)
                             ->unique(ignoreRecord: true),
@@ -92,10 +119,36 @@ class RoomForm
                             ->numeric()
                             ->minValue(1)
                             ->default(2),
-                        TextInput::make('bed_type')
-                            ->label(__('Bed type'))
-                            ->required()
-                            ->maxLength(50),
+                        ...($restricted !== null
+                            ? [
+                                TextInput::make("bed_type.{$restricted}")
+                                    ->label(__('Bed type'))
+                                    ->required()
+                                    ->maxLength(50),
+                                Hidden::make('bed_type.'.($restricted === 'en' ? 'ru' : 'en')),
+                            ]
+                            : [
+                                Tabs::make('bed_type_locale')
+                                    ->label(__('Bed type'))
+                                    ->columnSpanFull()
+                                    ->tabs([
+                                        Tab::make(__('English'))
+                                            ->schema([
+                                                TextInput::make('bed_type.en')
+                                                    ->label(__('Bed type'))
+                                                    ->required()
+                                                    ->maxLength(50),
+                                            ]),
+                                        Tab::make(__('Russian'))
+                                            ->schema([
+                                                TextInput::make('bed_type.ru')
+                                                    ->label(__('Bed type'))
+                                                    ->required()
+                                                    ->maxLength(50),
+                                            ]),
+                                    ]),
+                            ]
+                        ),
                         CheckboxList::make('amenities')
                             ->label(__('Furniture & appliances'))
                             ->helperText(__('Shown on the public site as a row of icon badges, in whichever language the guest is browsing in.'))

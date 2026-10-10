@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { MessageCircle, Phone, Send } from '@lucide/vue';
+import BookingExtras from '@/components/landing/BookingExtras.vue';
 import BookingForm from '@/components/landing/BookingForm.vue';
+import BookingSubmit from '@/components/landing/BookingSubmit.vue';
+import DirectCallCta from '@/components/landing/DirectCallCta.vue';
 import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
@@ -18,11 +21,11 @@ const messengers = [
 <template>
     <section
         id="contact"
-        class="relative flex min-h-screen snap-start flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-10 text-white sm:px-6 sm:py-14 lg:h-screen lg:py-0 lg:pt-16"
+        class="relative flex min-h-screen snap-start flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-5 text-white sm:px-6 sm:py-14 lg:h-screen lg:py-0 lg:pt-16"
     >
         <SectionBackdrop photo-id="photo-1520250497591-112f2f40a3f4" />
         <div
-            class="relative z-10 w-full max-w-xl space-y-4 sm:space-y-6 lg:space-y-8"
+            class="relative z-10 mx-auto w-full max-w-6xl space-y-3 sm:space-y-6 lg:space-y-8"
         >
             <div class="text-center">
                 <h2 class="text-2xl font-semibold sm:text-3xl lg:text-4xl">
@@ -33,10 +36,32 @@ const messengers = [
                 </p>
             </div>
 
-            <BookingForm />
+            <!--
+                Below md: a strict single-column flow (`flex flex-col`, not
+                a grid at all — a bare `grid` with no explicit columns can
+                still auto-place children side by side once any of them has
+                intrinsic min-content width to fill, which is exactly what
+                broke this on a phone before), in this exact order: selected
+                rooms, the contact fields, the services picker, then the
+                submit button immediately followed by the call-us card.
+                At md: an explicit 2-column/2-row grid instead — each piece
+                placed by `md:col-start-*`/`md:row-start-*` rather than by
+                DOM order, so the desktop column grouping (services + call-us
+                on the left; rooms/fields + submit on the right) can differ
+                from the mobile sequence above without moving anything in
+                the markup.
+            -->
+            <div
+                class="flex w-full flex-col gap-3 md:grid md:grid-cols-2 md:items-start md:gap-x-12 md:gap-y-6"
+            >
+                <BookingForm class="md:col-start-2 md:row-start-1" />
+                <BookingExtras class="md:col-start-1 md:row-start-1" />
+                <BookingSubmit class="md:col-start-2 md:row-start-2" />
+                <DirectCallCta class="md:col-start-1 md:row-start-2" />
+            </div>
 
             <div
-                class="flex flex-col items-center gap-3 border-t border-white/10 pt-4 text-center sm:gap-5 sm:pt-6 lg:gap-6"
+                class="flex flex-col items-center gap-2.5 border-t border-white/10 pt-3 text-center sm:gap-5 sm:pt-6 lg:gap-6"
             >
                 <ul
                     class="space-y-1 text-xs text-white/80 sm:text-sm lg:text-base"

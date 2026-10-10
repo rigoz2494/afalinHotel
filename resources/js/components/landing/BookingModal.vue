@@ -1,25 +1,33 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
 import { X } from '@lucide/vue';
+import { watch } from 'vue';
 import ClientOnly from '@/components/ClientOnly.vue';
+import BookingExtras from '@/components/landing/BookingExtras.vue';
 import BookingForm from '@/components/landing/BookingForm.vue';
+import BookingSubmit from '@/components/landing/BookingSubmit.vue';
+import DirectCallCta from '@/components/landing/DirectCallCta.vue';
+import { useBookingSubmission } from '@/composables/useBookingSubmission';
 import { useLocale } from '@/composables/useLocale';
 
 const open = defineModel<boolean>({ required: true });
 const { t } = useLocale();
+const { successOverlayOpen } = useBookingSubmission();
 
 const close = (): void => {
     open.value = false;
 };
 
 // Fires once the success overlay's own lifetime is over (its ~4s auto-hide,
-// or the guest closing it by hand) — see BookingForm.vue — so this modal
-// never disappears out from under that message while it's still showing.
-// The short extra wait lets the overlay's own 400ms fade-out finish first,
-// instead of this modal unmounting underneath it mid-transition.
-const handleSubmitted = (): void => {
-    setTimeout(close, 400);
-};
+// or the guest closing it by hand) — so this modal never disappears out
+// from under that message while it's still showing. The short extra wait
+// lets the overlay's own 400ms fade-out finish first, instead of this
+// modal unmounting underneath it mid-transition.
+watch(successOverlayOpen, (isOpen, wasOpen) => {
+    if (wasOpen && !isOpen) {
+        setTimeout(close, 400);
+    }
+});
 
 // No explicit `window` target: see the comment in SiteHeader.vue.
 useEventListener('keydown', (event: KeyboardEvent) => {
@@ -63,10 +71,10 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                         <p class="mt-1 text-sm text-white/60">
                             {{ t('reviewSelectedRooms') }}
                         </p>
-                        <BookingForm
-                            class="mt-6"
-                            @submitted="handleSubmitted"
-                        />
+                        <BookingForm class="mt-6" />
+                        <BookingExtras class="mt-4" />
+                        <BookingSubmit class="mt-4" />
+                        <DirectCallCta class="mt-4" />
                     </div>
                 </div>
             </Transition>

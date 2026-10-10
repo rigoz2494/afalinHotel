@@ -111,10 +111,7 @@ const translations = {
         en: 'Direct booking perk: free airport transfer on your first stay.',
         ru: 'Бонус за прямое бронирование: бесплатный трансфер из аэропорта в первую поездку.',
     },
-    swipeHint: {
-        en: 'Swipe to see all seasons →',
-        ru: 'Смахните, чтобы увидеть все сезоны →',
-    },
+    selectPeriodLabel: { en: 'Select Period', ru: 'Выберите период' },
     roomColumn: { en: 'Room', ru: 'Номер' },
     from: { en: 'from', ru: 'от' },
     perNight: { en: 'per night', ru: 'за ночь' },
@@ -142,9 +139,6 @@ const translations = {
         en: 'From the sunlit lobby to the poolside terrace and our seasonal restaurant, every corner of the grounds is made for slowing down and enjoying your stay.',
         ru: 'От светлого лобби до террасы у бассейна и сезонного ресторана — каждый уголок создан для того, чтобы вы могли отдохнуть и насладиться пребыванием.',
     },
-    statYears: { en: 'Years', ru: 'Лет' },
-    statRooms: { en: 'Rooms', ru: 'Номеров' },
-    statGuests: { en: 'Guests', ru: 'Гостей' },
     openPhoto: { en: 'Open photo: {alt}', ru: 'Открыть фото: {alt}' },
 
     // Contact
@@ -271,11 +265,22 @@ const LOCALES: { code: Locale; label: string }[] = [
  * Provides the guest's language choice to the whole landing page, the same
  * way `provideCurrency` does. Created once per page instance, so it never
  * leaks between server-rendered requests.
+ *
+ * `forcedLocale` is set when the admin's "Global Language Mode" restricts
+ * the whole site to one language (see HotelSettings.locale_mode): the
+ * locale is pinned to it, any previously stored choice is ignored, and
+ * `setLocale` becomes a no-op — a defensive backstop in case anything
+ * still calls it, since SiteHeader.vue already hides the switcher itself
+ * in that mode.
  */
-export function provideLocale(): LocaleContext {
-    const locale = ref<Locale>('en');
+export function provideLocale(forcedLocale?: Locale): LocaleContext {
+    const locale = ref<Locale>(forcedLocale ?? 'en');
 
     const setLocale = (next: Locale): void => {
+        if (forcedLocale) {
+            return;
+        }
+
         locale.value = next;
 
         try {
@@ -288,6 +293,10 @@ export function provideLocale(): LocaleContext {
     // Restore the guest's last choice only after mount, so server and client
     // markup match on the first render.
     onMounted(() => {
+        if (forcedLocale) {
+            return;
+        }
+
         let stored: string | null = null;
 
         try {

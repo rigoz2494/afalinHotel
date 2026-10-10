@@ -42,6 +42,48 @@ const initialIndex = props.focusSlug
 const activeIndex = ref(initialIndex);
 const imageIndex = ref(0);
 const activeRoom = computed(() => props.rooms[activeIndex.value]);
+
+// A target-sized, varied gallery for this room type's own card — not just
+// its single type-level photo, and not any one specific room's whole
+// gallery either. Round-robins one photo at a time across every specific
+// numbered room of this type (never a bathroom shot, matched by "bath" in
+// the path, e.g. a source file literally named bath.jpg) until it has
+// GALLERY_TARGET photos or every room's pool is exhausted. A type with
+// several numbered rooms ends up with real variety from each of them; a
+// type with only one keeps drawing from that single room until the target
+// is met (or it runs out).
+const GALLERY_TARGET = 5;
+
+const showcaseImages = computed(() => {
+    const perUnitPhotos = activeRoom.value.units.map((unit) =>
+        unit.images.filter((src) => !src.toLowerCase().includes('bath')),
+    );
+
+    const pool: string[] = [];
+
+    for (
+        let round = 0;
+        pool.length < GALLERY_TARGET &&
+        perUnitPhotos.some((photos) => photos.length > round);
+        round++
+    ) {
+        for (const photos of perUnitPhotos) {
+            if (photos[round] && pool.length < GALLERY_TARGET) {
+                pool.push(photos[round]);
+            }
+        }
+    }
+
+    // No units seeded yet (or none with their own photos) — fall back to
+    // the room type's own type-level photo, filtered the same way.
+    if (pool.length === 0) {
+        return activeRoom.value.images.filter(
+            (src) => !src.toLowerCase().includes('bath'),
+        );
+    }
+
+    return pool;
+});
 const activeRoomName = computed(() =>
     localized(activeRoom.value.name, locale.value),
 );
@@ -107,7 +149,11 @@ const amenityItems = computed(() => {
             label: t('capacity'),
             value: t('guestsCount', { n: amenities.capacity }),
         },
-        { icon: BedDouble, label: t('bed'), value: amenities.bed_type },
+        {
+            icon: BedDouble,
+            label: t('bed'),
+            value: localized(amenities.bed_type, locale.value),
+        },
     ];
 });
 
@@ -117,7 +163,7 @@ const stepRoom = (direction: 1 | -1): void => {
 };
 
 const stepImage = (direction: 1 | -1): void => {
-    const total = activeRoom.value.images.length;
+    const total = showcaseImages.value.length;
 
     if (total === 0) {
         return;
@@ -146,14 +192,14 @@ const stepImage = (direction: 1 | -1): void => {
                 >
                     <img
                         :key="`${activeRoom.id}-${imageIndex}`"
-                        :src="activeRoom.images[imageIndex]"
+                        :src="showcaseImages[imageIndex]"
                         :alt="`${activeRoomName} photo ${imageIndex + 1}`"
                         class="absolute inset-0 h-full w-full object-cover"
                         loading="lazy"
                         decoding="async"
                     />
                 </Transition>
-                <template v-if="activeRoom.images.length > 1">
+                <template v-if="showcaseImages.length > 1">
                     <button
                         type="button"
                         class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 backdrop-blur hover:bg-black/70 sm:left-4 sm:p-2"
@@ -173,11 +219,11 @@ const stepImage = (direction: 1 | -1): void => {
                 </template>
             </div>
             <div
-                v-if="activeRoom.images.length > 1"
+                v-if="showcaseImages.length > 1"
                 class="flex gap-1.5 overflow-x-auto bg-black/60 p-1.5 sm:gap-2 sm:p-2"
             >
                 <button
-                    v-for="(src, index) in activeRoom.images"
+                    v-for="(src, index) in showcaseImages"
                     :key="src + index"
                     type="button"
                     class="h-11 w-16 shrink-0 overflow-hidden rounded-md border-2 transition sm:h-14 sm:w-20"

@@ -63,7 +63,7 @@ onBeforeUnmount(() => {
             <img
                 src="/images/hotel-logo.svg"
                 alt=""
-                class="mx-auto mb-6 h-auto w-48 drop-shadow-lg sm:w-64 md:w-80"
+                class="mx-auto mb-5 h-auto w-48 drop-shadow-lg sm:mb-6 sm:w-64 md:w-80"
             />
             <h1
                 class="text-3xl font-semibold tracking-tight sm:text-5xl md:text-7xl"
@@ -73,18 +73,18 @@ onBeforeUnmount(() => {
             <p
                 class="mt-3 text-base text-white/85 sm:mt-6 sm:text-lg md:text-2xl"
             >
-                {{ hotel.tagline }}
+                {{ localized(hotel.tagline, locale) }}
             </p>
             <p
                 v-if="promoBanner"
-                class="mx-auto mt-6 flex max-w-xl items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/15 px-4 py-1.5 text-xs text-amber-100 backdrop-blur sm:mt-8 sm:px-5 sm:py-2 sm:text-sm"
+                class="mx-auto mt-5 flex max-w-xl items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/15 p-3.5 text-sm text-amber-100 backdrop-blur sm:mt-8 sm:p-4 sm:text-base"
             >
                 <Gift class="size-4 shrink-0 text-amber-300" />
                 {{ promoBanner }}
             </p>
             <a
                 href="#rooms"
-                class="mt-6 inline-block rounded-full bg-white px-6 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-white/90 sm:mt-8 sm:px-8 sm:py-3 sm:text-base"
+                class="mt-6 inline-block rounded-full bg-white px-7 py-3.5 text-base font-semibold text-slate-900 transition hover:bg-white/90 sm:mt-10 sm:px-10 sm:py-4 sm:text-lg"
             >
                 {{ t('viewRooms') }}
             </a>

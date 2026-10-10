@@ -1,6 +1,7 @@
 import type {
     AdditionalService,
     FaqItem,
+    GalleryImage,
     HotelSettings,
     PricingTable,
     Room,
@@ -11,7 +12,10 @@ const unsplash = (id: string, width = 1600): string =>
 
 export const mockHotel: HotelSettings = {
     hotel_name: { en: 'Afalina', ru: 'Афалина' },
-    tagline: 'Quiet luxury in the heart of the city',
+    tagline: {
+        en: 'Quiet luxury in the heart of the city',
+        ru: 'Тихая роскошь в самом сердце города',
+    },
     promo_banner: {
         en: 'Special Offer: Book now and get a 5% discount on early bird reservations!',
         ru: 'Специальное предложение: забронируйте сейчас и получите скидку 5% при раннем бронировании!',
@@ -38,6 +42,21 @@ export const mockHotel: HotelSettings = {
         },
         contact: { en: 'Request a Callback', ru: 'Заказать обратный звонок' },
     },
+    about_stats: {
+        years: {
+            label: { en: 'Years', ru: 'Лет' },
+            value: { en: '20+', ru: '20+' },
+        },
+        rooms: {
+            label: { en: 'Rooms', ru: 'Номеров' },
+            value: { en: '48', ru: '48' },
+        },
+        guests: {
+            label: { en: 'Guests', ru: 'Гостей' },
+            value: { en: '30k', ru: '30k' },
+        },
+    },
+    locale_mode: 'multilingual',
 };
 
 export const mockRooms: Room[] = [
@@ -57,7 +76,7 @@ export const mockRooms: Room[] = [
         base_price: 180,
         amenities: {
             capacity: 2,
-            bed_type: 'King bed',
+            bed_type: { en: 'King bed', ru: 'Кровать king-size' },
             tags: ['double_bed', 'table', 'nightstand', 'wardrobe', 'tv', 'ac'],
         },
         units: [
@@ -107,7 +126,10 @@ export const mockRooms: Room[] = [
         base_price: 290,
         amenities: {
             capacity: 4,
-            bed_type: 'King + 2 singles',
+            bed_type: {
+                en: 'King + 2 singles',
+                ru: 'Кровать king-size + 2 односпальные',
+            },
             tags: [
                 'double_bed',
                 'sofa',
@@ -167,7 +189,7 @@ export const mockRooms: Room[] = [
         base_price: 420,
         amenities: {
             capacity: 3,
-            bed_type: 'Super king bed',
+            bed_type: { en: 'Super king bed', ru: 'Кровать super king-size' },
             tags: [
                 'double_bed',
                 'armchair',
@@ -267,30 +289,30 @@ export const roomFallbackImages: string[] = [
     unsplash('photo-1522708323590-d24dbb6b0267'),
 ];
 
-export const galleryImages: { src: string; alt: string; tall: boolean }[] = [
+export const mockGalleryImages: GalleryImage[] = [
     {
         src: unsplash('photo-1566073771259-6a8506099945', 900),
-        alt: 'Lobby',
+        alt: { en: 'Lobby', ru: 'Лобби' },
         tall: true,
     },
     {
         src: unsplash('photo-1571896349842-33c89424de2d', 900),
-        alt: 'Pool',
+        alt: { en: 'Pool', ru: 'Бассейн' },
         tall: false,
     },
     {
         src: unsplash('photo-1517248135467-4c7edcad34c4', 900),
-        alt: 'Restaurant',
+        alt: { en: 'Restaurant', ru: 'Ресторан' },
         tall: false,
     },
     {
         src: unsplash('photo-1542314831-068cd1dbfeeb', 900),
-        alt: 'Exterior',
+        alt: { en: 'Exterior', ru: 'Фасад' },
         tall: false,
     },
     {
         src: unsplash('photo-1520250497591-112f2f40a3f4', 900),
-        alt: 'Poolside terrace',
+        alt: { en: 'Poolside terrace', ru: 'Терраса у бассейна' },
         tall: false,
     },
 ];

@@ -2,10 +2,12 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\SetAdminPanelLocale;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -35,6 +37,15 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            // Explicit order, top to bottom — Filament otherwise falls back
+            // to whatever order it happens to discover resources in, which
+            // is not a stable or intentional ordering for the sidebar.
+            ->navigationGroups([
+                NavigationGroup::make(__('Bookings & Leads')),
+                NavigationGroup::make(__('Inventory Management')),
+                NavigationGroup::make(__('Site Content')),
+                NavigationGroup::make(__('System Settings')),
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -45,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetAdminPanelLocale::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

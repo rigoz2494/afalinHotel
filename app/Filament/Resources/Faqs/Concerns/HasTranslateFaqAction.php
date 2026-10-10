@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Faqs\Concerns;
 
 use App\Exceptions\TranslationException;
+use App\Models\HotelSetting;
 use App\Services\TranslationService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -22,6 +23,9 @@ trait HasTranslateFaqAction
             ->tooltip(__('Fill in a question and answer in either language, then click this — it detects which language you wrote and translates it into the other side automatically.'))
             ->icon(Heroicon::OutlinedLanguage)
             ->color('gray')
+            // Nothing to translate between once the admin is locked to one
+            // language — the other side isn't even shown on this form.
+            ->visible(fn (): bool => HotelSetting::restrictedLocale() === null)
             // Manual only: nothing else ever calls this but the admin's click.
             ->action(function (TranslationService $translator): void {
                 try {

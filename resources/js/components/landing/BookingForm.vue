@@ -1,73 +1,26 @@
 <script setup lang="ts">
-import { Minus, Phone, Plus, Trash2 } from '@lucide/vue';
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
-import BookingSuccessOverlay from '@/components/landing/BookingSuccessOverlay.vue';
-import { store } from '@/actions/App/Http/Controllers/Api/V1/CallbackRequestController';
-import { useAdditionalServices } from '@/composables/useAdditionalServices';
+import { Minus, Plus, Trash2 } from '@lucide/vue';
+import { computed } from 'vue';
 import { useBookingBasket } from '@/composables/useBookingBasket';
+import { useBookingSubmission } from '@/composables/useBookingSubmission';
 import { useCurrency } from '@/composables/useCurrency';
-import { useHotelSettings } from '@/composables/useHotelSettings';
-import { localized, useLocale } from '@/composables/useLocale';
-import { formatPhoneInput, isPhoneComplete } from '@/composables/usePhoneMask';
-import { useRoomSelection } from '@/composables/useRoomSelection';
+import { useLocale } from '@/composables/useLocale';
 import { useServiceBasket } from '@/composables/useServiceBasket';
 
-const emit = defineEmits<{ submitted: [] }>();
-
-const { items, add, decrement, removeItem, clear } = useBookingBasket();
+const { items, add, decrement, removeItem } = useBookingBasket();
+// Only the shared basket's totals are needed here — the picker UI itself
+// lives in BookingExtras.vue, writing to this same singleton.
+const { items: serviceItems } = useServiceBasket();
+const { convert, format, formatConverted } = useCurrency();
+const { t } = useLocale();
 const {
-    items: serviceItems,
-    quantityFor: serviceQuantityFor,
-    add: addService,
-    decrement: decrementService,
-    clear: clearServices,
-} = useServiceBasket();
-const { convert, format, formatConverted, selected } = useCurrency();
-const { t, locale } = useLocale();
-const hotel = useHotelSettings();
-const { selectedRoomNumber } = useRoomSelection();
-const additionalServices = useAdditionalServices();
-
-// The direct-call fallback: hidden if the admin hasn't set a phone number
-// in Site Settings yet, rather than showing a broken link.
-const hotelPhoneNumber = computed(() => hotel.value.contacts.phone ?? null);
-const hotelPhoneHref = computed(() =>
-    hotelPhoneNumber.value
-        ? `tel:${hotelPhoneNumber.value.replace(/[^+\d]/g, '')}`
-        : null,
-);
-
-const form = reactive({ name: '', phone: '', message: '' });
-const wantsBalcony = ref(false);
-const specialRequests = ref('');
-const status = ref<'idle' | 'sending' | 'sent' | 'error'>('idle');
-const phoneError = ref<string | null>(null);
-
-const successOverlayOpen = ref(false);
-let successOverlayTimer: ReturnType<typeof setTimeout> | undefined;
-
-onBeforeUnmount(() => {
-    clearTimeout(successOverlayTimer);
-});
-
-// The parent modal closes once the success message's own lifetime is over —
-// whether that's its ~4s auto-hide or the guest dismissing it early by hand —
-// rather than on a second, separately-guessed timer of its own that could
-// close the modal (and tear the overlay down with it) before the guest has
-// had a chance to read it.
-watch(successOverlayOpen, (isOpen, wasOpen) => {
-    if (wasOpen && !isOpen) {
-        emit('submitted');
-    }
-});
-
-const onPhoneInput = (event: Event): void => {
-    form.phone = formatPhoneInput(
-        (event.target as HTMLInputElement).value,
-        locale.value,
-    );
-    phoneError.value = null;
-};
+    form,
+    wantsBalcony,
+    specialRequests,
+    phoneError,
+    onPhoneInput,
+    submit,
+} = useBookingSubmission();
 
 // Each line is converted and rounded on its own, the same way the server
 // stores it, so the total is the exact sum of what will be recorded.
@@ -82,65 +35,6 @@ const totalPrice = computed(
             0,
         ),
 );
-
-const submit = async (): Promise<void> => {
-    if (!isPhoneComplete(form.phone)) {
-        phoneError.value = t('invalidPhone');
-
-        return;
-    }
-
-    status.value = 'sending';
-
-    try {
-        const response = await fetch(store.url(), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: JSON.stringify({
-                ...form,
-                wants_balcony: wantsBalcony.value,
-                special_requests: specialRequests.value || null,
-                room_number: selectedRoomNumber.value,
-                // Only an ID and a quantity for each line — no price travels
-                // in this payload at all, so there is nothing here for a
-                // tampered request to lie about. The server looks up every
-                // price itself from the room/service and the active season.
-                currency: selected.value.code,
-                rooms: items.value.map((item) => ({
-                    room_id: item.roomId,
-                    period: item.period,
-                    quantity: item.quantity,
-                })),
-                services: serviceItems.value.map((item) => ({
-                    service_id: item.serviceId,
-                    quantity: item.quantity,
-                })),
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(String(response.status));
-        }
-
-        Object.assign(form, { name: '', phone: '', message: '' });
-        wantsBalcony.value = false;
-        specialRequests.value = '';
-        clear();
-        clearServices();
-        status.value = 'sent';
-
-        clearTimeout(successOverlayTimer);
-        successOverlayOpen.value = true;
-        successOverlayTimer = setTimeout(() => {
-            successOverlayOpen.value = false;
-        }, 4000);
-    } catch {
-        status.value = 'error';
-    }
-};
 
 const inputClass =
     'w-full rounded-lg border border-white/25 bg-black/35 px-3.5 py-2 text-sm text-white placeholder-white/60 outline-none focus:border-amber-300 sm:px-4 sm:py-3 sm:text-base';
@@ -230,7 +124,19 @@ const inputClass =
             </p>
         </div>
 
-        <form class="space-y-2.5 sm:space-y-3" @submit.prevent="submit">
+        <!--
+            No submit button in here: it lives in BookingSubmit.vue instead,
+            linked back to this exact form via `form="booking-form"` — the
+            mobile layout needs it to appear after the services picker (a
+            sibling elsewhere in the DOM), which an in-form button couldn't
+            reach, while `@submit.prevent` here still fires on Enter inside
+            any of these fields either way.
+        -->
+        <form
+            id="booking-form"
+            class="space-y-2.5 sm:space-y-3"
+            @submit.prevent="submit"
+        >
             <input
                 v-model="form.name"
                 required
@@ -274,126 +180,6 @@ const inputClass =
                 :aria-label="t('specialRequestsLabel')"
                 :class="inputClass"
             ></textarea>
-
-            <div v-if="additionalServices.length">
-                <p
-                    class="mb-1.5 text-xs tracking-widest text-amber-300 uppercase sm:mb-2"
-                >
-                    {{ t('addExtraServices') }}
-                </p>
-                <ul class="space-y-1.5 sm:space-y-2">
-                    <li
-                        v-for="service in additionalServices"
-                        :key="service.id"
-                        class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2"
-                    >
-                        <div class="min-w-0">
-                            <p class="truncate text-xs font-medium sm:text-sm">
-                                {{ localized(service.name, locale) }}
-                            </p>
-                            <p class="text-[11px] text-white/50 sm:text-xs">
-                                {{ format(service.price) }}
-                            </p>
-                        </div>
-                        <div class="flex shrink-0 items-center gap-1.5">
-                            <button
-                                v-if="serviceQuantityFor(service.id) === 0"
-                                type="button"
-                                :aria-label="t('addOneMore')"
-                                class="flex size-6 items-center justify-center rounded-full bg-white/10 transition hover:bg-amber-300 hover:text-slate-900 sm:size-7"
-                                @click="
-                                    addService(
-                                        service.id,
-                                        localized(service.name, locale),
-                                        service.price,
-                                    )
-                                "
-                            >
-                                <Plus class="size-3 sm:size-3.5" />
-                            </button>
-                            <div
-                                v-else
-                                class="flex items-center gap-1.5 rounded-full bg-white/10 p-1 sm:gap-2 sm:p-1.5"
-                            >
-                                <button
-                                    type="button"
-                                    :aria-label="t('removeOne')"
-                                    class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:size-6"
-                                    @click="decrementService(service.id)"
-                                >
-                                    <Minus class="size-3" />
-                                </button>
-                                <span
-                                    class="w-4 text-center text-xs font-semibold sm:w-5 sm:text-sm"
-                                    >{{ serviceQuantityFor(service.id) }}</span
-                                >
-                                <button
-                                    type="button"
-                                    :aria-label="t('addOneMore')"
-                                    class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200 sm:size-6"
-                                    @click="
-                                        addService(
-                                            service.id,
-                                            localized(service.name, locale),
-                                            service.price,
-                                        )
-                                    "
-                                >
-                                    <Plus class="size-3" />
-                                </button>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <button
-                type="submit"
-                :disabled="status === 'sending'"
-                class="w-full rounded-full bg-amber-300 px-6 py-2 text-xs font-medium text-slate-900 transition hover:bg-amber-200 disabled:opacity-60 sm:w-auto sm:px-8 sm:py-3 sm:text-base"
-            >
-                {{ status === 'sending' ? t('sending') : t('sendRequest') }}
-            </button>
-            <div v-if="hotelPhoneNumber" class="flex items-center gap-3">
-                <div class="h-px flex-1 bg-white/15"></div>
-                <span class="text-xs tracking-widest text-white/40 uppercase">{{
-                    t('orDivider')
-                }}</span>
-                <div class="h-px flex-1 bg-white/15"></div>
-            </div>
-            <a
-                v-if="hotelPhoneNumber"
-                :href="hotelPhoneHref!"
-                class="relative flex items-center gap-2.5 overflow-hidden rounded-2xl border-2 border-amber-300/70 bg-amber-300/10 px-3.5 py-2.5 transition hover:bg-amber-300/20 sm:gap-4 sm:px-5 sm:py-4"
-            >
-                <span
-                    class="pointer-events-none absolute inset-0 animate-pulse rounded-2xl ring-2 ring-amber-300/40"
-                ></span>
-                <span
-                    class="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-300 text-slate-900 sm:size-12"
-                >
-                    <Phone class="size-4 sm:size-6" />
-                </span>
-                <span class="relative min-w-0 text-left">
-                    <span
-                        class="block text-[11px] font-medium text-amber-200/90 sm:text-sm"
-                        >{{ t('directCallPrefix') }}</span
-                    >
-                    <span
-                        class="block text-sm font-bold text-white sm:text-xl"
-                        >{{ hotelPhoneNumber }}</span
-                    >
-                    <span
-                        class="mt-0.5 hidden text-xs text-white/60 sm:block sm:text-sm"
-                        >{{ t('directCallSuffix') }}</span
-                    >
-                </span>
-            </a>
-            <p v-if="status === 'error'" class="text-sm text-red-300">
-                {{ t('sendError') }}
-            </p>
         </form>
-
-        <BookingSuccessOverlay v-model="successOverlayOpen" />
     </div>
 </template>

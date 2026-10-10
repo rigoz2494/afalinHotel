@@ -21,7 +21,7 @@ class PricingPeriodResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function getModelLabel(): string
     {
@@ -40,7 +40,7 @@ class PricingPeriodResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('Landing page');
+        return __('Inventory Management');
     }
 
     public static function form(Schema $schema): Schema

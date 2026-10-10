@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomUnits\Schemas;
 
+use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Services\ImageOptimizer;
 use Filament\Forms\Components\CheckboxList;
@@ -26,7 +27,7 @@ class RoomUnitForm
                         Select::make('room_id')
                             ->label(__('Room type'))
                             ->relationship('room', 'id')
-                            ->getOptionLabelFromRecordUsing(fn (Room $room): string => $room->name['en'] ?? $room->name['ru'] ?? '—')
+                            ->getOptionLabelFromRecordUsing(fn (Room $room): string => HotelSetting::adminLabel($room->name))
                             ->searchable()
                             ->preload()
                             ->required(),

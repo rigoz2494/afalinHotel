@@ -49,6 +49,7 @@ class Room extends Model
         return [
             'name' => 'array',
             'description' => 'array',
+            'bed_type' => 'array',
             'amenities' => 'array',
             'images' => 'array',
             'is_active' => 'boolean',

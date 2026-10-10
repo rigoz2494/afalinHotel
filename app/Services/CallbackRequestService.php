@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class CallbackRequestService
 {
+    public function __construct(private HotelSettingService $settings) {}
+
     /**
      * Every price is derived from the database here, never trusted from the
      * browser — the client sends only IDs, quantities and a period name.
@@ -64,8 +66,25 @@ class CallbackRequestService
         ));
     }
 
+    /**
+     * When the admin has locked the site to a single language (see
+     * ManageHotelSettings' "Global Language Mode"), the matching currency
+     * is enforced here too, regardless of what the client sent — the same
+     * "never trust the browser" rule every other price in this class
+     * already follows.
+     */
     private function resolveCurrency(?string $code): Currency
     {
+        $forcedCode = match ($this->settings->all()['locale_mode'] ?? 'multilingual') {
+            'ru_only' => 'RUB',
+            'en_only' => 'USD',
+            default => null,
+        };
+
+        if ($forcedCode !== null) {
+            $code = $forcedCode;
+        }
+
         // Before any currency is configured, bookings are taken in USD at a rate of 1,
         // so a fresh install never rejects guests.
         if (! Currency::query()->exists()) {

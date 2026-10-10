@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomPrices\Schemas;
 
+use App\Models\HotelSetting;
 use App\Models\Room;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -22,7 +23,7 @@ class RoomPriceForm
                     // string, so `relationship()`'s title-attribute shortcut
                     // can't pluck it directly — the label is built by hand.
                     ->relationship('room', 'id')
-                    ->getOptionLabelFromRecordUsing(fn (Room $room): string => $room->name['en'] ?? $room->name['ru'] ?? '—')
+                    ->getOptionLabelFromRecordUsing(fn (Room $room): string => HotelSetting::adminLabel($room->name))
                     ->searchable()
                     ->preload()
                     ->required(),

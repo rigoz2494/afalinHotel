@@ -1,15 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import GalleryLightbox from '@/components/landing/GalleryLightbox.vue';
 import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
-import { galleryImages } from '@/data/landingMock';
-import type { HotelSettings } from '@/types/landing';
+import type { GalleryImage, HotelSettings } from '@/types/landing';
 
-defineProps<{ hotel: HotelSettings }>();
+const props = defineProps<{ hotel: HotelSettings; images: GalleryImage[] }>();
 const { t, locale } = useLocale();
 
+// GalleryLightbox and this grid both just need a plain display string, not
+// the raw {en, ru} pair — resolved once here, in the guest's own language.
+// `tall` isn't needed here: that was only ever for the old fixed-row grid's
+// row-span trick, and the masonry layout below flows each photo at its own
+// natural height instead.
+const displayImages = computed(() =>
+    props.images.map((image) => ({
+        src: image.src,
+        alt: localized(image.alt, locale.value),
+    })),
+);
+
 const lightboxIndex = ref<number | null>(null);
+
+// The three marketing badges (e.g. "20+ Years") — label and value are both
+// bilingual, set from Site Settings, not hardcoded on the page.
+const stats = computed(() =>
+    (['years', 'rooms', 'guests'] as const).map((key) => ({
+        key,
+        label: localized(props.hotel.about_stats[key].label, locale.value),
+        value: localized(props.hotel.about_stats[key].value, locale.value),
+    })),
+);
 </script>
 
 <template>
@@ -41,49 +62,40 @@ const lightboxIndex = ref<number | null>(null);
                 class="mt-6 grid grid-cols-3 gap-3 text-center sm:mt-8 sm:gap-4"
             >
                 <div
+                    v-for="stat in stats"
+                    :key="stat.key"
                     class="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4"
                 >
-                    <dt class="text-xs text-stone-300">{{ t('statYears') }}</dt>
+                    <dt class="text-xs text-stone-300">{{ stat.label }}</dt>
                     <dd
                         class="text-xl font-semibold text-amber-300 sm:text-2xl"
                     >
-                        20+
-                    </dd>
-                </div>
-                <div
-                    class="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4"
-                >
-                    <dt class="text-xs text-stone-300">{{ t('statRooms') }}</dt>
-                    <dd
-                        class="text-xl font-semibold text-amber-300 sm:text-2xl"
-                    >
-                        48
-                    </dd>
-                </div>
-                <div
-                    class="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4"
-                >
-                    <dt class="text-xs text-stone-300">
-                        {{ t('statGuests') }}
-                    </dt>
-                    <dd
-                        class="text-xl font-semibold text-amber-300 sm:text-2xl"
-                    >
-                        30k
+                        {{ stat.value }}
                     </dd>
                 </div>
             </dl>
         </div>
 
+        <!--
+            A native CSS multi-column flow, not a fixed-row grid: each photo
+            keeps its own natural aspect ratio and the columns stagger
+            organically, Pinterest-style, instead of every photo being
+            cropped to fit identical cells. `lg:overflow-y-auto` is the
+            fallback for the one place that matters — on `lg` the section
+            itself is pinned to exactly one screen (`lg:h-screen` plus
+            `overflow-hidden`), and unlike a fixed-row grid, a masonry
+            column's total height isn't guaranteed to fit that; below `lg`
+            the section already grows with the page, so there's nothing to
+            contain.
+        -->
         <div
-            class="relative z-10 grid auto-rows-[140px] grid-cols-2 gap-3 sm:auto-rows-[170px] lg:col-span-3 lg:h-full lg:auto-rows-auto lg:grid-cols-3 lg:grid-rows-2"
+            class="relative z-10 columns-1 gap-4 sm:columns-2 lg:col-span-3 lg:h-full lg:columns-3 lg:overflow-y-auto"
         >
             <button
-                v-for="(image, index) in galleryImages"
+                v-for="(image, index) in displayImages"
                 :key="image.src"
                 type="button"
-                class="group relative min-h-0 cursor-zoom-in overflow-hidden rounded-xl"
-                :class="image.tall ? 'row-span-2' : ''"
+                class="group mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-xl"
                 :aria-label="t('openPhoto', { alt: image.alt })"
                 @click="lightboxIndex = index"
             >
@@ -92,16 +104,11 @@ const lightboxIndex = ref<number | null>(null);
                     :alt="image.alt"
                     loading="lazy"
                     decoding="async"
-                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    class="h-auto w-full object-contain transition duration-500 group-hover:scale-105"
                 />
-                <span
-                    class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-left text-xs text-white sm:p-3 sm:text-sm"
-                >
-                    {{ image.alt }}
-                </span>
             </button>
         </div>
 
-        <GalleryLightbox v-model="lightboxIndex" :images="galleryImages" />
+        <GalleryLightbox v-model="lightboxIndex" :images="displayImages" />
     </section>
 </template>

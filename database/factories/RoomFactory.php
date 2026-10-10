@@ -23,7 +23,12 @@ class RoomFactory extends Factory
             'slug' => Str::slug($name),
             'description' => ['en' => fake()->paragraph(), 'ru' => fake()->paragraph()],
             'capacity' => fake()->numberBetween(1, 4),
-            'bed_type' => fake()->randomElement(['King', 'Queen', 'Twin', 'Double']),
+            'bed_type' => fake()->randomElement([
+                ['en' => 'King', 'ru' => 'Кровать king-size'],
+                ['en' => 'Queen', 'ru' => 'Кровать queen-size'],
+                ['en' => 'Twin', 'ru' => 'Раздельные кровати'],
+                ['en' => 'Double', 'ru' => 'Двуспальная кровать'],
+            ]),
             'amenities' => ['double_bed', 'wardrobe', 'tv', 'ac'],
             'images' => [],
             'base_price' => fake()->numberBetween(80, 500),

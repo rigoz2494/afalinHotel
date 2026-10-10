@@ -40,7 +40,7 @@ class RoomResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('Landing page');
+        return __('Inventory Management');
     }
 
     public static function form(Schema $schema): Schema

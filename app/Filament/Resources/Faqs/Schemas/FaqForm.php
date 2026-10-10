@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Faqs\Schemas;
 
+use App\Models\HotelSetting;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,29 +16,58 @@ class FaqForm
     {
         return $schema
             ->components([
-                TextInput::make('question')
-                    ->label(__('Question'))
-                    ->required()
-                    ->maxLength(200)
-                    ->columnSpanFull(),
-                Textarea::make('answer')
-                    ->label(__('Answer'))
-                    ->required()
-                    ->rows(4)
-                    ->columnSpanFull(),
-
-                Section::make(__('Russian translation'))
-                    ->description(__('Shown to guests browsing the site in Russian. Type a question and answer in either language above, then click "Auto-Translate" to fill in the other — it detects which language you wrote, so it works either way. Review before saving. Left blank, the English text is shown instead.'))
-                    ->schema([
+                ...(HotelSetting::restrictedLocale() === 'ru'
+                    // The Russian pair stands in as the only "Question"/"Answer"
+                    // fields; the English pair is preserved untouched via Hidden
+                    // rather than shown (or lost) here.
+                    ? [
                         TextInput::make('question_ru')
-                            ->label(__('Question (Russian)'))
+                            ->label(__('Question'))
+                            ->required()
                             ->maxLength(200)
                             ->columnSpanFull(),
                         Textarea::make('answer_ru')
-                            ->label(__('Answer (Russian)'))
+                            ->label(__('Answer'))
+                            ->required()
                             ->rows(4)
                             ->columnSpanFull(),
-                    ]),
+                        Hidden::make('question'),
+                        Hidden::make('answer'),
+                    ]
+                    : [
+                        TextInput::make('question')
+                            ->label(__('Question'))
+                            ->required()
+                            ->maxLength(200)
+                            ->columnSpanFull(),
+                        Textarea::make('answer')
+                            ->label(__('Answer'))
+                            ->required()
+                            ->rows(4)
+                            ->columnSpanFull(),
+                    ]
+                ),
+
+                ...(HotelSetting::restrictedLocale() === null
+                    ? [
+                        Section::make(__('Russian translation'))
+                            ->description(__('Shown to guests browsing the site in Russian. Type a question and answer in either language above, then click "Auto-Translate" to fill in the other — it detects which language you wrote, so it works either way. Review before saving. Left blank, the English text is shown instead.'))
+                            ->schema([
+                                TextInput::make('question_ru')
+                                    ->label(__('Question (Russian)'))
+                                    ->maxLength(200)
+                                    ->columnSpanFull(),
+                                Textarea::make('answer_ru')
+                                    ->label(__('Answer (Russian)'))
+                                    ->rows(4)
+                                    ->columnSpanFull(),
+                            ]),
+                    ]
+                    : (HotelSetting::restrictedLocale() === 'en'
+                        ? [Hidden::make('question_ru'), Hidden::make('answer_ru')]
+                        : []
+                    )
+                ),
 
                 TextInput::make('sort_order')
                     ->label(__('Display order'))

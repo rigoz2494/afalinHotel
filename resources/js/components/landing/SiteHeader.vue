@@ -11,6 +11,8 @@ const props = defineProps<{
     hotelName: string | null;
     links: { id: string; label: string }[];
     activeId: string;
+    /** False in a strict "Global Language Mode" — see Landing.vue. */
+    showLocalizationControls: boolean;
 }>();
 
 const emit = defineEmits<{ navigate: [id: string] }>();
@@ -98,6 +100,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 </nav>
 
                 <div
+                    v-if="showLocalizationControls"
                     class="hidden shrink-0 items-center gap-1.5 sm:flex"
                     :aria-label="t('localizationControls')"
                 >
@@ -158,6 +161,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                             {{ t('menuLabel') }}
                         </p>
                         <div
+                            v-if="showLocalizationControls"
                             class="mb-4 flex items-center gap-1.5"
                             :aria-label="t('localizationControls')"
                         >

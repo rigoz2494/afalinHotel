@@ -47,6 +47,20 @@ class ImageOptimizerTest extends TestCase
         $this->assertSame(300, $size[1]);
     }
 
+    public function test_a_filename_hint_is_slugged_into_the_stored_path(): void
+    {
+        Storage::fake('public');
+
+        $path = app(ImageOptimizer::class)->storeAsWebp(
+            UploadedFile::fake()->image('small.jpg', 400, 300),
+            'rooms',
+            1200,
+            'Bath.jpg',
+        );
+
+        $this->assertStringStartsWith('rooms/bathjpg-', $path);
+    }
+
     public function test_unreadable_files_are_rejected(): void
     {
         Storage::fake('public');

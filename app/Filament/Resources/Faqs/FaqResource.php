@@ -21,7 +21,7 @@ class FaqResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 2;
 
     public static function getModelLabel(): string
     {
@@ -40,7 +40,7 @@ class FaqResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('Landing page');
+        return __('Site Content');
     }
 
     public static function form(Schema $schema): Schema

@@ -1,7 +1,10 @@
 export type HotelSettings = {
     // Both languages are always present, like section_headings below.
     hotel_name: { en: string; ru: string };
-    tagline: string | null;
+    // null when the admin hasn't set one in either language; once any text
+    // is set, both keys are present — see normalizedPromoBanner's `localized()`
+    // note just below, which applies the same way here.
+    tagline: { en: string | null; ru: string | null } | null;
     // null hides the banner entirely; once any text is set, both keys are
     // present — see the `localized()` helper for the "ru falls back to en"
     // behavior if only one language was filled in.
@@ -10,6 +13,20 @@ export type HotelSettings = {
     contacts: Record<string, string>;
     // Both languages are always present; see the `localized()` helper.
     section_headings: Record<string, { en: string; ru: string }>;
+    // The three About Us marketing badges (e.g. "20+ Years"). Both label
+    // and value are bilingual, like section_headings above.
+    about_stats: Record<
+        'years' | 'rooms' | 'guests',
+        {
+            label: { en: string; ru: string };
+            value: { en: string; ru: string };
+        }
+    >;
+    // 'multilingual' (default) lets guests choose; 'ru_only'/'en_only'
+    // locks the whole site to one language and currency — see
+    // SiteHeader.vue (hides the switchers) and useLocale.ts (forces the
+    // active locale).
+    locale_mode: 'multilingual' | 'ru_only' | 'en_only';
 };
 
 export type Room = {
@@ -22,7 +39,8 @@ export type Room = {
     base_price: number | string;
     amenities: {
         capacity: number;
-        bed_type: string;
+        // Both languages are always present, like Room.name above.
+        bed_type: { en: string; ru: string };
         // A fixed vocabulary of tags (see Room::AMENITY_TAGS on the
         // backend), each rendered as one icon + bilingual label — see
         // the `amenity*` keys in useLocale.ts.
@@ -79,6 +97,15 @@ export type FaqItem = {
     // Admin-entered via the "Translate to Russian" action; null until set.
     question_ru?: string | null;
     answer_ru?: string | null;
+};
+
+/** A real hotel photo in the site-wide gallery (About section). */
+export type GalleryImage = {
+    src: string;
+    // Both languages are always present, like Room.name above.
+    alt: { en: string | null; ru: string | null };
+    // A portrait-oriented photo spans two grid rows on the masonry layout.
+    tall: boolean;
 };
 
 export type CurrencyOption = {

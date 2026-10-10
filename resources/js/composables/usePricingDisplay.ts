@@ -46,12 +46,37 @@ export const cellPrice = (row: PricingRow, column: PricingColumn): number => {
 export const isDeal = (row: PricingRow, column: PricingColumn): boolean =>
     cellPrice(row, column) < Number(row.base_price);
 
-/** The total saving versus the room's base price, for the offer badge. */
+/**
+ * The badge's "N% off" figure. When the admin set an explicit promo
+ * discount, this is exactly that number — never re-derived from a price
+ * ratio, which silently breaks whenever the cell's own regular rate
+ * (`rawPrice`) differs from the room's flat `base_price` (e.g. a
+ * price_override cell): a 50% discount on a 5700 override (base price
+ * 4700) would otherwise measure as (5700*0.5)/4700 ≈ 39% off base_price,
+ * instead of the 50% the admin actually set and the guest is actually
+ * charged. Only a pure season-modifier markdown — a deal with no explicit
+ * discount at all — has no stored percentage to report directly, so that
+ * one case alone still falls back to the price-ratio calculation.
+ */
 export const percentOffBase = (
     row: PricingRow,
     column: PricingColumn,
-): number =>
-    Math.round(100 - (cellPrice(row, column) / Number(row.base_price)) * 100);
+): number => {
+    const explicitDiscount = row.monthly_discounts?.[column.id];
+
+    // A negative value is a markup (see RoomPriceForm's helper text), not a
+    // discount — showing it directly on a "deal" badge would be nonsensical,
+    // so that case (and the undefined/zero case) falls through to the
+    // ratio below, which reflects whatever combination of factors actually
+    // produced a lower price.
+    if (explicitDiscount && explicitDiscount > 0) {
+        return explicitDiscount;
+    }
+
+    return Math.round(
+        100 - (cellPrice(row, column) / Number(row.base_price)) * 100,
+    );
+};
 
 /** The column with the lowest final price for a row, for a "from" teaser price. */
 export const cheapestColumn = (

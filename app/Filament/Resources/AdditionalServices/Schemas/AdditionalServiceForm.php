@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AdditionalServices\Schemas;
 
 use App\Models\Currency;
+use App\Models\HotelSetting;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -19,25 +21,37 @@ class AdditionalServiceForm
                 Section::make(__('Service'))
                     ->columns(2)
                     ->schema([
-                        Tabs::make('name_locale')
-                            ->label(__('Name'))
-                            ->columnSpanFull()
-                            ->tabs([
-                                Tab::make(__('English'))
-                                    ->schema([
-                                        TextInput::make('name.en')
-                                            ->label(__('Name'))
-                                            ->required()
-                                            ->maxLength(100),
+                        ...((($restricted = HotelSetting::restrictedLocale()) !== null)
+                            ? [
+                                TextInput::make("name.{$restricted}")
+                                    ->label(__('Name'))
+                                    ->required()
+                                    ->maxLength(100)
+                                    ->columnSpanFull(),
+                                Hidden::make('name.'.($restricted === 'en' ? 'ru' : 'en')),
+                            ]
+                            : [
+                                Tabs::make('name_locale')
+                                    ->label(__('Name'))
+                                    ->columnSpanFull()
+                                    ->tabs([
+                                        Tab::make(__('English'))
+                                            ->schema([
+                                                TextInput::make('name.en')
+                                                    ->label(__('Name'))
+                                                    ->required()
+                                                    ->maxLength(100),
+                                            ]),
+                                        Tab::make(__('Russian'))
+                                            ->schema([
+                                                TextInput::make('name.ru')
+                                                    ->label(__('Name'))
+                                                    ->required()
+                                                    ->maxLength(100),
+                                            ]),
                                     ]),
-                                Tab::make(__('Russian'))
-                                    ->schema([
-                                        TextInput::make('name.ru')
-                                            ->label(__('Name'))
-                                            ->required()
-                                            ->maxLength(100),
-                                    ]),
-                            ]),
+                            ]
+                        ),
                         TextInput::make('price')
                             ->label(__('Price'))
                             ->helperText(__('A flat price — not seasonal, unlike the rooms in the pricing matrix.'))

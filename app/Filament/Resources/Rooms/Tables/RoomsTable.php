@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Rooms\Tables;
 
 use App\Models\Currency;
+use App\Models\HotelSetting;
 use App\Models\Room;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -34,11 +35,12 @@ class RoomsTable
                     // string "Standard Double Room", then again with
                     // "Стандарт...", never with the array itself. This
                     // computes the display string directly instead.
-                    ->getStateUsing(fn (Room $record): string => $record->name['en'] ?? $record->name['ru'] ?? '—')
+                    ->getStateUsing(fn (Room $record): string => HotelSetting::adminLabel($record->name))
                     ->sortable(),
                 TextColumn::make('bed_type')
                     ->label(__('Bed'))
-                    ->searchable(),
+                    // See the identical comment above for `name`.
+                    ->getStateUsing(fn (Room $record): string => HotelSetting::adminLabel($record->bed_type)),
                 TextColumn::make('capacity')
                     ->label(__('Guests'))
                     ->numeric()

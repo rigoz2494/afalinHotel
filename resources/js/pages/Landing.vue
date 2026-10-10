@@ -16,6 +16,7 @@ import SideNavDots from '@/components/landing/SideNavDots.vue';
 import {
     faqItems as mockFaqItems,
     mockAdditionalServices,
+    mockGalleryImages,
     mockHotel,
     mockPricing,
     mockRooms,
@@ -29,6 +30,7 @@ import type {
     AdditionalService,
     CurrencyOption,
     FaqItem,
+    GalleryImage,
     HotelSettings,
     PricingTable,
     Room,
@@ -40,6 +42,7 @@ const props = defineProps<{
     rooms: { data: Room[] };
     faqs: { data: FaqItem[] };
     additionalServices: { data: AdditionalService[] };
+    gallery: { data: GalleryImage[] };
     pricing: {
         columns: PricingTable['columns'];
         rows: { data: PricingTable['rows'] };
@@ -61,7 +64,9 @@ const hotel = ref<HotelSettings>({
             Array.isArray(value) ? value.length > 0 : value,
         ),
     ),
-    // An empty banner in the database means "no promo", not "use the mock".
+    // An unset tagline/banner in the database means "show nothing there",
+    // not "use the mock" — same reasoning for both.
+    tagline: isHotelSeeded ? (props.hotel.tagline ?? null) : mockHotel.tagline,
     promo_banner: isHotelSeeded
         ? (props.hotel.promo_banner ?? null)
         : mockHotel.promo_banner,
@@ -89,11 +94,30 @@ const additionalServices = ref<AdditionalService[]>(
         ? props.additionalServices.data
         : mockAdditionalServices,
 );
+const gallery = ref<GalleryImage[]>(
+    props.gallery.data.length ? props.gallery.data : mockGalleryImages,
+);
 
 provideCurrency(() => props.currencies);
 provideHotelSettings(hotel);
 provideAdditionalServices(additionalServices);
-const { t, locale } = provideLocale();
+// A strict "Global Language Mode" (see ManageHotelSettings) pins the whole
+// site to one language, overriding whatever the guest had chosen before.
+const forcedLocale = computed(() => {
+    if (hotel.value.locale_mode === 'ru_only') {
+        return 'ru' as const;
+    }
+
+    if (hotel.value.locale_mode === 'en_only') {
+        return 'en' as const;
+    }
+
+    return undefined;
+});
+const { t, locale } = provideLocale(forcedLocale.value);
+const showLocalizationControls = computed(
+    () => hotel.value.locale_mode === 'multilingual',
+);
 
 // Reactive, so the nav labels translate instantly when the locale changes.
 // These are short, fixed UI-dictionary labels, not the admin-edited section
@@ -135,19 +159,25 @@ const focusRoom = computed(() =>
 const hotelName = computed(() =>
     localized(hotel.value.hotel_name, locale.value),
 );
+// Empty when the admin hasn't set a tagline in the guest's language (or at
+// all) — `localized()` already falls back between languages the same way
+// it does for every other bilingual field.
+const taglineText = computed(() =>
+    localized(hotel.value.tagline, locale.value),
+);
 // Fully self-contained: used for the <title> tag as well as og:title and
 // twitter:title. app.ts's title() callback is a pass-through, not a brand
 // suffix, specifically so this can't double up into "Room — Afalina - Afalina".
 const seoTitle = computed(() =>
     focusRoom.value
         ? `${localized(focusRoom.value.name, locale.value)} — ${hotelName.value}`
-        : `${hotelName.value}${hotel.value.tagline ? ` — ${hotel.value.tagline}` : ''}`,
+        : `${hotelName.value}${taglineText.value ? ` — ${taglineText.value}` : ''}`,
 );
 const seoDescription = computed(
     () =>
         (focusRoom.value &&
             localized(focusRoom.value.description, locale.value)) ||
-        hotel.value.tagline ||
+        taglineText.value ||
         t('metaDefaultDescription', { hotel: hotelName.value }),
 );
 const seoImage = computed(
@@ -196,6 +226,7 @@ onMounted(() => {
             :hotel-name="hotelName"
             :links="navLinks"
             :active-id="activeId"
+            :show-localization-controls="showLocalizationControls"
             @navigate="scrollTo"
         />
         <main
@@ -214,7 +245,7 @@ onMounted(() => {
                 :pricing="pricing"
                 :additional-services="additionalServices"
             />
-            <AboutSection :hotel="hotel" />
+            <AboutSection :hotel="hotel" :images="gallery" />
             <FaqSection :hotel="hotel" :faqs="faqs" />
             <ContactSection :hotel="hotel" />
         </main>

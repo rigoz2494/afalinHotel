@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomUnits\Tables;
 
+use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Models\RoomUnit;
 use Filament\Actions\BulkActionGroup;
@@ -30,7 +31,7 @@ class RoomUnitsTable
                     // See the identical comment in RoomsTable.php:
                     // formatStateUsing() is called once per element for an
                     // array-cast attribute, not once with the {en, ru} pair.
-                    ->getStateUsing(fn (RoomUnit $record): string => $record->room->name['en'] ?? $record->room->name['ru'] ?? '—')
+                    ->getStateUsing(fn (RoomUnit $record): string => HotelSetting::adminLabel($record->room->name))
                     ->sortable(),
                 TextColumn::make('number')
                     ->label(__('Number'))
@@ -53,7 +54,7 @@ class RoomUnitsTable
                 SelectFilter::make('room')
                     ->label(__('Room type'))
                     ->options(fn (): array => Room::query()->ordered()->get()
-                        ->mapWithKeys(fn (Room $room): array => [$room->id => $room->name['en'] ?? $room->name['ru'] ?? '—'])
+                        ->mapWithKeys(fn (Room $room): array => [$room->id => HotelSetting::adminLabel($room->name)])
                         ->all())
                     ->searchable()
                     ->preload(),

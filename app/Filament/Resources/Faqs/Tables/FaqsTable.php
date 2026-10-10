@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Faqs\Tables;
 
 use App\Models\Faq;
+use App\Models\HotelSetting;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -20,6 +21,16 @@ class FaqsTable
             ->columns([
                 TextColumn::make('question')
                     ->label(__('Question'))
+                    // In Strict Russian mode this listing is the only place
+                    // a non-English-reading admin sees FAQs at a glance, so
+                    // it shows the Russian translation when there is one —
+                    // the Edit form already does; this table just didn't.
+                    // Multilingual and Strict English modes are unchanged:
+                    // the baseline English question, with the "Russian"
+                    // column beside it showing translation status.
+                    ->getStateUsing(fn (Faq $record): string => HotelSetting::restrictedLocale() === 'ru'
+                        ? ($record->question_ru ?? $record->question)
+                        : $record->question)
                     ->limit(60)
                     ->searchable(),
                 IconColumn::make('question_ru')

@@ -1,9 +1,70 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { usePreloader } from '@/composables/usePreloader';
 import { useLocale } from '@/composables/useLocale';
 
 const { isLoading, releaseInput } = usePreloader();
-const { t } = useLocale();
+const { t, locale } = useLocale();
+
+// Witty, premium micro-copy — purely decorative, never a real progress
+// report — cycled underneath the logo while the preloader is up.
+const MICRO_COPY: { en: string; ru: string }[] = [
+    { en: 'Feeding the resort dolphins…', ru: 'Кормим дельфинов…' },
+    {
+        en: 'Ironing the crisp white linens…',
+        ru: 'Гладим белоснежные простыни…',
+    },
+    {
+        en: 'Polishing welcome crystal glasses…',
+        ru: 'Натираем бокалы до идеального блеска…',
+    },
+    {
+        en: 'Chilling the complimentary champagne…',
+        ru: 'Охлаждаем шампанское для вашего заезда…',
+    },
+    {
+        en: 'Hiding beautiful seashells along the shore…',
+        ru: 'Прячем самые красивые ракушки на пляже…',
+    },
+];
+const COPY_INTERVAL_MS = 1800;
+
+// A random index, never the same one twice in a row — so a reload doesn't
+// always greet guests with the same opening phrase, and the loop doesn't
+// visibly repeat itself every cycle.
+const randomCopyIndex = (exclude?: number): number => {
+    if (MICRO_COPY.length <= 1) {
+        return 0;
+    }
+
+    let next = Math.floor(Math.random() * MICRO_COPY.length);
+
+    while (next === exclude) {
+        next = Math.floor(Math.random() * MICRO_COPY.length);
+    }
+
+    return next;
+};
+
+const copyIndex = ref(randomCopyIndex());
+const currentCopy = computed(() => MICRO_COPY[copyIndex.value][locale.value]);
+
+let copyTimer: ReturnType<typeof setInterval> | undefined;
+
+onMounted(() => {
+    // A guest who asked for less motion gets one calm phrase, not a cycle.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    copyTimer = setInterval(() => {
+        copyIndex.value = randomCopyIndex(copyIndex.value);
+    }, COPY_INTERVAL_MS);
+});
+
+onBeforeUnmount(() => {
+    clearInterval(copyTimer);
+});
 </script>
 
 <template>
@@ -22,11 +83,27 @@ const { t } = useLocale();
                 class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950 to-amber-950/60"
                 aria-hidden="true"
             ></div>
-            <img
-                src="/images/hotel-logo.svg"
-                alt=""
-                class="preloader-logo relative h-24 w-auto sm:h-32 md:h-40"
-            />
+            <div class="relative flex flex-col items-center gap-5 sm:gap-6">
+                <img
+                    src="/images/hotel-logo.svg"
+                    alt=""
+                    class="preloader-logo h-24 w-auto sm:h-32 md:h-40"
+                />
+                <Transition
+                    mode="out-in"
+                    enter-active-class="transition-opacity duration-500 ease-in-out"
+                    enter-from-class="opacity-0"
+                    leave-active-class="transition-opacity duration-500 ease-in-out"
+                    leave-to-class="opacity-0"
+                >
+                    <p
+                        :key="copyIndex"
+                        class="px-6 text-center text-xs font-medium tracking-[0.2em] text-amber-200/80 uppercase sm:text-sm"
+                    >
+                        {{ currentCopy }}
+                    </p>
+                </Transition>
+            </div>
         </div>
     </Transition>
 </template>
