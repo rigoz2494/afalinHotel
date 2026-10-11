@@ -1,53 +1,40 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { usePreloader } from '@/composables/usePreloader';
+import { useHotelSettings } from '@/composables/useHotelSettings';
 import { useLocale } from '@/composables/useLocale';
 
 const { isLoading, releaseInput } = usePreloader();
 const { t, locale } = useLocale();
+const hotel = useHotelSettings();
 
 // Witty, premium micro-copy — purely decorative, never a real progress
-// report — cycled underneath the logo while the preloader is up.
-const MICRO_COPY: { en: string; ru: string }[] = [
-    { en: 'Feeding the resort dolphins…', ru: 'Кормим дельфинов…' },
-    {
-        en: 'Ironing the crisp white linens…',
-        ru: 'Гладим белоснежные простыни…',
-    },
-    {
-        en: 'Polishing welcome crystal glasses…',
-        ru: 'Натираем бокалы до идеального блеска…',
-    },
-    {
-        en: 'Chilling the complimentary champagne…',
-        ru: 'Охлаждаем шампанское для вашего заезда…',
-    },
-    {
-        en: 'Hiding beautiful seashells along the shore…',
-        ru: 'Прячем самые красивые ракушки на пляже…',
-    },
-];
+// report — cycled underneath the logo while the preloader is up. Admin-
+// managed (Site Settings → Preloader Loading Phrases), not hardcoded.
+const microCopy = computed(() => hotel.value.preloader_phrases);
 const COPY_INTERVAL_MS = 1800;
 
 // A random index, never the same one twice in a row — so a reload doesn't
 // always greet guests with the same opening phrase, and the loop doesn't
 // visibly repeat itself every cycle.
 const randomCopyIndex = (exclude?: number): number => {
-    if (MICRO_COPY.length <= 1) {
+    if (microCopy.value.length <= 1) {
         return 0;
     }
 
-    let next = Math.floor(Math.random() * MICRO_COPY.length);
+    let next = Math.floor(Math.random() * microCopy.value.length);
 
     while (next === exclude) {
-        next = Math.floor(Math.random() * MICRO_COPY.length);
+        next = Math.floor(Math.random() * microCopy.value.length);
     }
 
     return next;
 };
 
 const copyIndex = ref(randomCopyIndex());
-const currentCopy = computed(() => MICRO_COPY[copyIndex.value][locale.value]);
+const currentCopy = computed(
+    () => microCopy.value[copyIndex.value]?.[locale.value] ?? '',
+);
 
 let copyTimer: ReturnType<typeof setInterval> | undefined;
 

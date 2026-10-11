@@ -36,7 +36,7 @@ class RoomSeeder extends Seeder
         // price otherwise.
         $rooms = [
             [
-                'slug' => 'standard-double-room',
+                'slug' => 'standart-odnokomnatnyj-2-h-mestnyj',
                 'name' => ['en' => 'Standard Double Room', 'ru' => 'Стандарт однокомнатный 2-х местный'],
                 'description' => [
                     'en' => 'A cozy one-room suite for two guests, equipped with everything needed for a comfortable stay by the sea.',
@@ -49,7 +49,7 @@ class RoomSeeder extends Seeder
                 'overrides' => [],
             ],
             [
-                'slug' => 'twin-beds-standard-room',
+                'slug' => 'standart-odnokomnatnyj-2-h-mestnyj-razdelnye-krovati',
                 'name' => ['en' => 'Twin Beds Standard Room', 'ru' => 'Стандарт однокомнатный 2-х местный (раздельные кровати)'],
                 'description' => [
                     'en' => 'A comfortable one-room suite with separate beds, ideal for friends or colleagues.',
@@ -62,7 +62,7 @@ class RoomSeeder extends Seeder
                 'overrides' => [2 => '5700', 3 => '6200', 4 => '5700'],
             ],
             [
-                'slug' => 'extended-triple-room',
+                'slug' => 'rasshirennyj-odnokomnatnyj-3-h-mestnyj',
                 'name' => ['en' => 'Extended Triple Room', 'ru' => 'Расширенный однокомнатный 3-х местный'],
                 'description' => [
                     'en' => 'A spacious one-room suite with an extra bed, perfect for a small family.',
@@ -75,7 +75,7 @@ class RoomSeeder extends Seeder
                 'overrides' => [2 => '6500', 3 => '7500', 4 => '6500'],
             ],
             [
-                'slug' => 'family-two-room-triple',
+                'slug' => 'semejnyj-dvuhkomnatnyj-3-h-mestnyj',
                 'name' => ['en' => 'Family Two-Room Triple', 'ru' => 'Семейный двухкомнатный 3-х местный'],
                 'description' => [
                     'en' => 'A two-room suite creating the perfect conditions for a private, peaceful family stay.',
@@ -88,7 +88,7 @@ class RoomSeeder extends Seeder
                 'overrides' => [2 => '8500', 3 => '9500', 4 => '8500'],
             ],
             [
-                'slug' => 'luxury-two-room-triple',
+                'slug' => 'lyuks-dvuhkomnatnyj-3-h-mestnyj',
                 'name' => ['en' => 'Luxury Two-Room Triple', 'ru' => 'Люкс двухкомнатный 3-х местный'],
                 'description' => [
                     'en' => 'A premium two-room suite of enhanced comfort, with elegant furniture for an unforgettable stay.',

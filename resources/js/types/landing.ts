@@ -22,6 +22,13 @@ export type HotelSettings = {
             value: { en: string; ru: string };
         }
     >;
+    // The About Us section's own story text. A blank line between
+    // paragraphs in the admin's text starts a new one on the page — see
+    // the `localized()` helper.
+    about_story: { en: string; ru: string };
+    // The preloader's playful, purely decorative status phrases — one is
+    // picked at random on every load, never the same one twice in a row.
+    preloader_phrases: { en: string; ru: string }[];
     // 'multilingual' (default) lets guests choose; 'ru_only'/'en_only'
     // locks the whole site to one language and currency — see
     // SiteHeader.vue (hides the switchers) and useLocale.ts (forces the

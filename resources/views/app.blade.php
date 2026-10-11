@@ -11,8 +11,15 @@
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+        {{--
+            A generic/English placeholder here (e.g. the raw APP_NAME env
+            value) is what a guest would briefly see before Inertia's own
+            <Head> component — which picks the brand name in their actual
+            language — takes over. Hardcoded to the real brand name so
+            there's never an English flash for a Russian guest.
+        --}}
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>Афалина</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

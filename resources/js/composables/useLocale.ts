@@ -131,14 +131,6 @@ const translations = {
     addOneMore: { en: 'Add one more', ru: 'Добавить ещё' },
 
     // About
-    aboutBioOne: {
-        en: '{hotel} opened its doors with a simple idea: every guest should feel like a welcome friend. For over two decades our team has combined warm, attentive service with calm, thoughtfully designed spaces.',
-        ru: '{hotel} открыл свои двери с простой идеей: каждый гость должен чувствовать себя как дома. Уже более двадцати лет наша команда сочетает тёплый, внимательный сервис со спокойными, продуманными пространствами.',
-    },
-    aboutBioTwo: {
-        en: 'From the sunlit lobby to the poolside terrace and our seasonal restaurant, every corner of the grounds is made for slowing down and enjoying your stay.',
-        ru: 'От светлого лобби до террасы у бассейна и сезонного ресторана — каждый уголок создан для того, чтобы вы могли отдохнуть и насладиться пребыванием.',
-    },
     openPhoto: { en: 'Open photo: {alt}', ru: 'Открыть фото: {alt}' },
 
     // Contact

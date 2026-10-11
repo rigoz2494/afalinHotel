@@ -51,6 +51,32 @@ class HotelSetting extends Model
     ];
 
     /**
+     * The About Us section's own story text, in each supported language —
+     * two paragraphs, separated by a blank line (see `localized()` on the
+     * frontend, which splits on that to render each as its own <p>).
+     *
+     * @var array<string, string>
+     */
+    public const array DEFAULT_ABOUT_STORY = [
+        'en' => "Afalina opened its doors with a simple idea: every guest should feel like a welcome friend. For over two decades our team has combined warm, attentive service with calm, thoughtfully designed spaces.\n\nFrom the sunlit lobby to the poolside terrace and our seasonal restaurant, every corner of the grounds is made for slowing down and enjoying your stay.",
+        'ru' => "Афалина открыла свои двери с простой идеей: каждый гость должен чувствовать себя как дома. Уже более двадцати лет наша команда сочетает тёплый, внимательный сервис со спокойными, продуманными пространствами.\n\nОт светлого лобби до террасы у бассейна и сезонного ресторана — каждый уголок создан для того, чтобы вы могли отдохнуть и насладиться пребыванием.",
+    ];
+
+    /**
+     * The playful, purely decorative status phrases the preloader cycles
+     * through while the page loads — never a real progress report.
+     *
+     * @var array<int, array<string, string>>
+     */
+    public const array DEFAULT_PRELOADER_PHRASES = [
+        ['en' => 'Feeding the resort dolphins…', 'ru' => 'Кормим дельфинов…'],
+        ['en' => 'Ironing the crisp white linens…', 'ru' => 'Гладим белоснежные простыни…'],
+        ['en' => 'Polishing welcome crystal glasses…', 'ru' => 'Натираем бокалы до идеального блеска…'],
+        ['en' => 'Chilling the complimentary champagne…', 'ru' => 'Охлаждаем шампанское для вашего заезда…'],
+        ['en' => 'Hiding beautiful seashells along the shore…', 'ru' => 'Прячем самые красивые ракушки на пляже…'],
+    ];
+
+    /**
      * The "Global Language Mode" set in Site Settings — 'multilingual'
      * (default), 'ru_only' or 'en_only'. Read directly from the key/value
      * store rather than through HotelSettingService, so it's usable from
@@ -171,6 +197,51 @@ class HotelSetting extends Model
         }
 
         return $name;
+    }
+
+    /**
+     * Fills in whichever language the admin hasn't set yet with the default
+     * story text, the same way {@see defaultedHotelName()} does for the
+     * brand name. Both languages are always returned, in full.
+     *
+     * @return array<string, string>
+     */
+    public static function defaultedAboutStory(mixed $stored): array
+    {
+        $story = self::DEFAULT_ABOUT_STORY;
+
+        if (! is_array($stored)) {
+            return $story;
+        }
+
+        foreach (array_filter($stored) as $locale => $localizedValue) {
+            $story[$locale] = $localizedValue;
+        }
+
+        return $story;
+    }
+
+    /**
+     * The preloader's playful status phrases are a plain list the admin
+     * can freely add to, edit or remove from — unlike the fixed-key
+     * defaults above, there's nothing to merge per item. Falls back to the
+     * default set only when nothing usable was ever saved, since an empty
+     * list would leave the preloader with no text to show at all.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public static function defaultedPreloaderPhrases(mixed $stored): array
+    {
+        if (! is_array($stored)) {
+            return self::DEFAULT_PRELOADER_PHRASES;
+        }
+
+        $phrases = array_values(array_filter(
+            $stored,
+            fn (mixed $phrase): bool => is_array($phrase) && (filled($phrase['en'] ?? null) || filled($phrase['ru'] ?? null)),
+        ));
+
+        return $phrases === [] ? self::DEFAULT_PRELOADER_PHRASES : $phrases;
     }
 
     /**

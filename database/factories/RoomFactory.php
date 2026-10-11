@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Room;
+use App\Services\TransliterationService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -20,7 +21,7 @@ class RoomFactory extends Factory
 
         return [
             'name' => ['en' => Str::title($name), 'ru' => Str::title($name)],
-            'slug' => Str::slug($name),
+            'slug' => app(TransliterationService::class)->slug($name),
             'description' => ['en' => fake()->paragraph(), 'ru' => fake()->paragraph()],
             'capacity' => fake()->numberBetween(1, 4),
             'bed_type' => fake()->randomElement([

@@ -45,6 +45,12 @@ class HotelSettingsResource extends JsonResource
             // The three About Us marketing badges (label + value, each
             // bilingual) — see HotelSetting::defaultedAboutStats().
             'about_stats' => HotelSetting::defaultedAboutStats($this->resource['about_stats'] ?? []),
+            // The About Us section's own story text, both languages always
+            // sent — see HotelSetting::defaultedAboutStory().
+            'about_story' => HotelSetting::defaultedAboutStory($this->resource['about_story'] ?? null),
+            // The preloader's playful status phrases — see
+            // HotelSetting::defaultedPreloaderPhrases().
+            'preloader_phrases' => HotelSetting::defaultedPreloaderPhrases($this->resource['preloader_phrases'] ?? null),
             // 'multilingual' (default), 'ru_only' or 'en_only' — see
             // CallbackRequestService::resolveCurrency() for the matching
             // server-side currency lock.

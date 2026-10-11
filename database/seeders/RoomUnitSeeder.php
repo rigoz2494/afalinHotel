@@ -33,11 +33,11 @@ class RoomUnitSeeder extends Seeder
      * @var array<string, string>
      */
     private const array CATEGORY_FOLDERS = [
-        '1k standar' => 'standard-double-room',
-        '1k standart_seporated' => 'twin-beds-standard-room',
-        '1k widened' => 'extended-triple-room',
-        '2k family' => 'family-two-room-triple',
-        '2k suite' => 'luxury-two-room-triple',
+        '1k standar' => 'standart-odnokomnatnyj-2-h-mestnyj',
+        '1k standart_seporated' => 'standart-odnokomnatnyj-2-h-mestnyj-razdelnye-krovati',
+        '1k widened' => 'rasshirennyj-odnokomnatnyj-3-h-mestnyj',
+        '2k family' => 'semejnyj-dvuhkomnatnyj-3-h-mestnyj',
+        '2k suite' => 'lyuks-dvuhkomnatnyj-3-h-mestnyj',
     ];
 
     public function run(ImageOptimizer $images): void

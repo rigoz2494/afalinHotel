@@ -8,6 +8,7 @@ use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -73,6 +74,8 @@ class ManageHotelSettings extends Page
             'locale_mode' => $settings->get('locale_mode', 'multilingual'),
             'webhooks' => array_replace_recursive(self::DEFAULT_WEBHOOKS, $settings->get('webhooks', [])),
             'about_stats' => HotelSetting::defaultedAboutStats($settings->get('about_stats', [])),
+            'about_story' => HotelSetting::defaultedAboutStory($settings->get('about_story')),
+            'preloader_phrases' => HotelSetting::defaultedPreloaderPhrases($settings->get('preloader_phrases')),
         ]);
     }
 
@@ -255,6 +258,72 @@ class ManageHotelSettings extends Page
                                     ]),
                             ]
                         ),
+                        ...($restricted !== null
+                            ? [
+                                Textarea::make("about_story.{$restricted}")
+                                    ->label(__('About Us Story Text'))
+                                    ->helperText(__('A blank line between paragraphs starts a new one on the page.'))
+                                    ->rows(6)
+                                    ->columnSpanFull(),
+                                Hidden::make('about_story.'.($restricted === 'en' ? 'ru' : 'en')),
+                            ]
+                            : [
+                                Tabs::make('about_story_locale')
+                                    ->label(__('About Us Story Text'))
+                                    ->columnSpanFull()
+                                    ->tabs([
+                                        Tab::make(__('English'))
+                                            ->schema([
+                                                Textarea::make('about_story.en')
+                                                    ->label(__('About Us Story Text'))
+                                                    ->helperText(__('A blank line between paragraphs starts a new one on the page.'))
+                                                    ->rows(6),
+                                            ]),
+                                        Tab::make(__('Russian'))
+                                            ->schema([
+                                                Textarea::make('about_story.ru')
+                                                    ->label(__('About Us Story Text'))
+                                                    ->rows(6),
+                                            ]),
+                                    ]),
+                            ]
+                        ),
+                    ]),
+
+                Section::make(__('Preloader Loading Phrases'))
+                    ->description(__('Playful status lines the loading screen cycles through at random — purely decorative, never a real progress report.'))
+                    ->schema([
+                        Repeater::make('preloader_phrases')
+                            ->label(null)
+                            // Only the active site language's phrase is ever
+                            // shown to a guest (see Preloader.vue), so in a
+                            // single-language mode there's nothing to gain
+                            // from showing the other language's field here
+                            // — it would just confuse a non-technical admin
+                            // into thinking both are required.
+                            ->schema(fn (): array => (($restricted = HotelSetting::restrictedLocale()) !== null)
+                                ? [
+                                    TextInput::make($restricted)
+                                        ->label(__('Phrase'))
+                                        ->required()
+                                        ->maxLength(100)
+                                        ->columnSpanFull(),
+                                    Hidden::make($restricted === 'en' ? 'ru' : 'en'),
+                                ]
+                                : [
+                                    TextInput::make('en')
+                                        ->label(__('English'))
+                                        ->required()
+                                        ->maxLength(100),
+                                    TextInput::make('ru')
+                                        ->label(__('Russian'))
+                                        ->required()
+                                        ->maxLength(100),
+                                ])
+                            ->columns(2)
+                            ->addActionLabel(__('Add a phrase'))
+                            ->reorderableWithDragAndDrop()
+                            ->minItems(1),
                     ]),
 
                 Section::make(__('Notification Settings'))
@@ -266,25 +335,31 @@ class ManageHotelSettings extends Page
                             ->schema([
                                 TextInput::make('webhooks.telegram.url')
                                     ->label(__('Endpoint URL'))
+                                    ->helperText(__('Paste your Telegram bot\'s webhook link here. Bookings will arrive instantly in the messenger as a neat card. Leave this blank if you don\'t need this integration.'))
                                     ->url()
                                     ->maxLength(255),
                                 TextInput::make('webhooks.telegram.channel_id')
                                     ->label(__('Channel Identifier'))
+                                    ->helperText(__('The unique ID of your Telegram chat or group. To find it, add the bot @userinfobot to your chat, or forward a message from the group to the bot @ShowJsonBot. A group\'s ID usually starts with a minus sign (e.g. -100123456789).'))
                                     ->maxLength(100),
                                 Toggle::make('webhooks.telegram.active')
                                     ->label(__('Active'))
+                                    ->helperText(self::webhookActiveHelperText())
                                     ->default(false),
                             ]),
 
                         Section::make(__('WhatsApp Webhook'))
+                            ->description(__('Sends new booking details straight to a WhatsApp number or service, once you\'ve connected one below.'))
                             ->columns(2)
                             ->schema([
                                 TextInput::make('webhooks.whatsapp.url')
                                     ->label(__('API Instance Gateway URL'))
+                                    ->helperText(__('The gateway address for sending WhatsApp messages (e.g. via Green-API or a similar service). The system will send a JSON package with the guest\'s contact details here to automatically notify the manager.'))
                                     ->url()
                                     ->maxLength(255),
                                 Toggle::make('webhooks.whatsapp.active')
                                     ->label(__('Active'))
+                                    ->helperText(self::webhookActiveHelperText())
                                     ->default(false),
                             ]),
 
@@ -294,13 +369,16 @@ class ManageHotelSettings extends Page
                             ->schema([
                                 TextInput::make('webhooks.custom.url')
                                     ->label(__('Universal Webhook Endpoint URL'))
+                                    ->helperText(__('A backup channel for direct integration with corporate messengers (MAX by Rostelecom, TamTam, VK Teams). Paste the webhook URL created in your corporate chatbot\'s own settings here. Laravel will send a secure JSON package with the full booking details to it.'))
                                     ->url()
                                     ->maxLength(255),
                                 Toggle::make('webhooks.custom.active')
                                     ->label(__('Active'))
+                                    ->helperText(self::webhookActiveHelperText())
                                     ->default(false),
                                 Textarea::make('webhooks.custom.auth_header')
                                     ->label(__('Authorization Header'))
+                                    ->helperText(__('A secret access code the receiving system requires, usually given to you by a developer (often starting with the word "Bearer"). Leave this blank unless you were specifically told to enter something here.'))
                                     ->rows(2)
                                     ->columnSpanFull(),
                             ]),
@@ -393,6 +471,17 @@ class ManageHotelSettings extends Page
                 Hidden::make("about_stats.{$badge}.value.{$locale}"),
             ])
             ->all();
+    }
+
+    /**
+     * The same plain-language reminder under every webhook's "Active"
+     * toggle — flipping it on without a working address above it does
+     * nothing but silently fail, which is confusing for a non-technical
+     * admin to debug.
+     */
+    private static function webhookActiveHelperText(): string
+    {
+        return __('Only turn this on after the address above is filled in and has been tested — otherwise nothing will be sent anywhere, and the booking itself is never affected either way.');
     }
 
     public function save(): void

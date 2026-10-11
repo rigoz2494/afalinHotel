@@ -6,6 +6,7 @@ use App\Models\Currency;
 use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Services\ImageOptimizer;
+use App\Services\TransliterationService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -18,7 +19,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class RoomForm
@@ -37,7 +37,7 @@ class RoomForm
                                     ->required()
                                     ->maxLength(100)
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', app(TransliterationService::class)->slug($state))),
                                 Textarea::make("description.{$restricted}")
                                     ->label(__('Description'))
                                     ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
@@ -63,7 +63,7 @@ class RoomForm
                                                     ->required()
                                                     ->maxLength(100)
                                                     ->live(onBlur: true)
-                                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', app(TransliterationService::class)->slug($state))),
                                                 Textarea::make('description.en')
                                                     ->label(__('Description'))
                                                     ->helperText(__('Keep it to 2-3 short sentences — long descriptions get cut off on the room card.'))
@@ -78,7 +78,9 @@ class RoomForm
                                                 TextInput::make('name.ru')
                                                     ->label(__('Name'))
                                                     ->required()
-                                                    ->maxLength(100),
+                                                    ->maxLength(100)
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', app(TransliterationService::class)->slug($state))),
                                                 Textarea::make('description.ru')
                                                     ->label(__('Description'))
                                                     ->required()

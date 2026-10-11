@@ -31,6 +31,15 @@ const stats = computed(() =>
         value: localized(props.hotel.about_stats[key].value, locale.value),
     })),
 );
+
+// A blank line in the admin's free-text story field starts a new <p> on
+// the page, the same way the old hardcoded two-paragraph bio read.
+const storyParagraphs = computed(() =>
+    localized(props.hotel.about_story, locale.value)
+        .split(/\n\s*\n/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean),
+);
 </script>
 
 <template>
@@ -48,15 +57,13 @@ const stats = computed(() =>
             >
                 {{ localized(hotel.section_headings.about, locale) }}
             </h2>
-            <p class="mt-4 text-sm text-stone-300 sm:mt-5 sm:text-base">
-                {{
-                    t('aboutBioOne', {
-                        hotel: localized(hotel.hotel_name, locale),
-                    })
-                }}
-            </p>
-            <p class="mt-3 text-sm text-stone-300 sm:mt-4 sm:text-base">
-                {{ t('aboutBioTwo') }}
+            <p
+                v-for="(paragraph, index) in storyParagraphs"
+                :key="index"
+                class="text-sm text-stone-300 sm:text-base"
+                :class="index === 0 ? 'mt-4 sm:mt-5' : 'mt-3 sm:mt-4'"
+            >
+                {{ paragraph }}
             </p>
             <dl
                 class="mt-6 grid grid-cols-3 gap-3 text-center sm:mt-8 sm:gap-4"

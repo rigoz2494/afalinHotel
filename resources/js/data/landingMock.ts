@@ -56,6 +56,29 @@ export const mockHotel: HotelSettings = {
             value: { en: '30k', ru: '30k' },
         },
     },
+    about_story: {
+        en: 'Afalina opened its doors with a simple idea: every guest should feel like a welcome friend. For over two decades our team has combined warm, attentive service with calm, thoughtfully designed spaces.\n\nFrom the sunlit lobby to the poolside terrace and our seasonal restaurant, every corner of the grounds is made for slowing down and enjoying your stay.',
+        ru: 'Афалина открыла свои двери с простой идеей: каждый гость должен чувствовать себя как дома. Уже более двадцати лет наша команда сочетает тёплый, внимательный сервис со спокойными, продуманными пространствами.\n\nОт светлого лобби до террасы у бассейна и сезонного ресторана — каждый уголок создан для того, чтобы вы могли отдохнуть и насладиться пребыванием.',
+    },
+    preloader_phrases: [
+        { en: 'Feeding the resort dolphins…', ru: 'Кормим дельфинов…' },
+        {
+            en: 'Ironing the crisp white linens…',
+            ru: 'Гладим белоснежные простыни…',
+        },
+        {
+            en: 'Polishing welcome crystal glasses…',
+            ru: 'Натираем бокалы до идеального блеска…',
+        },
+        {
+            en: 'Chilling the complimentary champagne…',
+            ru: 'Охлаждаем шампанское для вашего заезда…',
+        },
+        {
+            en: 'Hiding beautiful seashells along the shore…',
+            ru: 'Прячем самые красивые ракушки на пляже…',
+        },
+    ],
     locale_mode: 'multilingual',
 };
 

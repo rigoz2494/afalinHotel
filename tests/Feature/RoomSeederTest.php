@@ -26,7 +26,13 @@ class RoomSeederTest extends TestCase
 
         $this->assertSame(5, Room::query()->count());
         $this->assertSame(
-            ['standard-double-room', 'twin-beds-standard-room', 'extended-triple-room', 'family-two-room-triple', 'luxury-two-room-triple'],
+            [
+                'standart-odnokomnatnyj-2-h-mestnyj',
+                'standart-odnokomnatnyj-2-h-mestnyj-razdelnye-krovati',
+                'rasshirennyj-odnokomnatnyj-3-h-mestnyj',
+                'semejnyj-dvuhkomnatnyj-3-h-mestnyj',
+                'lyuks-dvuhkomnatnyj-3-h-mestnyj',
+            ],
             Room::query()->ordered()->pluck('slug')->all(),
         );
     }
@@ -35,7 +41,7 @@ class RoomSeederTest extends TestCase
     {
         $this->seed(RoomSeeder::class);
 
-        $room = Room::query()->where('slug', 'standard-double-room')->firstOrFail();
+        $room = Room::query()->where('slug', 'standart-odnokomnatnyj-2-h-mestnyj')->firstOrFail();
 
         $this->assertSame('Standard Double Room', $room->name['en']);
         $this->assertSame('Стандарт однокомнатный 2-х местный', $room->name['ru']);
@@ -46,7 +52,7 @@ class RoomSeederTest extends TestCase
     {
         $this->seed(RoomSeeder::class);
 
-        $luxury = Room::query()->where('slug', 'luxury-two-room-triple')->firstOrFail();
+        $luxury = Room::query()->where('slug', 'lyuks-dvuhkomnatnyj-3-h-mestnyj')->firstOrFail();
 
         $this->assertSame(
             ['double_bed', 'table', 'nightstand', 'chairs', 'armchair', 'sofa', 'wardrobe', 'hanger', 'tv', 'ac', 'fridge', 'safe_box'],
@@ -76,10 +82,10 @@ class RoomSeederTest extends TestCase
         // Numeric overrides and plain modifier-computed cells alike come
         // back as numbers (int or float); assertEquals, not assertSame, so
         // e.g. 4500 and 4500.0 aren't treated as a mismatch.
-        $this->assertEquals([4500, 5500, 6000, 5500], $pricesFor('standard-double-room'));
-        $this->assertEquals([4700, 5700, 6200, 5700], $pricesFor('twin-beds-standard-room'));
-        $this->assertEquals([5500, 6500, 7500, 6500], $pricesFor('extended-triple-room'));
-        $this->assertEquals([6500, 8500, 9500, 8500], $pricesFor('family-two-room-triple'));
-        $this->assertEquals([7500, 9500, 11500, 9500], $pricesFor('luxury-two-room-triple'));
+        $this->assertEquals([4500, 5500, 6000, 5500], $pricesFor('standart-odnokomnatnyj-2-h-mestnyj'));
+        $this->assertEquals([4700, 5700, 6200, 5700], $pricesFor('standart-odnokomnatnyj-2-h-mestnyj-razdelnye-krovati'));
+        $this->assertEquals([5500, 6500, 7500, 6500], $pricesFor('rasshirennyj-odnokomnatnyj-3-h-mestnyj'));
+        $this->assertEquals([6500, 8500, 9500, 8500], $pricesFor('semejnyj-dvuhkomnatnyj-3-h-mestnyj'));
+        $this->assertEquals([7500, 9500, 11500, 9500], $pricesFor('lyuks-dvuhkomnatnyj-3-h-mestnyj'));
     }
 }
