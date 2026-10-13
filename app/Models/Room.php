@@ -9,6 +9,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property array{en: string, ru: string} $name
+ * @property string $slug
+ * @property array{en: string, ru: string} $description
+ * @property int $capacity
+ * @property array{en: string, ru: string} $bed_type
+ * @property array<int, string> $amenities
+ * @property array<int, string> $images
+ * @property int $base_price
+ * @property int|null $discount_percentage
+ * @property int $sort_order
+ * @property bool $is_active
+ */
 class Room extends Model
 {
     /** @use HasFactory<RoomFactory> */

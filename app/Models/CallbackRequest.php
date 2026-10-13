@@ -9,6 +9,24 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $phone
+ * @property string|null $message
+ * @property string|null $message_translated
+ * @property bool $wants_balcony
+ * @property string|null $special_requests
+ * @property string|null $special_requests_translated
+ * @property string|null $room_number
+ * @property array<int, array{room_id: int, room_name: string, period: string|null, currency: string, base_price: float, price: float, quantity: int}> $rooms
+ * @property array<int, array{service_id: int, name: string, currency: string, base_price: float, price: float, quantity: int}> $services
+ * @property float $total_price
+ * @property string|null $currency
+ * @property float $exchange_rate
+ * @property CallbackRequestStatus $status
+ * @property string|null $ip_address
+ */
 #[ObservedBy([CallbackRequestObserver::class])]
 class CallbackRequest extends Model
 {

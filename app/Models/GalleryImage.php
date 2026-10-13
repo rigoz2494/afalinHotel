@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Storage;
 /**
  * One real photo in the site-wide gallery shown on the About section —
  * lobby, pool, exterior, ... — not tied to a specific room.
+ *
+ * @property int $id
+ * @property string $path
+ * @property array{en: string|null, ru: string|null}|null $alt
+ * @property bool $tall
+ * @property int $sort_order
+ * @property bool $is_active
  */
 class GalleryImage extends Model
 {
