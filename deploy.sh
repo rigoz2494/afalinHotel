@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 #
 # Production VPS deploy. Talks to `docker compose` directly rather than
-# through ./vendor/bin/sail, since on a fresh clone vendor/ (and so the
-# sail script itself) doesn't exist yet — it's what `composer install`
-# below is for. WWWUSER/WWWGROUP below mirror exactly what the sail
-# script itself exports, so files created in the bind-mounted volume
-# keep sane host ownership.
+# through ./vendor/bin/sail (that script is itself a composer dependency,
+# so it can't exist yet on a fresh clone with no vendor/ installed).
+# compose.yaml builds from this project's own Dockerfile, so unlike Sail's
+# bundled Ubuntu+Sury-PPA runtime image, nothing here needs vendor/ to
+# exist before the image can even build. WWWUSER/WWWGROUP mirror exactly
+# what the sail script itself exports, so files created in the
+# bind-mounted volume keep sane host ownership.
 #
 # Everything composer/npm/artisan runs *inside* the container — never on
 # the bare host, since the host has no PHP and `vp build --ssr` (via
@@ -24,29 +26,6 @@ export WWWGROUP=${WWWGROUP:-$(id -g)}
 
 dc() { docker compose "$@"; }
 run() { dc exec -T laravel.test "$@"; }
-
-# compose.yaml's build context is vendor/laravel/sail/runtimes/8.4, which
-# doesn't exist on a fresh clone until composer has run at least once —
-# and the host has no PHP/Composer to run it directly. Bootstrap with
-# Laravel's own documented throwaway-container pattern (see "Installing
-# Composer Dependencies For Existing Projects" in the Sail docs); the
-# bind mount means vendor/ lands on the host too, not just in this
-# one-shot container, so `dc up --build` right after can find it.
-# No --no-dev here: laravel/sail lives in require-dev, and its
-# runtimes/8.4/Dockerfile is exactly what this bootstrap needs — the
-# `composer install --no-dev` right after `dc up` strips dev packages
-# back out for the actual running app, same as always.
-# --ignore-platform-reqs is only safe here because this container is
-# never anything but a one-shot installer — the real app container
-# built below genuinely has ext-intl, pdo_pgsql, etc.
-if [ ! -f vendor/laravel/sail/runtimes/8.4/Dockerfile ]; then
-    docker run --rm \
-        -u "$(id -u):$(id -g)" \
-        -v "$(pwd):/var/www/html" \
-        -w /var/www/html \
-        laravelsail/php84-composer:latest \
-        composer install --optimize-autoloader --ignore-platform-reqs
-fi
 
 dc up -d --build laravel.test pgsql
 

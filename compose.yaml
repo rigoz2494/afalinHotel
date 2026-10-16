@@ -1,11 +1,9 @@
 services:
     laravel.test:
         build:
-            context: './vendor/laravel/sail/runtimes/8.4'
+            context: .
             dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.4/app'
+        image: 'afalina/app'
         restart: unless-stopped
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -33,7 +31,7 @@ services:
     # container above only runs `artisan serve`, never `queue:work`.
     # Same built image as laravel.test, so nothing to build here.
     queue:
-        image: 'sail-8.4/app'
+        image: 'afalina/app'
         restart: unless-stopped
         entrypoint: ['php', '/var/www/html/artisan', 'queue:work', '--tries=3']
         environment:
@@ -49,7 +47,7 @@ services:
     # long-running node process serving bootstrap/ssr/app.js — the file
     # `vp build --ssr` actually emits, not `ssr.js`.
     ssr:
-        image: 'sail-8.4/app'
+        image: 'afalina/app'
         restart: unless-stopped
         entrypoint: ['node', '/var/www/html/bootstrap/ssr/app.js']
         environment:
@@ -70,7 +68,7 @@ services:
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
         volumes:
             - 'sail-pgsql:/var/lib/postgresql'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            - './docker/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
         networks:
             - sail
         healthcheck:
