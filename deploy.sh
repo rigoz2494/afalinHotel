@@ -32,6 +32,10 @@ run() { dc exec -T laravel.test "$@"; }
 # Composer Dependencies For Existing Projects" in the Sail docs); the
 # bind mount means vendor/ lands on the host too, not just in this
 # one-shot container, so `dc up --build` right after can find it.
+# No --no-dev here: laravel/sail lives in require-dev, and its
+# runtimes/8.4/Dockerfile is exactly what this bootstrap needs — the
+# `composer install --no-dev` right after `dc up` strips dev packages
+# back out for the actual running app, same as always.
 # --ignore-platform-reqs is only safe here because this container is
 # never anything but a one-shot installer — the real app container
 # built below genuinely has ext-intl, pdo_pgsql, etc.
@@ -41,7 +45,7 @@ if [ ! -f vendor/laravel/sail/runtimes/8.4/Dockerfile ]; then
         -v "$(pwd):/var/www/html" \
         -w /var/www/html \
         laravelsail/php84-composer:latest \
-        composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+        composer install --optimize-autoloader --ignore-platform-reqs
 fi
 
 dc up -d --build laravel.test pgsql
