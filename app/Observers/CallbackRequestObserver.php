@@ -2,44 +2,27 @@
 
 namespace App\Observers;
 
+use App\Jobs\TranslateBookingDetails;
 use App\Models\CallbackRequest;
-use App\Services\TranslationService;
 use App\Services\WebhookDispatchService;
 
 class CallbackRequestObserver
 {
     public function __construct(
-        private TranslationService $translator,
         private WebhookDispatchService $webhooks,
     ) {}
 
     /**
-     * A guest's message or special request could be written in any
-     * language; a Russian-speaking manager reading the admin dashboard may
-     * not understand it. This fills in the automatic Russian translation of
-     * both right after the booking is saved, so the manager always has a
-     * readable version alongside the guest's own words — never blocking
-     * the booking itself if the translation service is unreachable.
+     * Both side effects of a new booking call a real external API
+     * (TranslationService, each configured webhook endpoint) and run as
+     * queued jobs for exactly the same reason: neither should make the
+     * guest's own booking confirmation wait on a third party that could
+     * be slow or unreachable. This method itself does no network I/O —
+     * dispatching a job onto the `database` queue is just an INSERT.
      */
     public function created(CallbackRequest $callbackRequest): void
     {
-        $updates = [];
-
-        $translatedMessage = $this->translator->translateToRussian($callbackRequest->message);
-
-        if ($translatedMessage !== null) {
-            $updates['message_translated'] = $translatedMessage;
-        }
-
-        $translatedRequest = $this->translator->translateToRussian($callbackRequest->special_requests);
-
-        if ($translatedRequest !== null) {
-            $updates['special_requests_translated'] = $translatedRequest;
-        }
-
-        if ($updates !== []) {
-            $callbackRequest->updateQuietly($updates);
-        }
+        TranslateBookingDetails::dispatch($callbackRequest);
 
         $this->webhooks->dispatch($callbackRequest);
     }

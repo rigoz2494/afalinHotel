@@ -28,7 +28,11 @@ class WebhookDispatchTest extends TestCase
             'phone' => '+79161234567',
         ])->assertCreated();
 
-        Queue::assertNothingPushed();
+        // Not assertNothingPushed(): the observer also unconditionally
+        // queues a TranslateBookingDetails job (see
+        // CallbackRequestTranslationTest), entirely unrelated to whether
+        // any webhook channel is configured.
+        Queue::assertNotPushed(DispatchBookingWebhook::class);
     }
 
     public function test_an_active_telegram_webhook_receives_its_own_job_with_a_masked_phone_number(): void
@@ -71,7 +75,7 @@ class WebhookDispatchTest extends TestCase
             'phone' => '+79161234567',
         ])->assertCreated();
 
-        Queue::assertNothingPushed();
+        Queue::assertNotPushed(DispatchBookingWebhook::class);
     }
 
     public function test_an_active_toggle_with_no_url_receives_no_job(): void
@@ -90,7 +94,7 @@ class WebhookDispatchTest extends TestCase
             'phone' => '+79161234567',
         ])->assertCreated();
 
-        Queue::assertNothingPushed();
+        Queue::assertNotPushed(DispatchBookingWebhook::class);
     }
 
     public function test_every_active_channel_gets_its_own_job(): void
