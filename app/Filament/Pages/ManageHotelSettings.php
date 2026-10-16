@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\HotelSetting;
+use App\Models\User;
 use App\Services\ImageOptimizer;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
@@ -76,6 +77,14 @@ class ManageHotelSettings extends Page
             'about_stats' => HotelSetting::defaultedAboutStats($settings->get('about_stats', [])),
             'about_story' => HotelSetting::defaultedAboutStory($settings->get('about_story')),
             'preloader_phrases' => HotelSetting::defaultedPreloaderPhrases($settings->get('preloader_phrases')),
+            // Never backed by a HotelSetting row — this is a thin, virtual
+            // gateway onto the currently logged-in admin's own `users` row.
+            // The password side is always blank: a password is never
+            // redisplayed once set, only ever replaced.
+            'admin_credentials' => [
+                'email' => auth()->user()?->email,
+                'password' => null,
+            ],
         ]);
     }
 
@@ -326,6 +335,24 @@ class ManageHotelSettings extends Page
                             ->minItems(1),
                     ]),
 
+                Section::make(__('Admin Account Settings'))
+                    ->description(__('Change the login email or password for your own admin account. Neither field is required — leave one or both blank to leave them unchanged.'))
+                    ->schema([
+                        TextInput::make('admin_credentials.email')
+                            ->label(__('Admin Email/Login'))
+                            ->helperText(__('The email address you sign in to the dashboard with. Changing it takes effect immediately — make sure you can still access that inbox before saving.'))
+                            ->email()
+                            ->maxLength(255),
+                        TextInput::make('admin_credentials.password')
+                            ->label(__('New Admin Password'))
+                            ->helperText(__('Only fill this in if you want to change your password. It is never shown again once saved, for your own security.'))
+                            ->placeholder(__('Leave blank to keep your current password unchanged.'))
+                            ->password()
+                            ->revealable()
+                            ->autocomplete('new-password')
+                            ->minLength(8),
+                    ]),
+
                 Section::make(__('Notification Settings'))
                     ->description(__('Forward every new booking to these channels at once — see each one\'s own hint below. Only a channel that is both switched on and has a URL filled in actually receives anything.'))
                     ->schema([
@@ -488,13 +515,75 @@ class ManageHotelSettings extends Page
     {
         $data = $this->form->getState();
 
+        // Never a HotelSetting row — this updates the real `users` table
+        // directly instead, and is unset here so a plaintext password
+        // never ends up written into the generic settings JSON blob below.
+        $this->updateAdminCredentials($data['admin_credentials'] ?? []);
+        unset($data['admin_credentials']);
+
         foreach ($data as $key => $value) {
             HotelSetting::query()->updateOrCreate(['key' => $key], ['value' => $value]);
         }
+
+        // The password is never shown again, and the email reflects
+        // whatever is actually saved (unchanged if the new one was
+        // rejected as a duplicate) — never whatever was just typed.
+        $this->data['admin_credentials'] = [
+            'email' => auth()->user()?->email,
+            'password' => null,
+        ];
 
         Notification::make()
             ->title(__('Settings saved'))
             ->success()
             ->send();
+    }
+
+    /**
+     * Updates the currently logged-in admin's own `users` row — not
+     * whichever account happens to be first in the table, so one admin's
+     * edits here can never silently hijack a different admin's login in a
+     * future multi-admin setup. Blank fields are left alone; a changed
+     * email that collides with a different user's is rejected with its
+     * own notification instead of crashing on the column's unique
+     * constraint.
+     *
+     * @param  array{email?: string|null, password?: string|null}  $credentials
+     */
+    private function updateAdminCredentials(array $credentials): void
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            return;
+        }
+
+        $email = trim((string) ($credentials['email'] ?? ''));
+
+        if ($email !== '' && $email !== $user->email) {
+            if (User::query()->where('email', $email)->whereKeyNot($user->getKey())->exists()) {
+                Notification::make()
+                    ->title(__('That email is already in use by another account — the login email was not changed.'))
+                    ->danger()
+                    ->send();
+            } else {
+                $user->email = $email;
+            }
+        }
+
+        $password = $credentials['password'] ?? null;
+
+        if (filled($password)) {
+            // Not Hash::make() directly: User::$password already casts to
+            // 'hashed' (see the model), which calls it internally. Hashing
+            // it again here would double-hash it and permanently lock the
+            // admin out, since the stored hash would no longer match any
+            // plaintext password at all.
+            $user->password = $password;
+        }
+
+        if ($user->isDirty()) {
+            $user->save();
+        }
     }
 }
