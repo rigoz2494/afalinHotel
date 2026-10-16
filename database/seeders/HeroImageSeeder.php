@@ -3,50 +3,52 @@
 namespace Database\Seeders;
 
 use App\Models\HotelSetting;
+use App\Services\ImageOptimizer;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Finder\SplFileInfo as FinderFileInfo;
+use Symfony\Component\HttpFoundation\File\File as HttpFile;
 
 /**
- * Downloads the placeholder hero slides onto the public disk and records their
- * relative paths, so the Filament file field can show, reorder and delete them
- * like any upload. Existing files are reused, so re-seeding is safe.
+ * Converts the hotel's own hero slideshow photos — real local files in
+ * public/seedImgs/hero/, never a live download from a seed — into WebP
+ * and records their paths, the same way an admin's own upload through
+ * Site Settings would (see ManageHotelSettings' hero_images FileUpload:
+ * same 'hero-slideshow' directory, same 1920px width). Seeding this app
+ * never needs outbound network access.
  */
 class HeroImageSeeder extends Seeder
 {
-    public const string DIRECTORY = 'hero-slideshow';
+    private const string PHOTOS_ROOT = 'seedImgs/hero';
 
-    /**
-     * Unsplash photo IDs in slideshow order: lobby, pool, restaurant,
-     * exterior, poolside terrace.
-     *
-     * @var array<int, string>
-     */
-    private const array PHOTO_IDS = [
-        'photo-1566073771259-6a8506099945',
-        'photo-1571896349842-33c89424de2d',
-        'photo-1517248135467-4c7edcad34c4',
-        'photo-1542314831-068cd1dbfeeb',
-        'photo-1520250497591-112f2f40a3f4',
-    ];
+    private const string STORAGE_DIRECTORY = 'hero-slideshow';
 
-    public function run(): void
+    public function run(ImageOptimizer $images): void
     {
-        $paths = [];
+        $root = public_path(self::PHOTOS_ROOT);
 
-        foreach (self::PHOTO_IDS as $index => $photoId) {
-            $path = sprintf('%s/mock-%d.jpg', self::DIRECTORY, $index + 1);
+        if (! File::isDirectory($root)) {
+            $this->command?->warn('No hero slideshow photos found at public/'.self::PHOTOS_ROOT.' — skipping.');
 
-            if (! Storage::disk('public')->exists($path)) {
-                $response = Http::timeout(60)
-                    ->get("https://images.unsplash.com/{$photoId}?auto=format&fit=crop&w=2200&q=80")
-                    ->throw();
-
-                Storage::disk('public')->put($path, $response->body());
-            }
-
-            $paths[] = $path;
+            return;
         }
+
+        // Reseeding (without a full migrate:fresh) must not pile up the
+        // previous run's webp files — there's no stable natural key to
+        // reuse, since every conversion gets its own fresh ULID.
+        Storage::disk('public')->deleteDirectory(self::STORAGE_DIRECTORY);
+
+        $paths = collect(File::files($root))
+            ->sortBy(fn (FinderFileInfo $file): string => $file->getFilename())
+            ->map(fn (FinderFileInfo $file): string => $images->storeAsWebp(
+                new HttpFile($file->getPathname()),
+                self::STORAGE_DIRECTORY,
+                1920,
+                $file->getFilenameWithoutExtension(),
+            ))
+            ->values()
+            ->all();
 
         HotelSetting::query()->updateOrCreate(['key' => 'hero_images'], ['value' => $paths]);
     }
