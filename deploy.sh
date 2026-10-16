@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 #
-# Production VPS deploy. Builds and starts the app via Sail's own
-# compose.yaml, then runs composer/npm/migrate *inside* the container —
-# never on the bare host, since the host has no PHP and `vp build --ssr`
-# (via vite-plugin-wayfinder) shells out to `php artisan wayfinder:generate`.
+# Production VPS deploy. Talks to `docker compose` directly rather than
+# through ./vendor/bin/sail, since on a fresh clone vendor/ (and so the
+# sail script itself) doesn't exist yet — it's what `composer install`
+# below is for. WWWUSER/WWWGROUP below mirror exactly what the sail
+# script itself exports, so files created in the bind-mounted volume
+# keep sane host ownership.
+#
+# Everything composer/npm/artisan runs *inside* the container — never on
+# the bare host, since the host has no PHP and `vp build --ssr` (via
+# vite-plugin-wayfinder) shells out to `php artisan wayfinder:generate`.
 #
 # Usage: ./deploy.sh [--seed]
 #   --seed  Also run the database seeders. Only pass this on a fresh
@@ -13,21 +19,25 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-sail() { ./vendor/bin/sail "$@"; }
+export WWWUSER=${WWWUSER:-$UID}
+export WWWGROUP=${WWWGROUP:-$(id -g)}
 
-sail up -d --build laravel.test pgsql
+dc() { docker compose "$@"; }
+run() { dc exec -T laravel.test "$@"; }
 
-sail composer install --no-dev --optimize-autoloader
+dc up -d --build laravel.test pgsql
 
-sail npm ci
-sail npm run build:ssr
+run composer install --no-dev --optimize-autoloader
+
+run npm ci
+run npm run build:ssr
 
 # migrate:fresh is blocked by Laravel itself in production (APP_ENV=production)
 # and would drop live data anyway — migrate --force is the only safe choice here.
-sail artisan migrate --force
+run php artisan migrate --force
 
 if [ "${1:-}" = "--seed" ]; then
-    sail artisan db:seed --force
+    run php artisan db:seed --force
 fi
 
-sail up -d queue ssr
+dc up -d queue ssr
