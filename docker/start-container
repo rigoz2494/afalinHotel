@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-if [ -n "$WWWUSER" ]; then
-    usermod -u "$WWWUSER" www-data
-fi
-
-if [ -n "$WWWGROUP" ]; then
-    groupmod -g "$WWWGROUP" www-data
-fi
-
 mkdir -p /var/log/supervisor
 
 if [ $# -gt 0 ]; then

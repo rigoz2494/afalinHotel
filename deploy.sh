@@ -5,9 +5,10 @@
 # so it can't exist yet on a fresh clone with no vendor/ installed).
 # compose.yaml builds from this project's own Dockerfile, so unlike Sail's
 # bundled Ubuntu+Sury-PPA runtime image, nothing here needs vendor/ to
-# exist before the image can even build. WWWUSER/WWWGROUP mirror exactly
-# what the sail script itself exports, so files created in the
-# bind-mounted volume keep sane host ownership.
+# exist before the image can even build. php and the checked-out files are
+# both root-owned (this VPS is operated solely as root), so the container
+# runs php as root too rather than chasing a www-data UID mapping that
+# would fight that.
 #
 # Everything composer/npm/artisan runs *inside* the container — never on
 # the bare host, since the host has no PHP and `vp build --ssr` (via
@@ -20,9 +21,6 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-
-export WWWUSER=${WWWUSER:-$UID}
-export WWWGROUP=${WWWGROUP:-$(id -g)}
 
 dc() { docker compose "$@"; }
 run() { dc exec -T laravel.test "$@"; }
