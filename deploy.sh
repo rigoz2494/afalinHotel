@@ -42,4 +42,4 @@ if [ "${1:-}" = "--seed" ]; then
     run php artisan db:seed --force
 fi
 
-dc up -d queue ssr
+dc up -d queue ssr caddy

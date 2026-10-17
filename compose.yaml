@@ -8,10 +8,10 @@ services:
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
-            # If host port 80 is already bound by a system nginx/apache,
-            # set APP_PORT to something else (e.g. 8080) in .env and proxy
-            # to it instead, rather than fighting the system service for :80.
-            - '${APP_PORT:-80}:80'
+            # Caddy (below) is the sole public ingress in production, so
+            # this is for local Vite HMR access only. If you need to hit
+            # this container directly (bypassing Caddy/TLS) for debugging,
+            # set APP_PORT in .env and add back '${APP_PORT}:80' here.
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             WWWUSER: '${WWWUSER}'
@@ -82,9 +82,32 @@ services:
                 - '${DB_USERNAME}'
             retries: 3
             timeout: 5s
+    # Terminates TLS and automatically gets/renews a Let's Encrypt
+    # certificate for the domain in docker/Caddyfile - the only service
+    # publishing 80/443, reverse-proxying everything to laravel.test over
+    # the internal network. Needs that domain's DNS A record pointed at
+    # this VPS before Let's Encrypt can issue a cert for it.
+    caddy:
+        image: 'caddy:2-alpine'
+        restart: unless-stopped
+        ports:
+            - '80:80'
+            - '443:443'
+        volumes:
+            - './docker/Caddyfile:/etc/caddy/Caddyfile'
+            - 'caddy-data:/data'
+            - 'caddy-config:/config'
+        networks:
+            - sail
+        depends_on:
+            - laravel.test
 networks:
     sail:
         driver: bridge
 volumes:
     sail-pgsql:
+        driver: local
+    caddy-data:
+        driver: local
+    caddy-config:
         driver: local

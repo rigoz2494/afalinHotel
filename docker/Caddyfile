@@ -1,0 +1,3 @@
+afalina-sea.ru {
+	reverse_proxy laravel.test:80
+}
