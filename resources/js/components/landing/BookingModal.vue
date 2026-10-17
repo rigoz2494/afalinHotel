@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
 import { X } from '@lucide/vue';
-import { watch } from 'vue';
+import { onBeforeUnmount, watch } from 'vue';
 import ClientOnly from '@/components/ClientOnly.vue';
 import BookingExtras from '@/components/landing/BookingExtras.vue';
 import BookingForm from '@/components/landing/BookingForm.vue';
@@ -35,6 +35,18 @@ useEventListener('keydown', (event: KeyboardEvent) => {
         close();
     }
 });
+
+// Below `lg`, <main> no longer owns all page scrolling (see app.css) — the
+// document itself scrolls there, so without this a touch-drag that starts
+// inside the modal's own scrollable content can "leak" past its edges and
+// scroll the background page underneath it too, jittering both at once.
+watch(open, (isOpen) => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+
+onBeforeUnmount(() => {
+    document.body.style.overflow = '';
+});
 </script>
 
 <template>
@@ -55,17 +67,17 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                     @click.self="close"
                 >
                     <div
-                        class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-sky-950 p-6 text-white shadow-2xl sm:p-8"
+                        class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-sky-950 px-5 py-4 text-white shadow-2xl sm:p-8"
                     >
                         <button
                             type="button"
                             :aria-label="t('close')"
-                            class="absolute top-4 right-4 rounded-full bg-white/10 p-2 transition hover:bg-white/20"
+                            class="absolute top-3 right-3 rounded-full bg-white/10 p-2 transition hover:bg-white/20 sm:top-4 sm:right-4"
                             @click="close"
                         >
                             <X class="size-5" />
                         </button>
-                        <h2 class="text-2xl font-semibold sm:text-3xl">
+                        <h2 class="text-xl font-semibold sm:text-3xl">
                             {{ t('completeYourBooking') }}
                         </h2>
                         <p class="mt-1 text-sm text-white/60">

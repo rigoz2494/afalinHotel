@@ -131,16 +131,19 @@
 
 /*
  * The landing page's real scroll container is the snap-scrolling <main>
- * (see resources/js/pages/Landing.vue), not <html>/<body>. Without this,
- * the outer document can still grow a few pixels taller than the
- * viewport and show its own native scrollbar alongside <main>'s styled
- * one. Since <main> owns all scrolling, the document itself never needs
- * to scroll.
+ * (see resources/js/pages/Landing.vue) — but only at `lg` and up. Below
+ * that, <main> isn't a fixed-height snap container at all (mobile's
+ * fullpage snapping repeatedly hijacked touch scrolls meant for a
+ * section's own internal content, like room descriptions or the pricing
+ * extras list), so the document itself is the scroll container there,
+ * same as any normal page.
  */
-html,
-body {
-    height: 100%;
-    overflow: hidden;
+@media (min-width: 64rem) {
+    html,
+    body {
+        height: 100%;
+        overflow: hidden;
+    }
 }
 
 /*

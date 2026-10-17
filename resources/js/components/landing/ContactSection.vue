@@ -21,7 +21,7 @@ const messengers = [
 <template>
     <section
         id="contact"
-        class="relative flex min-h-screen snap-start flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-5 text-white sm:px-6 sm:py-14 lg:h-screen lg:py-0 lg:pt-16"
+        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-5 text-white sm:px-6 sm:py-14 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
     >
         <SectionBackdrop photo-id="photo-1520250497591-112f2f40a3f4" />
         <div

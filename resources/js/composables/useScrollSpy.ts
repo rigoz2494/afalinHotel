@@ -1,13 +1,9 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import type { Ref } from 'vue';
 
 /**
- * Tracks which section is mostly visible inside a scroll container.
+ * Tracks which section is mostly visible on screen.
  */
-export function useScrollSpy(
-    sectionIds: string[],
-    container: Ref<HTMLElement | null>,
-) {
+export function useScrollSpy(sectionIds: string[]) {
     const activeId = ref<string>(sectionIds[0] ?? '');
     let observer: IntersectionObserver | null = null;
 
@@ -20,7 +16,13 @@ export function useScrollSpy(
                     }
                 });
             },
-            { root: container.value, threshold: 0.6 },
+            // root: null (the browser viewport) rather than <main> - that's
+            // only a clipped, viewport-sized scroll area at `lg` and up,
+            // not below it, where it just grows with the page. The viewport
+            // works correctly at every size: <main> fills it edge-to-edge
+            // on desktop anyway (SiteHeader floats on top, fixed, rather
+            // than pushing it down), so this isn't a behavior change there.
+            { root: null, threshold: 0.6 },
         );
 
         sectionIds.forEach((id) => {

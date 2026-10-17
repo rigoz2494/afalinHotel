@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
 <template>
     <section
         id="hero"
-        class="relative flex min-h-screen snap-start items-center justify-center overflow-hidden bg-slate-900 lg:h-screen"
+        class="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-900 lg:h-screen lg:snap-start"
     >
         <!-- Slideshow layers: stacked, cross-fading via opacity. -->
         <div class="absolute inset-0 z-0">

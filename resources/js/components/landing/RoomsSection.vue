@@ -176,7 +176,7 @@ const stepImage = (direction: 1 | -1): void => {
 <template>
     <section
         id="rooms"
-        class="relative flex min-h-screen snap-start flex-col overflow-hidden bg-stone-950 pt-16 text-white lg:h-screen lg:flex-row"
+        class="relative flex min-h-screen flex-col overflow-hidden bg-stone-950 pt-16 text-white lg:h-screen lg:snap-start lg:flex-row"
     >
         <SectionBackdrop photo-id="photo-1517248135467-4c7edcad34c4" />
         <div

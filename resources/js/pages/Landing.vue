@@ -133,10 +133,8 @@ const navLinks = computed(() => [
     { id: 'contact', label: t('navContact') },
 ]);
 
-const scroller = ref<HTMLElement | null>(null);
 const { activeId, scrollTo } = useScrollSpy(
     navLinks.value.map((link) => link.id),
-    scroller,
 );
 
 const showBackToTop = computed(() => activeId.value !== 'hero');
@@ -230,8 +228,7 @@ onMounted(() => {
             @navigate="scrollTo"
         />
         <main
-            ref="scroller"
-            class="h-screen snap-y snap-mandatory overflow-y-scroll scroll-smooth"
+            class="scroll-smooth lg:h-screen lg:snap-y lg:snap-mandatory lg:overflow-y-scroll"
         >
             <HeroSection :hotel="hotel" />
             <RoomsSection

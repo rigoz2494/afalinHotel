@@ -45,7 +45,7 @@ const storyParagraphs = computed(() =>
 <template>
     <section
         id="about"
-        class="relative grid min-h-screen snap-start gap-6 overflow-hidden bg-stone-950 px-4 pt-24 pb-10 text-stone-100 sm:gap-8 sm:px-6 lg:h-screen lg:grid-cols-5 lg:px-12 lg:pb-8"
+        class="relative grid min-h-screen gap-6 overflow-hidden bg-stone-950 px-4 pt-24 pb-10 text-stone-100 sm:gap-8 sm:px-6 lg:h-screen lg:snap-start lg:grid-cols-5 lg:px-12 lg:pb-8"
     >
         <SectionBackdrop photo-id="photo-1571896349842-33c89424de2d" />
         <div class="relative z-10 flex flex-col justify-center lg:col-span-2">
@@ -84,19 +84,44 @@ const storyParagraphs = computed(() =>
         </div>
 
         <!--
-            A native CSS multi-column flow, not a fixed-row grid: each photo
-            keeps its own natural aspect ratio and the columns stagger
-            organically, Pinterest-style, instead of every photo being
-            cropped to fit identical cells. `lg:overflow-y-auto` is the
-            fallback for the one place that matters — on `lg` the section
-            itself is pinned to exactly one screen (`lg:h-screen` plus
-            `overflow-hidden`), and unlike a fixed-row grid, a masonry
-            column's total height isn't guaranteed to fit that; below `lg`
-            the section already grows with the page, so there's nothing to
-            contain.
+            Below `lg`: a horizontal touch-swipe carousel, one photo mostly
+            filling the viewport with a peek of the next — multi-column CSS
+            masonry fills top-to-bottom per column, not in visual swipe
+            order, which made scrolling past the first few photos feel like
+            the layout was jumping around under the user's finger.
         -->
         <div
-            class="relative z-10 columns-1 gap-4 sm:columns-2 lg:col-span-3 lg:h-full lg:columns-3 lg:overflow-y-auto"
+            class="relative z-10 -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:hidden"
+        >
+            <button
+                v-for="(image, index) in displayImages"
+                :key="image.src"
+                type="button"
+                class="group block w-[78%] flex-none shrink-0 cursor-zoom-in snap-center overflow-hidden rounded-xl sm:w-[55%]"
+                :aria-label="t('openPhoto', { alt: image.alt })"
+                @click="lightboxIndex = index"
+            >
+                <img
+                    :src="image.src"
+                    :alt="image.alt"
+                    loading="lazy"
+                    decoding="async"
+                    class="aspect-[4/5] h-auto w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+            </button>
+        </div>
+
+        <!--
+            `lg` and up: a native CSS multi-column flow, not a fixed-row
+            grid — each photo keeps its own natural aspect ratio and the
+            columns stagger organically, Pinterest-style, instead of every
+            photo being cropped to fit identical cells. `overflow-y-auto` is
+            needed because the section is pinned to exactly one screen
+            (`lg:h-screen` plus `overflow-hidden`) and a masonry column's
+            total height isn't guaranteed to fit that.
+        -->
+        <div
+            class="relative z-10 hidden gap-4 lg:col-span-3 lg:block lg:h-full lg:columns-3 lg:overflow-y-auto"
         >
             <button
                 v-for="(image, index) in displayImages"
