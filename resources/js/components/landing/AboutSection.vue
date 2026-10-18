@@ -47,7 +47,7 @@ const storyParagraphs = computed(() =>
         id="about"
         class="relative grid min-h-screen gap-6 overflow-hidden bg-stone-950 px-4 pt-24 pb-10 text-stone-100 sm:gap-8 sm:px-6 lg:h-screen lg:snap-start lg:grid-cols-5 lg:px-12 lg:pb-8"
     >
-        <SectionBackdrop photo-id="photo-1571896349842-33c89424de2d" />
+        <SectionBackdrop name="about" />
         <div class="relative z-10 flex flex-col justify-center lg:col-span-2">
             <p class="text-sm tracking-widest text-amber-300 uppercase">
                 {{ t('navAbout') }}

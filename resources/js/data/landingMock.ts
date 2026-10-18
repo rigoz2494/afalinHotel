@@ -36,6 +36,7 @@ export const mockHotel: HotelSettings = {
             en: 'A story of hospitality by the water',
             ru: 'История гостеприимства у воды',
         },
+        location: { en: 'Our Location', ru: 'Наше расположение' },
         faq: {
             en: 'Frequently Asked Questions',
             ru: 'Часто задаваемые вопросы',

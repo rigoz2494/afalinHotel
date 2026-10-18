@@ -9,6 +9,7 @@ import AboutSection from '@/components/landing/AboutSection.vue';
 import FaqSection from '@/components/landing/FaqSection.vue';
 import FloatingActions from '@/components/landing/FloatingActions.vue';
 import HeroSection from '@/components/landing/HeroSection.vue';
+import LocationSection from '@/components/landing/LocationSection.vue';
 import Preloader from '@/components/landing/Preloader.vue';
 import PricingSection from '@/components/landing/PricingSection.vue';
 import RoomsSection from '@/components/landing/RoomsSection.vue';
@@ -129,6 +130,7 @@ const navLinks = computed(() => [
     { id: 'rooms', label: t('navRooms') },
     { id: 'pricing', label: t('navPricing') },
     { id: 'about', label: t('navAbout') },
+    { id: 'location', label: t('navLocation') },
     { id: 'faq', label: t('navFaq') },
     { id: 'contact', label: t('navContact') },
 ]);
@@ -243,6 +245,7 @@ onMounted(() => {
                 :additional-services="additionalServices"
             />
             <AboutSection :hotel="hotel" :images="gallery" />
+            <LocationSection :hotel="hotel" />
             <FaqSection :hotel="hotel" :faqs="faqs" />
             <ContactSection :hotel="hotel" />
         </main>

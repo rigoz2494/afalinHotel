@@ -1,8 +1,15 @@
 <script setup lang="ts">
-// The Pricing section's backdrop, shared by the other sections: a blurred,
-// faded photo under a stone-to-amber gradient. The top and bottom fades meet
-// stone-950 so neighbouring sections blend into each other while scrolling.
-defineProps<{ photoId: string }>();
+// A blurred, faded photo under a stone-to-amber gradient, shared by every
+// section that uses one. The top and bottom fades meet stone-950 so
+// neighbouring sections blend into each other while scrolling.
+//
+// `name` maps to a fixed local file in public/images/backdrops/ (e.g.
+// "about" -> /images/backdrops/about.webp) - never a live fetch from
+// Unsplash or anywhere else. These are curated design assets, not
+// admin-editable content, so unlike uploads they're committed as plain
+// static files with stable names instead of going through
+// ImageOptimizer/Storage's ULID-named uploads pipeline.
+defineProps<{ name: string }>();
 </script>
 
 <template>
@@ -13,7 +20,7 @@ defineProps<{ photoId: string }>();
         <div
             class="absolute inset-0 scale-110 bg-cover bg-center opacity-20 blur-sm"
             :style="{
-                backgroundImage: `url('https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=1800&q=70')`,
+                backgroundImage: `url('/images/backdrops/${name}.webp')`,
             }"
         ></div>
         <div

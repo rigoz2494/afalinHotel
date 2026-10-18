@@ -178,9 +178,9 @@ const stepImage = (direction: 1 | -1): void => {
         id="rooms"
         class="relative flex min-h-screen flex-col overflow-hidden bg-stone-950 pt-16 text-white lg:h-screen lg:snap-start lg:flex-row"
     >
-        <SectionBackdrop photo-id="photo-1517248135467-4c7edcad34c4" />
+        <SectionBackdrop name="rooms" />
         <div
-            class="relative z-10 flex h-[42vh] flex-col sm:h-[48vh] lg:h-full lg:w-3/5"
+            class="relative z-10 flex h-[42vh] flex-col sm:h-[48vh] lg:h-full lg:w-3/5 2xl:w-1/2"
         >
             <div class="relative flex-1 overflow-hidden">
                 <Transition
@@ -257,9 +257,9 @@ const stepImage = (direction: 1 | -1): void => {
             that, instead of chasing every individual variable-height child.
         -->
         <div
-            class="relative z-10 flex flex-1 flex-col justify-start gap-3 overflow-y-auto p-5 sm:gap-4 sm:p-8 lg:h-full lg:w-2/5 lg:gap-3 lg:p-10"
+            class="relative z-10 flex flex-1 flex-col justify-start gap-3 overflow-y-auto p-5 sm:gap-4 sm:p-8 lg:h-full lg:w-2/5 lg:gap-3 lg:p-10 2xl:w-1/2 2xl:flex-row 2xl:items-stretch 2xl:gap-8"
         >
-            <div>
+            <div class="2xl:min-w-0 2xl:flex-1">
                 <p
                     class="text-[11px] tracking-widest text-amber-300/70 uppercase"
                 >
@@ -380,24 +380,35 @@ const stepImage = (direction: 1 | -1): void => {
                 </button>
             </div>
 
-            <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-3">
-                <li
-                    v-for="item in amenityItems"
-                    :key="item.label"
-                    class="flex items-center gap-2.5 rounded-lg bg-white/5 p-2.5 sm:gap-3 sm:p-3 lg:p-2.5"
+            <div
+                class="2xl:w-56 2xl:shrink-0 2xl:rounded-2xl 2xl:border 2xl:border-white/10 2xl:bg-white/5 2xl:p-5 2xl:shadow-2xl 2xl:backdrop-blur"
+            >
+                <p
+                    class="hidden text-xs tracking-widest text-amber-300/80 uppercase 2xl:block"
                 >
-                    <component
-                        :is="item.icon"
-                        class="size-5 shrink-0 text-amber-300 sm:size-6"
-                    />
-                    <div>
-                        <p class="text-[11px] text-white/70 sm:text-xs">
-                            {{ item.label }}
-                        </p>
-                        <p class="text-xs sm:text-sm">{{ item.value }}</p>
-                    </div>
-                </li>
-            </ul>
+                    {{ t('roomDetailsHeading') }}
+                </p>
+                <ul
+                    class="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-3 2xl:mt-3 2xl:grid-cols-1"
+                >
+                    <li
+                        v-for="item in amenityItems"
+                        :key="item.label"
+                        class="flex items-center gap-2.5 rounded-lg bg-white/5 p-2.5 sm:gap-3 sm:p-3 lg:p-2.5 2xl:bg-white/10"
+                    >
+                        <component
+                            :is="item.icon"
+                            class="size-5 shrink-0 text-amber-300 sm:size-6"
+                        />
+                        <div>
+                            <p class="text-[11px] text-white/70 sm:text-xs">
+                                {{ item.label }}
+                            </p>
+                            <p class="text-xs sm:text-sm">{{ item.value }}</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <RoomUnitModal v-model="unitModalOpen" :room="activeRoom" />

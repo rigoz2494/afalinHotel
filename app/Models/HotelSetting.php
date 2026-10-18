@@ -24,6 +24,7 @@ class HotelSetting extends Model
         'rooms' => ['en' => 'Our Rooms', 'ru' => 'Наши номера'],
         'pricing' => ['en' => 'Seasonal Rates & Special Offers', 'ru' => 'Сезонные тарифы и специальные предложения'],
         'about' => ['en' => 'A story of hospitality by the water', 'ru' => 'История гостеприимства у воды'],
+        'location' => ['en' => 'Our Location', 'ru' => 'Наше расположение'],
         'faq' => ['en' => 'Frequently Asked Questions', 'ru' => 'Часто задаваемые вопросы'],
         'contact' => ['en' => 'Request a Callback', 'ru' => 'Заказать обратный звонок'],
     ];

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Minus, Plus, Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
+import CustomCheckbox from '@/components/landing/CustomCheckbox.vue';
 import { useBookingBasket } from '@/composables/useBookingBasket';
 import { useBookingSubmission } from '@/composables/useBookingSubmission';
 import { useCurrency } from '@/composables/useCurrency';
@@ -165,11 +166,7 @@ const inputClass =
             <label
                 class="flex items-center gap-2 text-xs text-white/80 select-none sm:gap-2.5 sm:text-sm"
             >
-                <input
-                    v-model="wantsBalcony"
-                    type="checkbox"
-                    class="size-3.5 rounded border-white/25 bg-black/35 text-amber-300 focus:ring-amber-300/50 sm:size-4"
-                />
+                <CustomCheckbox v-model="wantsBalcony" />
                 {{ t('balconyPreference') }}
             </label>
             <textarea

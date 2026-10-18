@@ -3,6 +3,7 @@ import { useEventListener } from '@vueuse/core';
 import { ChevronDown, Percent, Minus, Plus, Sparkles, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ClientOnly from '@/components/ClientOnly.vue';
+import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { useBookingBasket } from '@/composables/useBookingBasket';
 import { useCurrency } from '@/composables/useCurrency';
 import { localized, useLocale } from '@/composables/useLocale';
@@ -53,15 +54,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
         id="pricing"
         class="relative flex h-screen max-h-screen items-stretch overflow-hidden bg-stone-950 px-4 pt-14 pb-5 text-stone-100 sm:px-6 sm:pt-16 sm:pb-8 lg:snap-start lg:pt-10 lg:pb-4"
     >
-        <div
-            class="absolute inset-0 scale-110 bg-cover bg-center opacity-20 blur-sm"
-            style="
-                background-image: url('https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1800&q=70');
-            "
-        ></div>
-        <div
-            class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950/90 to-amber-950/70"
-        ></div>
+        <SectionBackdrop name="pricing" />
 
         <!--
             A strict-height flex column at every size, not just desktop:
@@ -72,7 +65,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             rather than ever pushing the section past one screen's height.
         -->
         <div
-            class="relative mx-auto flex h-full w-full max-w-6xl flex-col gap-3 sm:gap-4 lg:gap-2"
+            class="relative mx-auto flex h-full w-full max-w-6xl flex-col gap-3 sm:gap-4 lg:gap-2 2xl:max-w-7xl"
         >
             <div>
                 <Sparkles class="size-5 text-amber-300 sm:size-7 lg:size-6" />

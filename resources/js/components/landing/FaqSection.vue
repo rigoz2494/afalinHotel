@@ -24,10 +24,10 @@ const displayAnswer = (item: FaqItem): string =>
 <template>
     <section
         id="faq"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-20 text-stone-100 sm:px-6 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
+        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
     >
-        <SectionBackdrop photo-id="photo-1542314831-068cd1dbfeeb" />
-        <div class="relative z-10 w-full max-w-3xl">
+        <SectionBackdrop name="faq" />
+        <div class="relative z-10 w-full max-w-3xl 2xl:max-w-4xl">
             <p
                 class="text-center text-sm tracking-widest text-amber-300 uppercase"
             >

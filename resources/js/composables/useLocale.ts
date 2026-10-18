@@ -36,6 +36,7 @@ const translations = {
     navRooms: { en: 'Rooms', ru: 'Номера' },
     navPricing: { en: 'Prices', ru: 'Цены' },
     navAbout: { en: 'About Us', ru: 'О нас' },
+    navLocation: { en: 'Location', ru: 'Расположение' },
     navFaq: { en: 'FAQ', ru: 'Вопросы' },
     navContact: { en: 'Contacts', ru: 'Контакты' },
     localizationControls: {
@@ -62,6 +63,7 @@ const translations = {
 
     // Rooms carousel
     roomCounter: { en: 'Room {n} / {total}', ru: 'Номер {n} из {total}' },
+    roomDetailsHeading: { en: 'Room Details', ru: 'Детали номера' },
     previousPhoto: { en: 'Previous photo', ru: 'Предыдущее фото' },
     nextPhoto: { en: 'Next photo', ru: 'Следующее фото' },
     showPhoto: { en: 'Show photo {n}', ru: 'Показать фото {n}' },
@@ -132,6 +134,16 @@ const translations = {
 
     // About
     openPhoto: { en: 'Open photo: {alt}', ru: 'Открыть фото: {alt}' },
+
+    // Location
+    locationIntro: {
+        en: 'Conveniently located in Feodosia, Republic of Crimea.',
+        ru: 'Удобно расположен в Феодосии, Республика Крым.',
+    },
+    openInYandexMaps: {
+        en: 'Open in Yandex Maps',
+        ru: 'Открыть в Яндекс Картах',
+    },
 
     // Contact
     contactIntro: {

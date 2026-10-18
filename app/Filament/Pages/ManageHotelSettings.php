@@ -425,6 +425,7 @@ class ManageHotelSettings extends Page
             'rooms' => __('Rooms'),
             'pricing' => __('Pricing'),
             'about' => __('About Us'),
+            'location' => __('Location'),
             'faq' => __('FAQ'),
             'contact' => __('Contact'),
         ];
@@ -449,7 +450,7 @@ class ManageHotelSettings extends Page
     {
         return array_map(
             fn (string $section): Hidden => Hidden::make("section_headings.{$section}.{$locale}"),
-            ['rooms', 'pricing', 'about', 'faq', 'contact'],
+            ['rooms', 'pricing', 'about', 'location', 'faq', 'contact'],
         );
     }
 

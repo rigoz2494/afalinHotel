@@ -23,7 +23,7 @@ const messengers = [
         id="contact"
         class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-5 text-white sm:px-6 sm:py-14 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
     >
-        <SectionBackdrop photo-id="photo-1520250497591-112f2f40a3f4" />
+        <SectionBackdrop name="contact" />
         <div
             class="relative z-10 mx-auto w-full max-w-6xl space-y-3 sm:space-y-6 lg:space-y-8"
         >
