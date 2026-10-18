@@ -247,8 +247,18 @@ onMounted(() => {
                 :additional-services="additionalServices"
             />
             <AboutSection :hotel="hotel" :images="gallery" />
-            <LocationSection :hotel="hotel" />
-            <ReviewsSection :hotel="hotel" />
+            <!--
+                Two independent sections below lg (each its own full,
+                snappable screen with its own id - unchanged), merged at lg
+                and up into a single side-by-side snap-stop instead: this
+                wrapper owns the height/snap there, letting both halves sit
+                in one view rather than two consecutive empty-feeling
+                screens on a wide monitor.
+            -->
+            <div class="lg:flex lg:h-screen lg:snap-start lg:items-stretch">
+                <LocationSection :hotel="hotel" class="lg:w-1/2" />
+                <ReviewsSection :hotel="hotel" class="lg:w-1/2" />
+            </div>
             <FaqSection :hotel="hotel" :faqs="faqs" />
             <ContactSection :hotel="hotel" />
         </main>

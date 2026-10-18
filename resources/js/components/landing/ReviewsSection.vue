@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
@@ -12,15 +13,22 @@ const { t, locale } = useLocale();
 const yandexOrgUrl = 'https://yandex.ru/maps/org/afalina/12100073003/';
 const yandexReviewsWidgetSrc =
     'https://yandex.ru/maps-reviews-widget/12100073003?comments';
+
+// Same reasoning as LocationSection's map overlay: this is a cross-origin
+// iframe with its own internal scroll (the comment list), which can
+// swallow a swipe meant for the page instead. Tap-to-unlock first.
+const reviewsUnlocked = ref(false);
 </script>
 
 <template>
     <section
         id="reviews"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
+        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-full lg:py-0 lg:pt-16"
     >
         <SectionBackdrop name="reviews" />
-        <div class="relative z-10 w-full max-w-2xl text-center">
+        <div
+            class="relative z-10 w-full max-w-2xl text-center lg:max-h-full lg:max-w-md lg:overflow-y-auto lg:py-2"
+        >
             <p class="text-sm tracking-widest text-amber-300 uppercase">
                 {{ t('navReviews') }}
             </p>
@@ -42,7 +50,7 @@ const yandexReviewsWidgetSrc =
                 rather than a clashing default embed.
             -->
             <div
-                class="mt-5 overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl sm:mt-6"
+                class="relative mt-5 overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl sm:mt-6"
             >
                 <iframe
                     :src="yandexReviewsWidgetSrc"
@@ -50,6 +58,16 @@ const yandexReviewsWidgetSrc =
                     class="h-[48vh] w-full sm:h-[52vh] lg:h-[55vh]"
                     loading="lazy"
                 ></iframe>
+                <button
+                    v-if="!reviewsUnlocked"
+                    type="button"
+                    class="absolute inset-0 flex cursor-pointer items-center justify-center bg-stone-950/20 text-sm font-medium text-stone-900 backdrop-blur-[1px] transition hover:bg-stone-950/10"
+                    @click="reviewsUnlocked = true"
+                >
+                    <span class="rounded-full bg-white px-4 py-2 shadow-lg">{{
+                        t('tapToUnlockReviews')
+                    }}</span>
+                </button>
             </div>
             <a
                 :href="yandexOrgUrl"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { MapPin } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
@@ -25,15 +25,26 @@ const displayAddress = computed(() => localized(address, locale.value));
 const yandexOrgUrl = 'https://yandex.ru/maps/org/afalina/12100073003/';
 const yandexMapWidgetSrc =
     'https://yandex.ru/map-widget/v1/org/afalina/12100073003/?ll=35.381746%2C45.037573&z=16';
+
+// The map is a cross-origin iframe, so there's no way to tell its own
+// pan/zoom gestures apart from a scroll of the page itself from here -
+// a finger (or scroll wheel) passing over it while scrolling the site
+// gets eaten by the map instead. This transparent tap-to-unlock overlay
+// is the standard fix: it owns the gesture first (so the page scrolls
+// normally), and steps aside for the real map underneath once the guest
+// deliberately taps it.
+const mapUnlocked = ref(false);
 </script>
 
 <template>
     <section
         id="location"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
+        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-full lg:border-r lg:border-white/10 lg:py-0 lg:pt-16"
     >
         <SectionBackdrop name="location" />
-        <div class="relative z-10 w-full max-w-3xl text-center 2xl:max-w-5xl">
+        <div
+            class="relative z-10 w-full max-w-3xl text-center lg:max-h-full lg:overflow-y-auto lg:py-2 2xl:max-w-5xl"
+        >
             <p class="text-sm tracking-widest text-amber-300 uppercase">
                 {{ t('navLocation') }}
             </p>
@@ -79,6 +90,17 @@ const yandexMapWidgetSrc =
                     loading="lazy"
                     allowfullscreen
                 ></iframe>
+                <button
+                    v-if="!mapUnlocked"
+                    type="button"
+                    class="absolute inset-0 flex cursor-pointer items-center justify-center bg-stone-950/40 text-sm font-medium text-white backdrop-blur-[1px] transition hover:bg-stone-950/25"
+                    @click="mapUnlocked = true"
+                >
+                    <span
+                        class="rounded-full bg-black/60 px-4 py-2 backdrop-blur-sm"
+                        >{{ t('tapToUnlockMap') }}</span
+                    >
+                </button>
             </div>
 
             <a

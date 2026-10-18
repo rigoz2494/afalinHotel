@@ -510,15 +510,48 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                     </table>
                 </div>
 
+                <!-- Below lg: still a button opening the drawer (not much
+                room to spare on a phone/tablet). At lg and up: there's no
+                need to hide this behind a click at all, so the same list
+                shows inline instead - it also gives the section real
+                content to fill out that space with, rather than a mostly
+                empty screen below the table on a wide monitor. -->
+                <div
+                    v-if="additionalServices.length"
+                    class="mt-3 hidden lg:block"
+                >
+                    <h3
+                        class="text-xs font-semibold tracking-widest text-amber-200 uppercase"
+                    >
+                        {{ t('additionalServicesTitle') }}
+                    </h3>
+                    <ul
+                        class="mt-2 divide-y divide-white/10 rounded-xl border border-white/10 bg-white/5"
+                    >
+                        <li
+                            v-for="service in additionalServices"
+                            :key="service.id"
+                            class="flex items-center justify-between gap-4 px-4 py-2 text-sm"
+                        >
+                            <span class="text-stone-100">{{
+                                localized(service.name, locale)
+                            }}</span>
+                            <span class="font-semibold text-amber-300">{{
+                                format(service.price)
+                            }}</span>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Directly beneath the grid/cards, centered — a sibling
                 inside this same scrollable area rather than a separate flex
                 item of the outer column, so its position tracks the
                 table/cards' own height instead of always sitting pinned to
                 the section's bottom edge regardless of how tall they are. -->
-                <div class="mt-3 flex justify-center lg:mt-2">
+                <div class="mt-3 flex justify-center lg:hidden">
                     <button
                         type="button"
-                        class="inline-flex items-center gap-1.5 rounded-full border border-amber-300/50 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-300/10 sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm lg:py-1.5"
+                        class="inline-flex items-center gap-1.5 rounded-full border border-amber-300/50 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-300/10 sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm"
                         @click="servicesOpen = true"
                     >
                         <Sparkles class="size-3.5 sm:size-4" />

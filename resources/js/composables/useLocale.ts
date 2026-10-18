@@ -149,6 +149,10 @@ const translations = {
         en: "Map showing the hotel's location",
         ru: 'Карта с расположением гостевого дома',
     },
+    tapToUnlockMap: {
+        en: 'Tap to interact with the map',
+        ru: 'Нажмите, чтобы открыть карту',
+    },
 
     // Reviews
     reviewsIntro: {
@@ -158,6 +162,10 @@ const translations = {
     reviewsWidgetTitle: {
         en: 'Guest reviews on Yandex Maps',
         ru: 'Отзывы гостей на Яндекс Картах',
+    },
+    tapToUnlockReviews: {
+        en: 'Tap to scroll through reviews',
+        ru: 'Нажмите, чтобы пролистать отзывы',
     },
 
     // Contact
