@@ -14,6 +14,7 @@ import Preloader from '@/components/landing/Preloader.vue';
 import PricingSection from '@/components/landing/PricingSection.vue';
 import ReviewsSection from '@/components/landing/ReviewsSection.vue';
 import RoomsSection from '@/components/landing/RoomsSection.vue';
+import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import SideNavDots from '@/components/landing/SideNavDots.vue';
 import {
     faqItems as mockFaqItems,
@@ -131,10 +132,10 @@ const navLinks = computed(() => [
     { id: 'rooms', label: t('navRooms') },
     { id: 'pricing', label: t('navPricing') },
     { id: 'about', label: t('navAbout') },
-    { id: 'location', label: t('navLocation') },
-    { id: 'reviews', label: t('navReviews') },
     { id: 'faq', label: t('navFaq') },
     { id: 'contact', label: t('navContact') },
+    { id: 'location', label: t('navLocation') },
+    { id: 'reviews', label: t('navReviews') },
 ]);
 
 const { activeId, scrollTo } = useScrollSpy(
@@ -247,20 +248,25 @@ onMounted(() => {
                 :additional-services="additionalServices"
             />
             <AboutSection :hotel="hotel" :images="gallery" />
+            <FaqSection :hotel="hotel" :faqs="faqs" />
+            <ContactSection :hotel="hotel" />
             <!--
                 Two independent sections below lg (each its own full,
                 snappable screen with its own id - unchanged), merged at lg
                 and up into a single side-by-side snap-stop instead: this
-                wrapper owns the height/snap there, letting both halves sit
-                in one view rather than two consecutive empty-feeling
-                screens on a wide monitor.
+                wrapper owns the height/snap/backdrop there, letting both
+                halves sit in one view - with one continuous photo behind
+                them instead of each half's own backdrop fighting the
+                other's color right at the shared seam - rather than two
+                consecutive empty-feeling screens on a wide monitor.
             -->
-            <div class="lg:flex lg:h-screen lg:snap-start lg:items-stretch">
+            <div
+                class="relative lg:flex lg:h-screen lg:snap-start lg:items-stretch"
+            >
+                <SectionBackdrop name="reviews" class="hidden lg:block" />
                 <LocationSection :hotel="hotel" class="lg:w-1/2" />
                 <ReviewsSection :hotel="hotel" class="lg:w-1/2" />
             </div>
-            <FaqSection :hotel="hotel" :faqs="faqs" />
-            <ContactSection :hotel="hotel" />
         </main>
 
         <SideNavDots

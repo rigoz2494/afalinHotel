@@ -41,7 +41,7 @@ const mapUnlocked = ref(false);
         id="location"
         class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-full lg:border-r lg:border-white/10 lg:py-0 lg:pt-16"
     >
-        <SectionBackdrop name="location" />
+        <SectionBackdrop name="location" class="lg:hidden" />
         <div
             class="relative z-10 w-full max-w-3xl text-center lg:max-h-full lg:overflow-y-auto lg:py-2 2xl:max-w-5xl"
         >

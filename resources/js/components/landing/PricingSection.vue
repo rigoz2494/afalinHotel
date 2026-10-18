@@ -52,20 +52,23 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 <template>
     <section
         id="pricing"
-        class="relative flex h-screen max-h-screen items-stretch justify-center overflow-hidden bg-stone-950 px-4 pt-14 pb-5 text-stone-100 sm:px-6 sm:pt-16 sm:pb-8 lg:snap-start lg:pt-10 lg:pb-4"
+        class="relative flex min-h-screen items-stretch justify-center overflow-hidden bg-stone-950 px-4 pt-14 pb-5 text-stone-100 sm:px-6 sm:pt-16 sm:pb-8 lg:h-screen lg:max-h-screen lg:snap-start lg:pt-10 lg:pb-4"
     >
         <SectionBackdrop name="pricing" />
 
         <!--
-            A strict-height flex column at every size, not just desktop:
-            intro/heading hugs the top, and the grid/cards plus the
-            "Additional Services" button below them share the remaining
-            space (`min-h-0 flex-1 overflow-y-auto`), so that whole group
+            A strict-height flex column at lg and up only, matching every
+            other section (min-h-screen below that, so mobile scrolls
+            normally with the rest of the page instead of confining this
+            to one screen with its own internal scrollbar): intro/heading
+            hugs the top, and the grid/cards plus the "Additional Services"
+            button below them share the remaining space
+            (`min-h-0 flex-1 overflow-y-auto`), so that whole group
             compresses or scrolls internally to whatever room is left
             rather than ever pushing the section past one screen's height.
         -->
         <div
-            class="relative mx-auto flex h-full w-full max-w-6xl flex-col gap-3 sm:gap-4 lg:gap-2 2xl:max-w-7xl"
+            class="relative mx-auto flex w-full max-w-6xl flex-col gap-3 sm:gap-4 lg:h-full lg:gap-2 2xl:max-w-7xl"
         >
             <div>
                 <Sparkles class="size-5 text-amber-300 sm:size-7 lg:size-6" />
