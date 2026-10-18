@@ -1,21 +1,39 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 /**
- * Tracks which section(s) are mostly visible on screen. A set, not a single
- * id: Location and Reviews share one viewport side by side at `lg` and up
- * (see Landing.vue), so both can be simultaneously intersecting at once -
- * a single "last one wins" id would make one of them permanently
- * unhighlightable.
+ * Tracks which section is mostly visible on screen, and which single nav
+ * link should show as active.
+ *
+ * Location and Reviews share one viewport side by side at `lg` and up
+ * (see Landing.vue), so both can be simultaneously intersecting at once.
+ * When that happens, whichever one the guest actually clicked (or
+ * scrolled past first, if they never clicked either) wins, rather than
+ * both lighting up together - correct in the literal "both are in view"
+ * sense, but it reads as broken, since from the guest's side they picked
+ * one specific thing to look at.
  */
 export function useScrollSpy(sectionIds: string[]) {
-    const activeIds = ref<Set<string>>(
-        new Set(sectionIds[0] ? [sectionIds[0]] : []),
-    );
+    const activeId = ref<string>(sectionIds[0] ?? '');
     let observer: IntersectionObserver | null = null;
+    const visible = new Set<string>();
+    let lastClicked: string | null = null;
+
+    const pickActiveId = (): void => {
+        if (visible.size === 0) {
+            return;
+        }
+
+        if (lastClicked && visible.has(lastClicked)) {
+            activeId.value = lastClicked;
+
+            return;
+        }
+
+        activeId.value =
+            sectionIds.find((id) => visible.has(id)) ?? activeId.value;
+    };
 
     onMounted(() => {
-        const visible = new Set<string>();
-
         observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -26,12 +44,7 @@ export function useScrollSpy(sectionIds: string[]) {
                     }
                 });
 
-                // Between sections (e.g. mid-scroll), nothing is past the
-                // 0.6 threshold yet - keep the previous highlight rather
-                // than flashing every nav link off for a moment.
-                if (visible.size > 0) {
-                    activeIds.value = new Set(visible);
-                }
+                pickActiveId();
             },
             // root: null (the browser viewport) rather than <main> - that's
             // only a clipped, viewport-sized scroll area at `lg` and up,
@@ -54,8 +67,9 @@ export function useScrollSpy(sectionIds: string[]) {
     onBeforeUnmount(() => observer?.disconnect());
 
     const scrollTo = (id: string): void => {
+        lastClicked = id;
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    return { activeIds, scrollTo };
+    return { activeId, scrollTo };
 }

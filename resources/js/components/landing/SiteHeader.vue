@@ -10,7 +10,7 @@ import { useLocale } from '@/composables/useLocale';
 const props = defineProps<{
     hotelName: string | null;
     links: { id: string; label: string }[];
-    activeIds: Set<string>;
+    activeId: string;
     /** False in a strict "Global Language Mode" — see Landing.vue. */
     showLocalizationControls: boolean;
 }>();
@@ -28,7 +28,7 @@ const navigate = (id: string): void => {
 // The user may scroll (e.g. via the floating button) while the mobile
 // menu is open; close it so it doesn't linger over the new section.
 watch(
-    () => props.activeIds,
+    () => props.activeId,
     () => {
         mobileMenuOpen.value = false;
     },
@@ -89,7 +89,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                         :href="`#${link.id}`"
                         class="shrink-0 rounded-full px-3 py-1.5 whitespace-nowrap transition md:px-4"
                         :class="
-                            activeIds.has(link.id)
+                            activeId === link.id
                                 ? 'bg-white text-slate-900'
                                 : 'text-white/75 hover:bg-white/10 hover:text-white'
                         "
@@ -174,7 +174,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                             :href="`#${link.id}`"
                             class="rounded-lg px-3 py-2.5 text-sm font-medium tracking-wide transition"
                             :class="
-                                activeIds.has(link.id)
+                                activeId === link.id
                                     ? 'bg-white text-slate-900'
                                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                             "

@@ -3,7 +3,7 @@ import { useLocale } from '@/composables/useLocale';
 
 defineProps<{
     links: { id: string; label: string }[];
-    activeIds: Set<string>;
+    activeId: string;
 }>();
 
 defineEmits<{ navigate: [id: string] }>();
@@ -22,15 +22,13 @@ const { t } = useLocale();
             type="button"
             class="group relative flex items-center justify-center p-1.5"
             :aria-label="t('goTo', { label: link.label })"
-            :aria-current="activeIds.has(link.id) ? 'true' : undefined"
+            :aria-current="activeId === link.id ? 'true' : undefined"
             @click="$emit('navigate', link.id)"
         >
             <span
                 class="rounded-full bg-white/40 transition-all duration-300 group-hover:bg-amber-200"
                 :class="
-                    activeIds.has(link.id)
-                        ? 'size-2.5 bg-amber-300'
-                        : 'size-1.5'
+                    activeId === link.id ? 'size-2.5 bg-amber-300' : 'size-1.5'
                 "
             ></span>
             <span
