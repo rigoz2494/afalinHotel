@@ -31,6 +31,8 @@ class BilingualSectionHeadingsTest extends TestCase
                 'section_headings.rooms.ru' => 'Наши номера',
                 'section_headings.location.en' => 'Find Us',
                 'section_headings.location.ru' => 'Как нас найти',
+                'section_headings.reviews.en' => 'Guest Reviews',
+                'section_headings.reviews.ru' => 'Отзывы гостей',
                 'section_headings.contact.en' => 'Get in Touch',
                 'section_headings.contact.ru' => 'Связаться с нами',
             ])
@@ -43,6 +45,8 @@ class BilingualSectionHeadingsTest extends TestCase
         $this->assertSame('Наши номера', $stored['rooms']['ru']);
         $this->assertSame('Find Us', $stored['location']['en']);
         $this->assertSame('Как нас найти', $stored['location']['ru']);
+        $this->assertSame('Guest Reviews', $stored['reviews']['en']);
+        $this->assertSame('Отзывы гостей', $stored['reviews']['ru']);
         $this->assertSame('Get in Touch', $stored['contact']['en']);
         $this->assertSame('Связаться с нами', $stored['contact']['ru']);
     }
@@ -63,6 +67,8 @@ class BilingualSectionHeadingsTest extends TestCase
                 ->where('hotel.section_headings.rooms.ru', 'Наши номера')
                 ->where('hotel.section_headings.location.en', 'Our Location')
                 ->where('hotel.section_headings.location.ru', 'Наше расположение')
+                ->where('hotel.section_headings.reviews.en', 'What Our Guests Say')
+                ->where('hotel.section_headings.reviews.ru', 'Отзывы наших гостей')
                 ->where('hotel.section_headings.contact.en', 'Request a Callback')
                 ->where('hotel.section_headings.contact.ru', 'Заказать обратный звонок'));
     }

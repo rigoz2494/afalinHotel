@@ -52,7 +52,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 <template>
     <section
         id="pricing"
-        class="relative flex h-screen max-h-screen items-stretch overflow-hidden bg-stone-950 px-4 pt-14 pb-5 text-stone-100 sm:px-6 sm:pt-16 sm:pb-8 lg:snap-start lg:pt-10 lg:pb-4"
+        class="relative flex h-screen max-h-screen items-stretch justify-center overflow-hidden bg-stone-950 px-4 pt-14 pb-5 text-stone-100 sm:px-6 sm:pt-16 sm:pb-8 lg:snap-start lg:pt-10 lg:pb-4"
     >
         <SectionBackdrop name="pricing" />
 

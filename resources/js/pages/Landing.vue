@@ -12,6 +12,7 @@ import HeroSection from '@/components/landing/HeroSection.vue';
 import LocationSection from '@/components/landing/LocationSection.vue';
 import Preloader from '@/components/landing/Preloader.vue';
 import PricingSection from '@/components/landing/PricingSection.vue';
+import ReviewsSection from '@/components/landing/ReviewsSection.vue';
 import RoomsSection from '@/components/landing/RoomsSection.vue';
 import SideNavDots from '@/components/landing/SideNavDots.vue';
 import {
@@ -131,6 +132,7 @@ const navLinks = computed(() => [
     { id: 'pricing', label: t('navPricing') },
     { id: 'about', label: t('navAbout') },
     { id: 'location', label: t('navLocation') },
+    { id: 'reviews', label: t('navReviews') },
     { id: 'faq', label: t('navFaq') },
     { id: 'contact', label: t('navContact') },
 ]);
@@ -246,6 +248,7 @@ onMounted(() => {
             />
             <AboutSection :hotel="hotel" :images="gallery" />
             <LocationSection :hotel="hotel" />
+            <ReviewsSection :hotel="hotel" />
             <FaqSection :hotel="hotel" :faqs="faqs" />
             <ContactSection :hotel="hotel" />
         </main>

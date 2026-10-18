@@ -37,6 +37,7 @@ const translations = {
     navPricing: { en: 'Prices', ru: 'Цены' },
     navAbout: { en: 'About Us', ru: 'О нас' },
     navLocation: { en: 'Location', ru: 'Расположение' },
+    navReviews: { en: 'Reviews', ru: 'Отзывы' },
     navFaq: { en: 'FAQ', ru: 'Вопросы' },
     navContact: { en: 'Contacts', ru: 'Контакты' },
     localizationControls: {
@@ -143,6 +144,20 @@ const translations = {
     openInYandexMaps: {
         en: 'Open in Yandex Maps',
         ru: 'Открыть в Яндекс Картах',
+    },
+    locationMapTitle: {
+        en: "Map showing the hotel's location",
+        ru: 'Карта с расположением гостевого дома',
+    },
+
+    // Reviews
+    reviewsIntro: {
+        en: 'Real reviews from real guests, straight from our Yandex Maps listing.',
+        ru: 'Настоящие отзывы настоящих гостей — напрямую с нашей страницы на Яндекс Картах.',
+    },
+    reviewsWidgetTitle: {
+        en: 'Guest reviews on Yandex Maps',
+        ru: 'Отзывы гостей на Яндекс Картах',
     },
 
     // Contact
