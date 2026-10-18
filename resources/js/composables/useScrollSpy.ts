@@ -1,20 +1,37 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 /**
- * Tracks which section is mostly visible on screen.
+ * Tracks which section(s) are mostly visible on screen. A set, not a single
+ * id: Location and Reviews share one viewport side by side at `lg` and up
+ * (see Landing.vue), so both can be simultaneously intersecting at once -
+ * a single "last one wins" id would make one of them permanently
+ * unhighlightable.
  */
 export function useScrollSpy(sectionIds: string[]) {
-    const activeId = ref<string>(sectionIds[0] ?? '');
+    const activeIds = ref<Set<string>>(
+        new Set(sectionIds[0] ? [sectionIds[0]] : []),
+    );
     let observer: IntersectionObserver | null = null;
 
     onMounted(() => {
+        const visible = new Set<string>();
+
         observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        activeId.value = entry.target.id;
+                        visible.add(entry.target.id);
+                    } else {
+                        visible.delete(entry.target.id);
                     }
                 });
+
+                // Between sections (e.g. mid-scroll), nothing is past the
+                // 0.6 threshold yet - keep the previous highlight rather
+                // than flashing every nav link off for a moment.
+                if (visible.size > 0) {
+                    activeIds.value = new Set(visible);
+                }
             },
             // root: null (the browser viewport) rather than <main> - that's
             // only a clipped, viewport-sized scroll area at `lg` and up,
@@ -40,5 +57,5 @@ export function useScrollSpy(sectionIds: string[]) {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    return { activeId, scrollTo };
+    return { activeIds, scrollTo };
 }

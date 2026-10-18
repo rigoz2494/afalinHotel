@@ -138,11 +138,11 @@ const navLinks = computed(() => [
     { id: 'reviews', label: t('navReviews') },
 ]);
 
-const { activeId, scrollTo } = useScrollSpy(
+const { activeIds, scrollTo } = useScrollSpy(
     navLinks.value.map((link) => link.id),
 );
 
-const showBackToTop = computed(() => activeId.value !== 'hero');
+const showBackToTop = computed(() => !activeIds.value.has('hero'));
 const bookingModalOpen = ref(false);
 
 // SEO: the room this exact URL is about, if any. Its own name, description
@@ -228,7 +228,7 @@ onMounted(() => {
         <SiteHeader
             :hotel-name="hotelName"
             :links="navLinks"
-            :active-id="activeId"
+            :active-ids="activeIds"
             :show-localization-controls="showLocalizationControls"
             @navigate="scrollTo"
         />
@@ -271,7 +271,7 @@ onMounted(() => {
 
         <SideNavDots
             :links="navLinks"
-            :active-id="activeId"
+            :active-ids="activeIds"
             @navigate="scrollTo"
         />
 

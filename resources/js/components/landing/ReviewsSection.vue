@@ -47,7 +47,11 @@ const reviewsUnlocked = ref(false);
                 here. The widget itself is a light card (Yandex's own
                 styling, not restylable from here), so it's framed to read
                 as an intentional bright highlight against the dark section
-                rather than a clashing default embed.
+                rather than a clashing default embed. `dvh`, not `vh`, below
+                lg: a mobile browser's address bar eats into `vh` without
+                actually shrinking the real visible area, so a `vh`-sized
+                box was cropping this tall enough that no comment - only
+                the rating header - ever fit in view.
             -->
             <div
                 class="relative mt-5 overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl sm:mt-6"
@@ -55,7 +59,7 @@ const reviewsUnlocked = ref(false);
                 <iframe
                     :src="yandexReviewsWidgetSrc"
                     :title="t('reviewsWidgetTitle')"
-                    class="h-[48vh] w-full sm:h-[52vh] lg:h-[55vh]"
+                    class="h-[70dvh] w-full sm:h-[65dvh] lg:h-[55vh]"
                     loading="lazy"
                 ></iframe>
                 <button
