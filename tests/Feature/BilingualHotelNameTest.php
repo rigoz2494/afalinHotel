@@ -23,7 +23,7 @@ class BilingualHotelNameTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->fillForm([
                 'hotel_name.en' => 'Afalina',
                 'hotel_name.ru' => 'Афалина',
@@ -66,7 +66,7 @@ class BilingualHotelNameTest extends TestCase
 
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->assertFormSet([
                 'hotel_name.en' => 'Afalina',
                 'hotel_name.ru' => 'Афалина',

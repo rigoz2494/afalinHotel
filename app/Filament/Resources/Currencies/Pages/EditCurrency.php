@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Currencies\Pages;
 
 use App\Filament\Resources\Currencies\CurrencyResource;
+use App\Models\Currency;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -14,7 +15,7 @@ class EditCurrency extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->hidden(fn (): bool => $this->getRecord()->is_base),
+                ->hidden(fn (Currency $record): bool => $record->is_base),
         ];
     }
 

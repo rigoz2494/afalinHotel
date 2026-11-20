@@ -177,7 +177,7 @@ class CallbackRequestService
         // discount from.
         $discount = $period === null
             ? null
-            : ($override?->discount_percentage ?? $room->discount_percentage);
+            : ($override->discount_percentage ?? $room->discount_percentage);
 
         $basePrice = $discount ? round($regularPrice * (1 - $discount / 100)) : $regularPrice;
 
@@ -226,7 +226,7 @@ class CallbackRequestService
 
         return [
             'service_id' => $service->id,
-            'name' => $service->name['en'] ?? $service->name['ru'] ?? '',
+            'name' => (is_array($service->name) ? ($service->name['en'] ?? $service->name['ru'] ?? '') : $service->name),
             'currency' => $currency->code,
             'base_price' => (float) $service->price,
             'price' => (float) round($service->price * $currency->exchange_rate),

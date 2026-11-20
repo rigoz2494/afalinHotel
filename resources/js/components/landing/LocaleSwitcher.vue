@@ -15,7 +15,7 @@ const onChange = (event: Event): void => {
         <select
             :value="locale"
             :aria-label="t('languageLabel')"
-            class="appearance-none rounded-full border border-white/20 bg-white/10 py-1.5 pr-7 pl-3 text-xs font-medium text-white transition hover:border-amber-300/50 hover:bg-amber-300/10 focus:border-amber-300 focus:outline-none sm:text-sm"
+            class="coast-light-select border-coast-line text-coast-ink hover:border-coast-blue/50 hover:bg-coast-mist focus:border-coast-blue appearance-none rounded-lg border bg-white py-1.5 pr-7 pl-3 text-xs font-medium transition focus:outline-none sm:text-sm"
             @change="onChange"
         >
             <option
@@ -27,7 +27,7 @@ const onChange = (event: Event): void => {
             </option>
         </select>
         <ChevronDown
-            class="pointer-events-none absolute right-2 size-3.5 text-white/70"
+            class="text-coast-muted pointer-events-none absolute right-2 size-3.5"
             aria-hidden="true"
         />
     </div>

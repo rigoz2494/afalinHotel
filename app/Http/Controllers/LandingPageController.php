@@ -8,6 +8,7 @@ use App\Http\Resources\FaqResource;
 use App\Http\Resources\GalleryImageResource;
 use App\Http\Resources\HotelSettingsResource;
 use App\Http\Resources\RoomResource;
+use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Services\AdditionalServiceService;
 use App\Services\CurrencyService;
@@ -36,9 +37,15 @@ class LandingPageController extends Controller
         }
 
         $table = $pricing->table();
+        $hotel = HotelSettingsResource::make($settings->all())->resolve();
+
+        if ($request->user() && $request->query->has('preview_theme') && $request->hasValidSignature()) {
+            $hotel['seasonal_theme'] = HotelSetting::seasonalTheme($request->query->get('preview_theme'));
+        }
 
         return Inertia::render('Landing', [
-            'hotel' => HotelSettingsResource::make($settings->all())->resolve(),
+            'hotel' => $hotel,
+            'showDemoData' => app()->environment('local'),
             'currencies' => CurrencyResource::collection($currencies->selectable())->resolve(),
             'rooms' => RoomResource::collection($rooms->listActive()),
             'faqs' => FaqResource::collection($faqs->listActive()),

@@ -7,33 +7,33 @@ import { Compass } from '@lucide/vue';
     <Head title="Page not found - Afalina" />
 
     <div
-        class="relative flex min-h-screen items-center justify-center overflow-hidden bg-stone-950 px-4 py-20 text-center text-stone-100 sm:px-6"
+        class="bg-coast-deep relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-20 text-center text-white sm:px-6"
     >
         <div
-            class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950/95 to-amber-950/60"
+            class="from-coast-deep via-coast-deep to-coast-blue/60 absolute inset-0 bg-linear-to-br"
             aria-hidden="true"
         ></div>
 
         <div class="relative z-10 flex max-w-lg flex-col items-center">
             <img
-                src="/images/hotel-logo.svg"
+                src="/images/afalina-logo.webp"
                 alt=""
-                class="mb-6 h-14 w-auto opacity-90"
+                class="bg-coast-paper mb-6 h-16 w-auto rounded-lg p-1.5"
             />
 
             <Compass
                 :stroke-width="1.25"
-                class="not-found-compass mb-4 size-14 text-amber-300 sm:size-16"
+                class="not-found-compass text-coast-tide mb-4 size-14 sm:size-16"
                 aria-hidden="true"
             />
 
             <p
-                class="text-xs tracking-widest text-amber-300/80 uppercase sm:text-sm"
+                class="text-coast-tide text-xs tracking-widest uppercase sm:text-sm"
             >
                 Error 404
             </p>
             <h1
-                class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl"
+                class="font-coastal-heading mt-3 text-3xl tracking-tight sm:text-4xl md:text-5xl"
             >
                 This page has sailed off the map
             </h1>
@@ -44,7 +44,7 @@ import { Compass } from '@lucide/vue';
 
             <Link
                 href="/"
-                class="not-found-cta group mt-8 inline-flex items-center gap-2 rounded-full bg-amber-300 px-7 py-3 text-sm font-medium text-stone-900 transition hover:bg-amber-200 sm:text-base"
+                class="not-found-cta group bg-coast-tide text-coast-ink mt-8 inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-medium transition hover:bg-sky-100 sm:text-base"
             >
                 Back to the hotel
                 <span

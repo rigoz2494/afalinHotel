@@ -15,7 +15,10 @@ const props = defineProps<{
     showLocalizationControls: boolean;
 }>();
 
-const emit = defineEmits<{ navigate: [id: string] }>();
+const emit = defineEmits<{
+    navigate: [id: string];
+    openBooking: [];
+}>();
 const { t } = useLocale();
 
 const mobileMenuOpen = ref(false);
@@ -23,6 +26,11 @@ const mobileMenuOpen = ref(false);
 const navigate = (id: string): void => {
     mobileMenuOpen.value = false;
     emit('navigate', id);
+};
+
+const openBooking = (): void => {
+    mobileMenuOpen.value = false;
+    emit('openBooking');
 };
 
 // The user may scroll (e.g. via the floating button) while the mobile
@@ -56,24 +64,21 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 <template>
     <div>
         <header
-            class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/40 text-white backdrop-blur-md"
+            class="border-coast-line bg-coast-paper/95 text-coast-ink fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md"
         >
             <div
-                class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-4 sm:h-16 sm:gap-3 sm:px-6"
+                class="max-w-landing mx-auto flex h-14 items-center justify-between gap-2 px-4 sm:h-16 sm:gap-3 sm:px-6 lg:px-8"
             >
                 <a
                     href="#hero"
-                    class="flex min-w-0 shrink-0 items-center gap-2 text-base font-semibold tracking-wide sm:text-lg"
+                    class="flex shrink-0 items-center"
                     @click.prevent="navigate('hero')"
                 >
                     <img
-                        src="/images/hotel-logo.svg"
-                        alt=""
-                        class="h-7 w-auto shrink-0 sm:h-10"
+                        src="/images/afalina-logo.webp"
+                        :alt="hotelName ?? 'Afalina'"
+                        class="h-10 w-auto sm:h-12"
                     />
-                    <span class="max-w-[9rem] truncate sm:max-w-none">{{
-                        hotelName
-                    }}</span>
                 </a>
 
                 <!-- min-w-0 lets this shrink below its content's width (the
@@ -81,17 +86,20 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 than the viewport); overflow-x-auto is a last-resort safety
                 net if labels are ever still too long to fit even so. -->
                 <nav
-                    class="hidden min-w-0 flex-1 justify-center gap-1 overflow-x-auto text-sm md:flex md:gap-1.5"
+                    class="hidden min-w-0 flex-1 justify-center-safe gap-0.5 overflow-x-auto text-sm xl:flex"
                 >
                     <a
                         v-for="link in links"
                         :key="link.id"
                         :href="`#${link.id}`"
-                        class="shrink-0 rounded-full px-3 py-1.5 whitespace-nowrap transition md:px-4"
+                        class="shrink-0 border-b-2 px-2.5 py-1.5 whitespace-nowrap transition"
+                        :aria-current="
+                            activeId === link.id ? 'location' : undefined
+                        "
                         :class="
                             activeId === link.id
-                                ? 'bg-white text-slate-900'
-                                : 'text-white/75 hover:bg-white/10 hover:text-white'
+                                ? 'border-coast-blue text-coast-blue'
+                                : 'text-coast-ink hover:text-coast-blue border-transparent'
                         "
                         @click.prevent="navigate(link.id)"
                     >
@@ -110,7 +118,15 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 
                 <button
                     type="button"
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 md:hidden"
+                    class="bg-coast-blue hover:bg-coast-ink hidden shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white transition xl:block"
+                    @click="openBooking"
+                >
+                    {{ t('bookNow') }}
+                </button>
+
+                <button
+                    type="button"
+                    class="bg-coast-mist hover:bg-coast-line flex size-10 shrink-0 items-center justify-center rounded-lg transition xl:hidden"
                     :aria-expanded="mobileMenuOpen"
                     :aria-label="t('toggleNavigationMenu')"
                     @click="mobileMenuOpen = !mobileMenuOpen"
@@ -139,7 +155,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 >
                     <div
                         v-if="mobileMenuOpen"
-                        class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+                        class="bg-coast-deep/50 fixed inset-0 z-40 backdrop-blur-sm xl:hidden"
                         @click="mobileMenuOpen = false"
                     ></div>
                 </Transition>
@@ -152,14 +168,9 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                 >
                     <nav
                         v-if="mobileMenuOpen"
-                        class="fixed inset-y-0 right-0 z-40 flex w-[78%] max-w-xs flex-col gap-1 bg-slate-950/98 px-5 pt-24 pb-10 shadow-2xl md:hidden"
+                        class="bg-coast-paper text-coast-ink fixed inset-y-0 right-0 z-40 flex w-[78%] max-w-xs flex-col gap-1 overflow-y-auto px-5 pt-20 pb-6 shadow-2xl xl:hidden"
                         :aria-label="t('navigationMenu')"
                     >
-                        <p
-                            class="mb-2 px-3 text-[11px] tracking-widest text-white/40 uppercase"
-                        >
-                            {{ t('menuLabel') }}
-                        </p>
                         <div
                             v-if="showLocalizationControls"
                             class="mb-4 flex items-center gap-1.5"
@@ -175,13 +186,20 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                             class="rounded-lg px-3 py-2.5 text-sm font-medium tracking-wide transition"
                             :class="
                                 activeId === link.id
-                                    ? 'bg-white text-slate-900'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                                    ? 'bg-coast-mist text-coast-blue font-semibold'
+                                    : 'hover:bg-coast-mist'
                             "
                             @click.prevent="navigate(link.id)"
                         >
                             {{ link.label }}
                         </a>
+                        <button
+                            type="button"
+                            class="bg-coast-blue hover:bg-coast-ink mt-4 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
+                            @click="openBooking"
+                        >
+                            {{ t('bookNow') }}
+                        </button>
                     </nav>
                 </Transition>
             </Teleport>

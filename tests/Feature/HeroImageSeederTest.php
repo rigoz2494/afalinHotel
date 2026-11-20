@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 /**
  * HeroImageSeeder reads the hotel's own real photos from
- * public/seedImgs/hero, so every test here fakes the public disk — the
+ * public/seedImgs/hero/afalina, so every test here fakes the public disk — the
  * actual WebP conversion pipeline (ImageOptimizer) is exercised for real,
  * but nothing is written to the real storage directory during a test run.
  */
@@ -26,7 +26,9 @@ class HeroImageSeederTest extends TestCase
 
         $paths = HotelSetting::query()->where('key', 'hero_images')->firstOrFail()->value;
 
-        $this->assertCount(5, $paths);
+        $this->assertCount(2, $paths);
+        $this->assertStringStartsWith('hero-slideshow/00-pool-and-hotel-', $paths[0]);
+        $this->assertStringStartsWith('hero-slideshow/01-hotel-and-seafront-', $paths[1]);
 
         foreach ($paths as $path) {
             $this->assertStringStartsWith('hero-slideshow/', $path);
@@ -35,7 +37,7 @@ class HeroImageSeederTest extends TestCase
         }
     }
 
-    public function test_reseeding_replaces_the_previous_runs_files_instead_of_piling_up(): void
+    public function test_reseeding_preserves_existing_files(): void
     {
         Storage::fake('public');
 
@@ -45,10 +47,10 @@ class HeroImageSeederTest extends TestCase
         $this->seed(HeroImageSeeder::class);
         $secondRunPaths = HotelSetting::query()->where('key', 'hero_images')->firstOrFail()->value;
 
-        $this->assertCount(5, $secondRunPaths);
+        $this->assertSame($firstRunPaths, $secondRunPaths);
 
         foreach ($firstRunPaths as $path) {
-            Storage::disk('public')->assertMissing($path);
+            Storage::disk('public')->assertExists($path);
         }
     }
 }

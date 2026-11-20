@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $special_requests
  * @property string|null $special_requests_translated
  * @property string|null $room_number
- * @property array<int, array{room_id: int, room_name: string, period: string|null, currency: string, base_price: float, price: float, quantity: int}> $rooms
+ * @property array<int, array{room_id?: int, room_name: string, period?: string|null, currency?: string, base_price?: float, price?: float, quantity?: int}>|null $rooms
  * @property array<int, array{service_id: int, name: string, currency: string, base_price: float, price: float, quantity: int}> $services
  * @property float $total_price
  * @property string|null $currency

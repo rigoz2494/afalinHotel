@@ -20,7 +20,8 @@ class HotelSettingsResource extends JsonResource
         // Absolute, not relative: these are shared as og:image previews on
         // Telegram/WhatsApp, which fetch the image directly and can't
         // resolve a path relative to the page.
-        $heroImages = collect($this->resource['hero_images'] ?? [])
+        $storedHeroImages = $this->resource['hero_images'] ?? [];
+        $heroImages = collect(is_array($storedHeroImages) ? $storedHeroImages : [])
             ->map(fn (string $path): string => str_starts_with($path, 'http') ? $path : url(Storage::disk('public')->url($path)))
             ->values()
             ->all();
@@ -37,6 +38,7 @@ class HotelSettingsResource extends JsonResource
             // HotelSetting::normalizedPromoBanner().
             'promo_banner' => HotelSetting::normalizedPromoBanner($this->resource['promo_banner'] ?? null),
             'hero_images' => $heroImages,
+            'seasonal_theme' => HotelSetting::seasonalTheme($this->resource['seasonal_theme'] ?? null),
             'contacts' => $this->resource['contacts'] ?? [],
             // Any section/locale the admin hasn't set yet falls back to a
             // sensible default, so the page never renders a blank title. Both
@@ -44,10 +46,10 @@ class HotelSettingsResource extends JsonResource
             'section_headings' => HotelSetting::defaultedSectionHeadings($this->resource['section_headings'] ?? []),
             // The three About Us marketing badges (label + value, each
             // bilingual) — see HotelSetting::defaultedAboutStats().
-            'about_stats' => HotelSetting::defaultedAboutStats($this->resource['about_stats'] ?? []),
+            'about_stats' => HotelSetting::defaultedAboutStats($this->resource['about_stats'] ?? [], withSampleContent: ! app()->isProduction()),
             // The About Us section's own story text, both languages always
             // sent — see HotelSetting::defaultedAboutStory().
-            'about_story' => HotelSetting::defaultedAboutStory($this->resource['about_story'] ?? null),
+            'about_story' => HotelSetting::defaultedAboutStory($this->resource['about_story'] ?? null, withSampleContent: ! app()->isProduction()),
             // The preloader's playful status phrases — see
             // HotelSetting::defaultedPreloaderPhrases().
             'preloader_phrases' => HotelSetting::defaultedPreloaderPhrases($this->resource['preloader_phrases'] ?? null),

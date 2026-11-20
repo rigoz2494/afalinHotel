@@ -34,7 +34,8 @@ class BookingsChart extends ChartWidget
         $counts = [];
 
         for ($date = $start->copy(); $date->lte(today()); $date = $date->addDay()) {
-            $labels[] = $date->locale(app()->getLocale())->isoFormat('MMM D');
+            $date->locale(app()->getLocale());
+            $labels[] = $date->isoFormat('MMM D');
             $counts[] = (int) ($countsByDate[$date->format('Y-m-d')] ?? 0);
         }
 

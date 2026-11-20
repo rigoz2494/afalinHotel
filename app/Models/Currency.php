@@ -96,7 +96,7 @@ class Currency extends Model
      */
     public static function baseSymbol(): string
     {
-        return static::base()?->symbol ?? '$';
+        return static::base()->symbol ?? '$';
     }
 
     /**

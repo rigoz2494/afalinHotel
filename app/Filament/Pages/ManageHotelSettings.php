@@ -6,6 +6,7 @@ use App\Models\HotelSetting;
 use App\Models\User;
 use App\Services\ImageOptimizer;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\KeyValue;
@@ -21,11 +22,16 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\URL;
+use Livewire\Attributes\Locked;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use UnitEnum;
 
+/** @property-read Schema $form */
 class ManageHotelSettings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHome;
@@ -61,21 +67,64 @@ class ManageHotelSettings extends Page
         return __('System Settings');
     }
 
-    public function mount(): void
+    private const array SECTIONS = [
+        'general' => ['Platform', 'Contact details'],
+        'homepage' => ['Homepage hero', 'Section headings', 'About Us Statistics'],
+        'appearance' => ['Seasonal appearance', 'Preloader Loading Phrases'],
+        'notifications' => ['Notification Settings'],
+        'account' => ['Admin Account Settings'],
+    ];
+
+    private const array FIELDS = [
+        'general' => ['locale_mode', 'contacts'],
+        'homepage' => ['hotel_name', 'tagline', 'promo_banner', 'hero_images', 'section_headings', 'about_stats', 'about_story'],
+        'appearance' => ['seasonal_theme', 'preloader_phrases'],
+        'notifications' => ['webhooks'],
+        'account' => ['admin_credentials'],
+    ];
+
+    private const array LABELS = [
+        'general' => 'General settings',
+        'homepage' => 'Homepage',
+        'appearance' => 'Appearance',
+        'notifications' => 'Notification Settings',
+        'account' => 'Admin Account Settings',
+    ];
+
+    #[Locked]
+    public string $section = 'general';
+
+    /** @return array<string, string> */
+    public function getSettingsLinks(): array
     {
+        return array_map(static fn (string $label): string => __($label), Arr::except(self::LABELS, ['account']));
+    }
+
+    public function getTitle(): string
+    {
+        return $this->section === 'account' ? __(self::LABELS['account']) : __('Site Settings');
+    }
+
+    public function mount(?string $section = null): void
+    {
+        $requested = $section ?? request()->query('section', 'general');
+        abort_unless(is_string($requested) && isset(self::SECTIONS[$requested]), 404);
+        $this->section = $requested;
+
         $settings = HotelSetting::query()->pluck('value', 'key');
 
-        $this->form->fill([
+        $this->form->fill(Arr::only([
             'hotel_name' => HotelSetting::defaultedHotelName($settings->get('hotel_name')),
             'tagline' => HotelSetting::normalizedTagline($settings->get('tagline')) ?? ['en' => null, 'ru' => null],
             'promo_banner' => HotelSetting::normalizedPromoBanner($settings->get('promo_banner')) ?? ['en' => null, 'ru' => null],
             'hero_images' => $settings->get('hero_images', []),
+            'seasonal_theme' => HotelSetting::seasonalTheme($settings->get('seasonal_theme')),
             'contacts' => $settings->get('contacts', []),
             'section_headings' => HotelSetting::defaultedSectionHeadings($settings->get('section_headings', [])),
             'locale_mode' => $settings->get('locale_mode', 'multilingual'),
             'webhooks' => array_replace_recursive(self::DEFAULT_WEBHOOKS, $settings->get('webhooks', [])),
-            'about_stats' => HotelSetting::defaultedAboutStats($settings->get('about_stats', [])),
-            'about_story' => HotelSetting::defaultedAboutStory($settings->get('about_story')),
+            'about_stats' => HotelSetting::defaultedAboutStats($settings->get('about_stats', []), withSampleContent: ! app()->isProduction()),
+            'about_story' => HotelSetting::defaultedAboutStory($settings->get('about_story'), withSampleContent: ! app()->isProduction()),
             'preloader_phrases' => HotelSetting::defaultedPreloaderPhrases($settings->get('preloader_phrases')),
             // Never backed by a HotelSetting row — this is a thin, virtual
             // gateway onto the currently logged-in admin's own `users` row.
@@ -85,15 +134,15 @@ class ManageHotelSettings extends Page
                 'email' => auth()->user()?->email,
                 'password' => null,
             ],
-        ]);
+        ], self::FIELDS[$this->section]));
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->statePath('data')
-            ->components([
-                Section::make(__('Platform'))
+            ->components(array_values(Arr::only([
+                'Platform' => Section::make(__('Platform'))
                     ->description(__('Restricts the entire public site to a single language and currency, instead of letting guests choose.'))
                     ->schema([
                         Select::make('locale_mode')
@@ -108,7 +157,31 @@ class ManageHotelSettings extends Page
                             ->required(),
                     ]),
 
-                Section::make(__('Homepage hero'))
+                'Seasonal appearance' => Section::make(__('Seasonal appearance'))
+                    ->schema([
+                        Select::make('seasonal_theme')
+                            ->label(__('Design theme'))
+                            ->options([
+                                'summer' => __('Summer — Sea Mist'),
+                                'autumn' => __('Autumn — Olive and Linen'),
+                                'winter' => __('Winter — Silver and Indigo'),
+                                'spring' => __('Spring — Sage'),
+                            ])
+                            ->in(HotelSetting::SEASONAL_THEMES)
+                            ->live()
+                            ->suffixAction(Action::make('preview_theme')
+                                ->label(__('Preview theme'))
+                                ->icon(Heroicon::OutlinedEye)
+                                ->url(fn (Get $get): string => URL::temporarySignedRoute(
+                                    'home',
+                                    now()->addMinutes(15),
+                                    ['preview_theme' => HotelSetting::seasonalTheme($get('seasonal_theme'))],
+                                ), shouldOpenInNewTab: true))
+                            ->helperText(__('Choose the colors visitors see across the hotel website.'))
+                            ->required(),
+                    ]),
+
+                'Homepage hero' => Section::make(__('Homepage hero'))
                     ->description(__('Controls the title, tagline, promo banner and background slideshow on the public homepage.'))
                     ->schema([
                         ...((($restricted = HotelSetting::restrictedLocale()) !== null)
@@ -214,7 +287,7 @@ class ManageHotelSettings extends Page
                             ->panelLayout('grid'),
                     ]),
 
-                Section::make(__('Contact details'))
+                'Contact details' => Section::make(__('Contact details'))
                     ->description(__('Shown in the Contact section and used for the WhatsApp quick-connect link. Use the field name "phone" for the phone number — it\'s automatically turned into a tap-to-call link for mobile guests.'))
                     ->schema([
                         KeyValue::make('contacts')
@@ -225,7 +298,7 @@ class ManageHotelSettings extends Page
                             ->reorderable(),
                     ]),
 
-                Section::make(__('Section headings'))
+                'Section headings' => Section::make(__('Section headings'))
                     ->description(__('The main title shown at the top of each landing-page section, and in the navigation menu, in each language.'))
                     ->schema([
                         ...(($restricted = HotelSetting::restrictedLocale()) !== null
@@ -247,7 +320,7 @@ class ManageHotelSettings extends Page
                         ),
                     ]),
 
-                Section::make(__('About Us Statistics'))
+                'About Us Statistics' => Section::make(__('About Us Statistics'))
                     ->description(__('The three marketing badges shown on the About Us section (e.g. "20+ Years", "48 Rooms").'))
                     ->schema([
                         ...(($restricted = HotelSetting::restrictedLocale()) !== null
@@ -299,7 +372,7 @@ class ManageHotelSettings extends Page
                         ),
                     ]),
 
-                Section::make(__('Preloader Loading Phrases'))
+                'Preloader Loading Phrases' => Section::make(__('Preloader Loading Phrases'))
                     ->description(__('Playful status lines the loading screen cycles through at random — purely decorative, never a real progress report.'))
                     ->schema([
                         Repeater::make('preloader_phrases')
@@ -335,7 +408,7 @@ class ManageHotelSettings extends Page
                             ->minItems(1),
                     ]),
 
-                Section::make(__('Admin Account Settings'))
+                'Admin Account Settings' => Section::make(__('Admin Account Settings'))
                     ->description(__('Change the login email or password for your own admin account. Neither field is required — leave one or both blank to leave them unchanged.'))
                     ->schema([
                         TextInput::make('admin_credentials.email')
@@ -353,10 +426,11 @@ class ManageHotelSettings extends Page
                             ->minLength(8),
                     ]),
 
-                Section::make(__('Notification Settings'))
+                'Notification Settings' => Section::make(__('Notification Settings'))
                     ->description(__('Forward every new booking to these channels at once — see each one\'s own hint below. Only a channel that is both switched on and has a URL filled in actually receives anything.'))
                     ->schema([
                         Section::make(__('Telegram Webhook'))
+                            ->collapsed()
                             ->description(__('Connect an external router or a direct link for Telegram bots here.'))
                             ->columns(2)
                             ->schema([
@@ -376,6 +450,7 @@ class ManageHotelSettings extends Page
                             ]),
 
                         Section::make(__('WhatsApp Webhook'))
+                            ->collapsed()
                             ->description(__('Sends new booking details straight to a WhatsApp number or service, once you\'ve connected one below.'))
                             ->columns(2)
                             ->schema([
@@ -391,6 +466,7 @@ class ManageHotelSettings extends Page
                             ]),
 
                         Section::make(__('Custom Corporate Gateway'))
+                            ->collapsed()
                             ->description(__('A backup channel for integrating with corporate messengers (MAX, MyTeam, TamTam).'))
                             ->columns(2)
                             ->schema([
@@ -410,7 +486,7 @@ class ManageHotelSettings extends Page
                                     ->columnSpanFull(),
                             ]),
                     ]),
-            ]);
+            ], self::SECTIONS[$this->section])));
     }
 
     /**
@@ -515,7 +591,7 @@ class ManageHotelSettings extends Page
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $data = Arr::only($this->form->getState(), self::FIELDS[$this->section]);
 
         // Never a HotelSetting row — this updates the real `users` table
         // directly instead, and is unset here so a plaintext password

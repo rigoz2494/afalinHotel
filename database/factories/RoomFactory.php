@@ -17,7 +17,7 @@ class RoomFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->unique()->words(2, true).' Room';
+        $name = implode(' ', (array) fake()->unique()->words(2)).' Room';
 
         return [
             'name' => ['en' => Str::title($name), 'ru' => Str::title($name)],

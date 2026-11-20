@@ -17,7 +17,7 @@ class WebhookDispatchService
 {
     public function dispatch(CallbackRequest $callbackRequest): void
     {
-        $webhooks = HotelSetting::query()->where('key', 'webhooks')->first()?->value ?? [];
+        $webhooks = HotelSetting::query()->where('key', 'webhooks')->first()->value ?? [];
 
         if (! is_array($webhooks)) {
             return;

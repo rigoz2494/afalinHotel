@@ -51,7 +51,7 @@ class RoomUnitForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make(__('Photos'))
+                Section::make(__('Photos and video'))
                     ->schema([
                         FileUpload::make('images')
                             ->label(__('This room\'s own photos'))
@@ -72,6 +72,16 @@ class RoomUnitForm
                             ->disk('public')
                             ->imagePreviewHeight('120')
                             ->panelLayout('grid'),
+                        FileUpload::make('video_path')
+                            ->label(__('Room video'))
+                            ->helperText(__('Recommended length: 10–15 seconds. MP4, up to 10 MB. The video appears after the photos.'))
+                            ->disk('public')
+                            ->directory('room-unit-videos')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['video/mp4'])
+                            ->maxSize(10240)
+                            ->preventFilePathTampering()
+                            ->openable(),
                     ]),
 
                 Section::make(__('Visibility'))

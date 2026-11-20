@@ -10,7 +10,7 @@ const checked = defineModel<boolean>({ required: true });
 
 <template>
     <span
-        class="relative inline-flex size-5 shrink-0 items-center justify-center rounded border border-white/25 bg-black/35 transition-all duration-200 has-checked:border-amber-300 has-checked:bg-amber-300"
+        class="has-checked:border-coast-blue has-checked:bg-coast-blue border-coast-line relative inline-flex size-5 shrink-0 items-center justify-center rounded border bg-white transition-all duration-200"
     >
         <input
             v-model="checked"
@@ -18,7 +18,7 @@ const checked = defineModel<boolean>({ required: true });
             class="absolute inset-0 size-full cursor-pointer appearance-none"
         />
         <Check
-            class="pointer-events-none size-3.5 text-slate-900 transition-all duration-200"
+            class="pointer-events-none size-3.5 text-white transition-all duration-200"
             :class="checked ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
         />
     </span>

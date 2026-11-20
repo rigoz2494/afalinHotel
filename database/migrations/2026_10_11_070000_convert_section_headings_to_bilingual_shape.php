@@ -35,8 +35,8 @@ return new class extends Migration
         }
 
         $setting->update([
-            'value' => collect($setting->value)
-                ->map(fn (array $locales): ?string => $locales['en'] ?? null)
+            'value' => collect(is_array($setting->value) ? $setting->value : [])
+                ->map(fn (mixed $locales): ?string => is_array($locales) ? ($locales['en'] ?? null) : null)
                 ->filter()
                 ->all(),
         ]);

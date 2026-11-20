@@ -67,6 +67,9 @@ const translations = {
     roomDetailsHeading: { en: 'Room Details', ru: 'Детали номера' },
     previousPhoto: { en: 'Previous photo', ru: 'Предыдущее фото' },
     nextPhoto: { en: 'Next photo', ru: 'Следующее фото' },
+    previousSlide: { en: 'Previous slide', ru: 'Предыдущий слайд' },
+    nextSlide: { en: 'Next slide', ru: 'Следующий слайд' },
+    roomVideo: { en: 'Room video', ru: 'Видео номера' },
     showPhoto: { en: 'Show photo {n}', ru: 'Показать фото {n}' },
     previousRoom: { en: 'Previous room', ru: 'Предыдущий номер' },
     nextRoom: { en: 'Next room', ru: 'Следующий номер' },
@@ -107,12 +110,8 @@ const translations = {
 
     // Pricing table
     pricingIntro: {
-        en: 'Transparent nightly rates for every season. Pick a room and a month below to add it to your booking — direct bookings also include complimentary breakfast, late check-out and 10% off stays of five nights or more.',
-        ru: 'Прозрачные цены за ночь на каждый сезон. Выберите номер и месяц ниже, чтобы добавить его в бронирование — прямые бронирования также включают завтрак, поздний выезд и скидку 10% при проживании от пяти ночей.',
-    },
-    directBookingPerk: {
-        en: 'Direct booking perk: free airport transfer on your first stay.',
-        ru: 'Бонус за прямое бронирование: бесплатный трансфер из аэропорта в первую поездку.',
+        en: 'Choose a room and a period to add it to your booking request.',
+        ru: 'Выберите номер и период, чтобы добавить их в заявку на бронирование.',
     },
     selectPeriodLabel: { en: 'Select Period', ru: 'Выберите период' },
     roomColumn: { en: 'Room', ru: 'Номер' },
@@ -176,6 +175,7 @@ const translations = {
 
     // Floating actions
     backToTop: { en: 'Back to top', ru: 'Наверх' },
+    bookNow: { en: 'Book now', ru: 'Забронировать' },
     completeBooking: { en: 'Complete booking', ru: 'Завершить бронирование' },
 
     // Booking modal
@@ -205,6 +205,14 @@ const translations = {
     },
     sending: { en: 'Sending…', ru: 'Отправка…' },
     sendRequest: { en: 'Send request', ru: 'Отправить заявку' },
+    bookingSummary: { en: 'Request summary', ru: 'Итог заявки' },
+    bookingRequestedRoom: { en: 'Preferred room', ru: 'Желаемый номер' },
+    bookingRoomsPerNight: { en: 'Rooms per night', ru: 'Номера за ночь' },
+    bookingServicesTotal: { en: 'Extras total', ru: 'Итого за доп. услуги' },
+    bookingConfirmationNote: {
+        en: 'Our team will contact you to confirm availability.',
+        ru: 'Администратор свяжется с вами и подтвердит наличие.',
+    },
     sentThanks: {
         en: "Thanks! We'll call you shortly.",
         ru: 'Спасибо! Мы скоро вам позвоним.',

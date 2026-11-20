@@ -8,7 +8,6 @@ import {
 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import RoomUnitModal from '@/components/landing/RoomUnitModal.vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { useAmenityTags } from '@/composables/useAmenityTags';
 import { useCurrency } from '@/composables/useCurrency';
 import { localized, useLocale } from '@/composables/useLocale';
@@ -176,145 +175,142 @@ const stepImage = (direction: 1 | -1): void => {
 <template>
     <section
         id="rooms"
-        class="relative flex min-h-screen flex-col overflow-hidden bg-stone-950 pt-16 text-white lg:h-screen lg:snap-start lg:flex-row"
+        class="landing-screen bg-coast-mist text-coast-ink flex scroll-mt-14 flex-col justify-center sm:scroll-mt-16"
     >
-        <SectionBackdrop name="rooms" />
-        <div
-            class="relative z-10 flex h-[42vh] flex-col sm:h-[48vh] lg:h-full lg:w-3/5 2xl:w-1/2"
-        >
-            <div class="relative flex-1 overflow-hidden">
-                <Transition
-                    mode="out-in"
-                    enter-active-class="transition-opacity duration-500"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition-opacity duration-500"
-                    leave-to-class="opacity-0"
-                >
-                    <img
-                        :key="`${activeRoom.id}-${imageIndex}`"
-                        :src="showcaseImages[imageIndex]"
-                        :alt="`${activeRoomName} photo ${imageIndex + 1}`"
-                        class="absolute inset-0 h-full w-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                    />
-                </Transition>
-                <template v-if="showcaseImages.length > 1">
-                    <button
-                        type="button"
-                        class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 backdrop-blur hover:bg-black/70 sm:left-4 sm:p-2"
-                        :aria-label="t('previousPhoto')"
-                        @click="stepImage(-1)"
-                    >
-                        <ChevronLeft class="size-4 sm:size-5" />
-                    </button>
-                    <button
-                        type="button"
-                        class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 backdrop-blur hover:bg-black/70 sm:right-4 sm:p-2"
-                        :aria-label="t('nextPhoto')"
-                        @click="stepImage(1)"
-                    >
-                        <ChevronRight class="size-4 sm:size-5" />
-                    </button>
-                </template>
-            </div>
-            <div
-                v-if="showcaseImages.length > 1"
-                class="flex gap-1.5 overflow-x-auto bg-black/60 p-1.5 sm:gap-2 sm:p-2"
-            >
-                <button
-                    v-for="(src, index) in showcaseImages"
-                    :key="src + index"
-                    type="button"
-                    class="h-11 w-16 shrink-0 overflow-hidden rounded-md border-2 transition sm:h-14 sm:w-20"
-                    :class="
-                        index === imageIndex
-                            ? 'border-amber-300'
-                            : 'border-transparent opacity-60 hover:opacity-100'
-                    "
-                    :aria-label="t('showPhoto', { n: index + 1 })"
-                    @click="imageIndex = index"
-                >
-                    <img
-                        :src="src"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        class="h-full w-full object-cover"
-                    />
-                </button>
-            </div>
-        </div>
-
-        <!--
-            justify-start, not justify-center: the "Previous/Next room"
-            arrows sit near the top of this block, and a centered flex
-            column re-centers its *whole* group whenever anything inside it
-            changes height — the description (fixed below), but just as
-            much the amenity badge row, which has a different tag count per
-            room and disappears entirely for the one room with none at all.
-            Anchoring to the top makes the arrows' position immune to any of
-            that, instead of chasing every individual variable-height child.
-        -->
-        <div
-            class="relative z-10 flex flex-1 flex-col justify-start gap-3 overflow-y-auto p-5 sm:gap-4 sm:p-8 lg:h-full lg:w-2/5 lg:gap-3 lg:p-10 2xl:w-1/2 2xl:flex-row 2xl:items-stretch 2xl:gap-8"
-        >
-            <div class="2xl:min-w-0 2xl:flex-1">
-                <p
-                    class="text-[11px] tracking-widest text-amber-300/70 uppercase"
+        <div class="max-w-landing mx-auto w-full px-4 sm:px-6 lg:px-8">
+            <div class="py-8 sm:py-12 lg:px-4">
+                <h2
+                    class="font-coastal-heading mb-5 text-3xl leading-tight font-medium sm:text-5xl"
                 >
                     {{ localized(hotel.section_headings.rooms, locale) }}
-                </p>
-                <div class="mt-1 flex items-center justify-between">
-                    <p
-                        class="text-xs tracking-widest text-amber-300 uppercase sm:text-sm"
-                    >
-                        {{
-                            t('roomCounter', {
-                                n: activeIndex + 1,
-                                total: rooms.length,
-                            })
-                        }}
-                    </p>
-                    <div class="flex gap-2">
-                        <button
-                            type="button"
-                            class="rounded-full bg-white/10 p-2 hover:bg-white/20"
-                            :aria-label="t('previousRoom')"
-                            @click="stepRoom(-1)"
-                        >
-                            <ChevronLeft class="size-4" />
-                        </button>
-                        <button
-                            type="button"
-                            class="rounded-full bg-white/10 p-2 hover:bg-white/20"
-                            :aria-label="t('nextRoom')"
-                            @click="stepRoom(1)"
-                        >
-                            <ChevronRight class="size-4" />
-                        </button>
-                    </div>
-                </div>
-                <h2 class="mt-2 text-2xl font-semibold sm:text-3xl lg:text-3xl">
-                    {{ activeRoomName }}
                 </h2>
-                <!-- Amenity tags: a fixed vocabulary, each one icon + a
-                bilingual label, right under the room title. -->
-                <ul
-                    v-if="activeRoomAmenityTags.length"
-                    class="mt-2 flex flex-wrap gap-1.5"
+                <div
+                    class="grid items-start gap-5 sm:gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-center 2xl:items-start"
                 >
-                    <li
-                        v-for="item in activeRoomAmenityTags"
-                        :key="item.tag"
-                        :title="item.label"
-                        :aria-label="item.label"
-                        class="flex size-8 items-center justify-center rounded-full bg-white/10 text-amber-300 sm:size-9"
-                    >
-                        <component :is="item.icon" class="size-4 sm:size-4.5" />
-                    </li>
-                </ul>
-                <!--
+                    <div v-if="showcaseImages.length" class="min-w-0">
+                        <div
+                            class="bg-coast-line relative aspect-video overflow-hidden rounded-xl lg:aspect-auto lg:h-[clamp(19rem,calc(100svh-17rem),min(37rem,42vw))]"
+                        >
+                            <Transition
+                                mode="out-in"
+                                enter-active-class="transition-opacity duration-500"
+                                enter-from-class="opacity-0"
+                                leave-active-class="transition-opacity duration-500"
+                                leave-to-class="opacity-0"
+                            >
+                                <img
+                                    :key="`${activeRoom.id}-${imageIndex}`"
+                                    :src="showcaseImages[imageIndex]"
+                                    :alt="`${activeRoomName} photo ${imageIndex + 1}`"
+                                    class="absolute inset-0 h-full w-full object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                            </Transition>
+                            <template v-if="showcaseImages.length > 1">
+                                <button
+                                    type="button"
+                                    class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white backdrop-blur hover:bg-black/70 sm:left-4 sm:p-2"
+                                    :aria-label="t('previousPhoto')"
+                                    @click="stepImage(-1)"
+                                >
+                                    <ChevronLeft class="size-4 sm:size-5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white backdrop-blur hover:bg-black/70 sm:right-4 sm:p-2"
+                                    :aria-label="t('nextPhoto')"
+                                    @click="stepImage(1)"
+                                >
+                                    <ChevronRight class="size-4 sm:size-5" />
+                                </button>
+                            </template>
+                        </div>
+                        <div
+                            v-if="showcaseImages.length > 1"
+                            class="mt-2 flex gap-1.5 overflow-x-auto pb-1 sm:gap-2"
+                        >
+                            <button
+                                v-for="(src, index) in showcaseImages"
+                                :key="src + index"
+                                type="button"
+                                class="h-11 w-16 shrink-0 overflow-hidden rounded-md border-2 transition sm:h-14 sm:w-20"
+                                :class="
+                                    index === imageIndex
+                                        ? 'border-coast-blue'
+                                        : 'border-transparent opacity-60 hover:opacity-100'
+                                "
+                                :aria-label="t('showPhoto', { n: index + 1 })"
+                                @click="imageIndex = index"
+                            >
+                                <img
+                                    :src="src"
+                                    alt=""
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="h-full w-full object-cover"
+                                />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex min-w-0 flex-col gap-5">
+                        <div>
+                            <div class="mt-1 flex items-center justify-between">
+                                <p
+                                    class="text-coast-blue text-xs tracking-widest uppercase sm:text-sm"
+                                >
+                                    {{
+                                        t('roomCounter', {
+                                            n: activeIndex + 1,
+                                            total: rooms.length,
+                                        })
+                                    }}
+                                </p>
+                                <div class="flex gap-2">
+                                    <button
+                                        type="button"
+                                        class="bg-coast-mist hover:bg-coast-line rounded-full p-2"
+                                        :aria-label="t('previousRoom')"
+                                        @click="stepRoom(-1)"
+                                    >
+                                        <ChevronLeft class="size-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="bg-coast-mist hover:bg-coast-line rounded-full p-2"
+                                        :aria-label="t('nextRoom')"
+                                        @click="stepRoom(1)"
+                                    >
+                                        <ChevronRight class="size-4" />
+                                    </button>
+                                </div>
+                            </div>
+                            <h3
+                                class="font-coastal-heading mt-2 text-2xl font-medium sm:text-3xl lg:text-3xl"
+                            >
+                                {{ activeRoomName }}
+                            </h3>
+                            <!-- Amenity tags: a fixed vocabulary, each one icon + a
+                bilingual label, right under the room title. -->
+                            <ul
+                                v-if="activeRoomAmenityTags.length"
+                                class="mt-2 flex flex-wrap gap-1.5"
+                            >
+                                <li
+                                    v-for="item in activeRoomAmenityTags"
+                                    :key="item.tag"
+                                    :title="item.label"
+                                    :aria-label="item.label"
+                                    class="bg-coast-mist text-coast-blue flex size-8 items-center justify-center rounded-full sm:size-9"
+                                >
+                                    <component
+                                        :is="item.icon"
+                                        class="size-4 sm:size-4.5"
+                                    />
+                                </li>
+                            </ul>
+                            <!--
                     A fixed height, not just a minimum: `line-clamp-2` caps
                     how tall this can grow and `min-h` guarantees it never
                     shrinks below two lines either, so switching rooms can't
@@ -322,92 +318,109 @@ const stepImage = (direction: 1 | -1): void => {
                     whichever room's description happens to be shorter or
                     longer than another's.
                 -->
-                <p
-                    class="mt-2 line-clamp-2 min-h-[2.5rem] text-sm text-white/70 sm:mt-3 sm:min-h-[3rem] sm:text-base"
-                >
-                    {{ activeRoomDescription }}
-                </p>
-                <div
-                    class="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4 lg:mt-3"
-                >
-                    <p
-                        v-if="bestIsDeal"
-                        class="flex flex-wrap items-baseline gap-1.5 text-lg sm:text-xl"
-                    >
-                        {{ t('from') }}
-                        <span class="text-sm text-white/50 line-through">{{
-                            format(Number(activeRoom.base_price))
-                        }}</span>
-                        <span class="font-semibold text-amber-300">{{
-                            format(bestPrice)
-                        }}</span>
-                        <span
-                            class="inline-flex items-center gap-0.5 rounded-full bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-stone-900"
-                            :title="t('percentOff', { pct: bestPercentOff })"
-                        >
-                            <Percent class="size-2.5" />{{ bestPercentOff }}
-                        </span>
-                        {{ t('slashPerNight') }}
-                    </p>
-                    <!--
+                            <p
+                                class="text-coast-muted mt-2 line-clamp-2 min-h-[2.5rem] text-sm sm:mt-3 sm:min-h-[3rem] sm:text-base"
+                            >
+                                {{ activeRoomDescription }}
+                            </p>
+                            <div
+                                class="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4 lg:mt-3"
+                            >
+                                <p
+                                    v-if="bestIsDeal"
+                                    class="flex flex-wrap items-baseline gap-1.5 text-lg sm:text-xl"
+                                >
+                                    {{ t('from') }}
+                                    <span
+                                        class="text-coast-muted text-sm line-through"
+                                        >{{
+                                            format(
+                                                Number(activeRoom.base_price),
+                                            )
+                                        }}</span
+                                    >
+                                    <span
+                                        class="text-coast-blue font-semibold"
+                                        >{{ format(bestPrice) }}</span
+                                    >
+                                    <span
+                                        class="bg-coast-blue inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white"
+                                        :title="
+                                            t('percentOff', {
+                                                pct: bestPercentOff,
+                                            })
+                                        "
+                                    >
+                                        <Percent class="size-2.5" />{{
+                                            bestPercentOff
+                                        }}
+                                    </span>
+                                    {{ t('slashPerNight') }}
+                                </p>
+                                <!--
                         Case A (flat): the cheapest available month is still at or
                         above the base price (a peak-season rate), so no strikethrough
                         or "markup" is shown — just the plain final price.
                     -->
-                    <p v-else class="text-lg sm:text-xl">
-                        {{ t('from') }}
-                        <span class="font-semibold">{{
-                            format(bestPrice)
-                        }}</span>
-                        {{ t('slashPerNight') }}
-                    </p>
-                    <button
-                        type="button"
-                        class="rounded-full bg-amber-300 px-5 py-2 text-xs font-semibold text-slate-900 transition hover:bg-amber-200 sm:text-sm"
-                        @click="goToPricing"
-                    >
-                        {{ t('viewPricesAvailability') }}
-                    </button>
-                </div>
-                <!-- Opens the modal below, listing this room type's own
+                                <p v-else class="text-lg sm:text-xl">
+                                    {{ t('from') }}
+                                    <span class="font-semibold">{{
+                                        format(bestPrice)
+                                    }}</span>
+                                    {{ t('slashPerNight') }}
+                                </p>
+                                <button
+                                    v-if="pricing.columns.length"
+                                    type="button"
+                                    class="bg-coast-blue hover:bg-coast-ink rounded-full px-5 py-2 text-xs font-semibold text-white transition sm:text-sm"
+                                    @click="goToPricing"
+                                >
+                                    {{ t('viewPricesAvailability') }}
+                                </button>
+                            </div>
+                            <!-- Opens the modal below, listing this room type's own
                 specific numbered rooms. -->
-                <button
-                    type="button"
-                    class="mt-3 w-full rounded-full border border-amber-300/50 px-5 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-300/10 sm:mt-4 sm:w-auto sm:text-sm lg:mt-3"
-                    @click="unitModalOpen = true"
-                >
-                    {{ t('viewAvailableRooms') }}
-                </button>
-            </div>
-
-            <div
-                class="2xl:w-56 2xl:shrink-0 2xl:rounded-2xl 2xl:border 2xl:border-white/10 2xl:bg-white/5 2xl:p-5 2xl:shadow-2xl 2xl:backdrop-blur"
-            >
-                <p
-                    class="hidden text-xs tracking-widest text-amber-300/80 uppercase 2xl:block"
-                >
-                    {{ t('roomDetailsHeading') }}
-                </p>
-                <ul
-                    class="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-3 2xl:mt-3 2xl:grid-cols-1"
-                >
-                    <li
-                        v-for="item in amenityItems"
-                        :key="item.label"
-                        class="flex items-center gap-2.5 rounded-lg bg-white/5 p-2.5 sm:gap-3 sm:p-3 lg:p-2.5 2xl:bg-white/10"
-                    >
-                        <component
-                            :is="item.icon"
-                            class="size-5 shrink-0 text-amber-300 sm:size-6"
-                        />
-                        <div>
-                            <p class="text-[11px] text-white/70 sm:text-xs">
-                                {{ item.label }}
-                            </p>
-                            <p class="text-xs sm:text-sm">{{ item.value }}</p>
+                            <button
+                                v-if="activeRoom.units.length"
+                                type="button"
+                                class="border-coast-blue/50 text-coast-blue hover:bg-coast-mist mt-3 w-full rounded-full border px-5 py-2 text-xs font-semibold transition sm:mt-4 sm:w-auto sm:text-sm lg:mt-3"
+                                @click="unitModalOpen = true"
+                            >
+                                {{ t('viewAvailableRooms') }}
+                            </button>
                         </div>
-                    </li>
-                </ul>
+
+                        <div class="border-coast-line border-t pt-4">
+                            <p
+                                class="text-coast-blue mb-3 text-xs tracking-widest uppercase"
+                            >
+                                {{ t('roomDetailsHeading') }}
+                            </p>
+                            <ul class="grid grid-cols-2 gap-3">
+                                <li
+                                    v-for="item in amenityItems"
+                                    :key="item.label"
+                                    class="flex items-center gap-2.5 rounded-lg bg-white/65 p-2.5 sm:gap-3 sm:p-3"
+                                >
+                                    <component
+                                        :is="item.icon"
+                                        class="text-coast-blue size-5 shrink-0 sm:size-6"
+                                    />
+                                    <div>
+                                        <p
+                                            class="text-coast-muted text-[11px] sm:text-xs"
+                                        >
+                                            {{ item.label }}
+                                        </p>
+                                        <p class="text-xs sm:text-sm">
+                                            {{ item.value }}
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

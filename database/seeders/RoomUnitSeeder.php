@@ -126,7 +126,7 @@ class RoomUnitSeeder extends Seeder
     }
 
     /**
-     * @return Collection<int, string>
+     * @return Collection<int, non-falsy-string>
      */
     private function jpgFiles(string $unitPath): Collection
     {

@@ -11,7 +11,7 @@ class CallbackRequestController extends Controller
 {
     public function store(StoreCallbackRequestRequest $request, CallbackRequestService $callbacks): JsonResponse
     {
-        $callbacks->create($request->validated(), $request->ip());
+        $callbacks->create($request->bookingData(), $request->ip());
 
         return response()->json(['message' => 'Thank you! We will call you back shortly.'], 201);
     }

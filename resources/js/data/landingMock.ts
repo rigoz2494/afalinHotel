@@ -22,6 +22,7 @@ export const mockHotel: HotelSettings = {
     },
     // Hero slides come only from the database (see HeroImageSeeder).
     hero_images: [],
+    seasonal_theme: 'summer',
     contacts: {
         phone: '+1 (555) 010-2030',
         email: 'stay@afalina.example',
@@ -307,12 +308,6 @@ export const mockPricing: PricingTable = {
         },
     ],
 };
-
-export const roomFallbackImages: string[] = [
-    unsplash('photo-1618773928121-c32242e63f39'),
-    unsplash('photo-1590490360182-c33d57733427'),
-    unsplash('photo-1522708323590-d24dbb6b0267'),
-];
 
 export const mockGalleryImages: GalleryImage[] = [
     {

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { MapPin } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
 
@@ -39,29 +38,25 @@ const mapUnlocked = ref(false);
 <template>
     <section
         id="location"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-full lg:border-r lg:border-white/10 lg:py-0 lg:pt-16"
+        class="bg-coast-paper text-coast-ink relative flex scroll-mt-14 flex-col items-center px-4 py-10 sm:scroll-mt-16 sm:px-6 sm:py-14 lg:row-span-3 lg:grid lg:grid-rows-subgrid lg:items-stretch lg:bg-transparent lg:p-0"
     >
-        <SectionBackdrop name="location" class="lg:hidden" />
-        <div
-            class="relative z-10 w-full max-w-3xl text-center lg:max-h-full lg:overflow-y-auto lg:py-2 2xl:max-w-5xl"
-        >
-            <p class="text-sm tracking-widest text-amber-300 uppercase">
-                {{ t('navLocation') }}
-            </p>
-            <h2
-                class="mt-3 text-3xl leading-tight font-semibold sm:text-4xl md:text-5xl"
-            >
-                {{ localized(hotel.section_headings.location, locale) }}
-            </h2>
-            <p class="mt-3 text-sm text-stone-300 sm:text-base">
-                {{ t('locationIntro') }}
-            </p>
+        <div class="relative w-full max-w-3xl text-center lg:contents">
+            <div class="lg:text-left">
+                <h2
+                    class="font-coastal-heading text-3xl leading-tight font-medium sm:text-4xl"
+                >
+                    {{ localized(hotel.section_headings.location, locale) }}
+                </h2>
+                <p class="text-coast-muted mt-3 text-sm sm:text-base">
+                    {{ t('locationIntro') }}
+                </p>
 
-            <div
-                class="mt-6 flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 backdrop-blur sm:mt-8 sm:text-base"
-            >
-                <MapPin class="size-5 shrink-0 text-amber-300" />
-                {{ displayAddress }}
+                <div
+                    class="text-coast-muted mt-3 flex items-center justify-center gap-2 text-sm lg:justify-start"
+                >
+                    <MapPin class="text-coast-blue size-5 shrink-0" />
+                    {{ displayAddress }}
+                </div>
             </div>
 
             <!--
@@ -74,7 +69,7 @@ const mapUnlocked = ref(false);
                 container instead of the raw default markup.
             -->
             <div
-                class="relative mt-5 overflow-hidden rounded-xl border border-white/10 shadow-2xl sm:mt-6"
+                class="border-coast-line relative mt-5 overflow-hidden rounded-xl border bg-white shadow-sm sm:mt-6 lg:mt-0"
             >
                 <a
                     :href="yandexOrgUrl"
@@ -86,18 +81,18 @@ const mapUnlocked = ref(false);
                 <iframe
                     :src="yandexMapWidgetSrc"
                     :title="t('locationMapTitle')"
-                    class="h-64 w-full sm:h-80 lg:h-72 2xl:h-96"
+                    class="block h-64 w-full sm:h-80 lg:h-[clamp(19rem,48svh,34rem)]"
                     loading="lazy"
                     allowfullscreen
                 ></iframe>
                 <button
                     v-if="!mapUnlocked"
                     type="button"
-                    class="absolute inset-0 flex cursor-pointer items-center justify-center bg-stone-950/40 text-sm font-medium text-white backdrop-blur-[1px] transition hover:bg-stone-950/25"
+                    class="bg-coast-deep/20 hover:bg-coast-deep/10 text-coast-ink absolute inset-0 flex cursor-pointer items-center justify-center text-sm font-medium backdrop-blur-[1px] transition"
                     @click="mapUnlocked = true"
                 >
                     <span
-                        class="rounded-full bg-black/60 px-4 py-2 backdrop-blur-sm"
+                        class="border-coast-line rounded-full border bg-white px-4 py-2 shadow-sm"
                         >{{ t('tapToUnlockMap') }}</span
                     >
                 </button>
@@ -107,7 +102,7 @@ const mapUnlocked = ref(false);
                 :href="yandexOrgUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="mt-5 inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-amber-200 sm:mt-6"
+                class="border-coast-blue text-coast-blue hover:text-coast-ink mt-5 inline-flex items-center gap-2 border-b pb-1 text-sm font-semibold transition sm:mt-6 lg:mt-0 lg:justify-self-start"
             >
                 <MapPin class="size-4" />
                 {{ t('openInYandexMaps') }}

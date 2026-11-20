@@ -57,7 +57,7 @@ class CallbackRequestsTable
                     // Prefer the automatic Russian translation in the
                     // tooltip when there is one, since that's the version
                     // a Russian-speaking manager can actually read.
-                    ->tooltip(fn (CallbackRequest $record): ?string => $record->special_requests_translated
+                    ->tooltip(fn (CallbackRequest $record): string => $record->special_requests_translated
                         ?? $record->special_requests
                         ?? __('No special requests')),
                 TextColumn::make('total_price')

@@ -28,7 +28,7 @@ const { t } = useLocale();
                         v-if="visible"
                         type="button"
                         :aria-label="t('backToTop')"
-                        class="flex size-11 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-lg backdrop-blur transition hover:bg-white sm:size-12"
+                        class="text-coast-ink flex size-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur transition hover:bg-white sm:size-12"
                         @click="$emit('top')"
                     >
                         <ArrowUp class="size-5" />
@@ -45,7 +45,7 @@ const { t } = useLocale();
                         v-if="totalCount > 0"
                         type="button"
                         :aria-label="t('completeBooking')"
-                        class="relative flex size-12 items-center justify-center rounded-full bg-amber-300 text-slate-900 shadow-lg transition hover:bg-amber-200 sm:size-14"
+                        class="bg-coast-tide text-coast-ink relative flex size-12 items-center justify-center rounded-full shadow-lg transition hover:bg-sky-100 sm:size-14"
                         @click="$emit('openBooking')"
                     >
                         <KeyRound class="size-5 sm:size-6" />

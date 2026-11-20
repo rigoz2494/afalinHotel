@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Gift } from '@lucide/vue';
+import { ArrowRight, Gift } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
 
-const props = defineProps<{ hotel: HotelSettings }>();
+const props = defineProps<{ hotel: HotelSettings; hasRooms: boolean }>();
+defineEmits<{ viewRooms: [] }>();
 const { t, locale } = useLocale();
 
 // null (hidden) when the admin hasn't set a promo in either language;
@@ -36,58 +37,56 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <section
-        id="hero"
-        class="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-900 lg:h-screen lg:snap-start"
-    >
-        <!-- Slideshow layers: stacked, cross-fading via opacity. -->
-        <div class="absolute inset-0 z-0">
-            <img
-                v-for="(src, index) in hotel.hero_images"
-                :key="src"
-                :src="src"
-                alt=""
-                :loading="index === 0 ? 'eager' : 'lazy'"
-                decoding="async"
-                class="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
-                :class="index === activeSlide ? 'opacity-100' : 'opacity-0'"
-            />
-        </div>
-
-        <!-- Dimming overlay: always above the slideshow, below the content. -->
-        <div class="absolute inset-0 z-10 bg-black/60"></div>
-
+    <section id="hero" class="bg-coast-paper text-coast-ink pt-14 sm:pt-16">
         <div
-            class="animate-in fade-in slide-in-from-bottom-6 relative z-20 max-w-3xl px-4 py-24 text-center text-white duration-1000 sm:px-6"
+            class="mx-auto max-w-[clamp(96rem,76vw,122rem)] px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8"
         >
-            <img
-                src="/images/hotel-logo.svg"
-                alt=""
-                class="mx-auto mb-5 h-auto w-48 drop-shadow-lg sm:mb-6 sm:w-64 md:w-80"
-            />
-            <h1
-                class="text-3xl font-semibold tracking-tight sm:text-5xl md:text-7xl"
+            <div
+                class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 py-6 sm:py-8 lg:px-4"
             >
-                {{ localized(hotel.hotel_name, locale) }}
-            </h1>
-            <p
-                class="mt-3 text-base text-white/85 sm:mt-6 sm:text-lg md:text-2xl"
+                <h1
+                    class="font-coastal-heading text-[clamp(2.25rem,4.4vw,4.25rem)] leading-[1.08] font-medium tracking-tight"
+                >
+                    {{
+                        localized(hotel.tagline, locale) ||
+                        localized(hotel.hotel_name, locale)
+                    }}
+                </h1>
+                <a
+                    v-if="hasRooms"
+                    href="#rooms"
+                    class="border-coast-blue text-coast-blue hover:text-coast-ink inline-flex shrink-0 items-center gap-2 border-b pb-1 text-sm font-semibold transition sm:text-base"
+                    @click.prevent="$emit('viewRooms')"
+                >
+                    {{ t('viewRooms') }}
+                    <ArrowRight class="size-5" aria-hidden="true" />
+                </a>
+            </div>
+            <div
+                v-if="hotel.hero_images.length"
+                class="bg-coast-mist relative aspect-[16/10] overflow-hidden rounded-xl sm:aspect-[12/5] lg:aspect-[16/5]"
             >
-                {{ localized(hotel.tagline, locale) }}
-            </p>
+                <img
+                    v-for="(src, index) in hotel.hero_images"
+                    :key="src"
+                    :src="src"
+                    alt=""
+                    :loading="index === 0 ? 'eager' : 'lazy'"
+                    decoding="async"
+                    class="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 motion-reduce:transition-none lg:object-[50%_32%]"
+                    :class="index === activeSlide ? 'opacity-100' : 'opacity-0'"
+                />
+            </div>
             <p
                 v-if="promoBanner"
-                class="mx-auto mt-5 flex max-w-xl items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/15 p-3.5 text-sm text-amber-100 backdrop-blur sm:mt-8 sm:p-4 sm:text-base"
+                class="text-coast-muted mt-3 flex items-start gap-2 text-sm lg:px-4"
             >
-                <Gift class="size-4 shrink-0 text-amber-300" />
+                <Gift
+                    class="text-coast-blue mt-0.5 size-4 shrink-0"
+                    aria-hidden="true"
+                />
                 {{ promoBanner }}
             </p>
-            <a
-                href="#rooms"
-                class="mt-6 inline-block rounded-full bg-white px-7 py-3.5 text-base font-semibold text-slate-900 transition hover:bg-white/90 sm:mt-10 sm:px-10 sm:py-4 sm:text-lg"
-            >
-                {{ t('viewRooms') }}
-            </a>
         </div>
     </section>
 </template>

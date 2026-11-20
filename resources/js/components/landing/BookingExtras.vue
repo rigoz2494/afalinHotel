@@ -18,7 +18,7 @@ const additionalServices = useAdditionalServices();
 <template>
     <div v-if="additionalServices.length">
         <p
-            class="mb-1.5 text-xs tracking-widest text-amber-300 uppercase sm:mb-2"
+            class="text-coast-blue mb-1.5 text-xs tracking-widest uppercase sm:mb-2"
         >
             {{ t('addExtraServices') }}
         </p>
@@ -26,13 +26,13 @@ const additionalServices = useAdditionalServices();
             <li
                 v-for="service in additionalServices"
                 :key="service.id"
-                class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2"
+                class="bg-coast-mist flex items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2"
             >
                 <div class="min-w-0">
                     <p class="truncate text-xs font-medium sm:text-sm">
                         {{ localized(service.name, locale) }}
                     </p>
-                    <p class="text-[11px] text-white/50 sm:text-xs">
+                    <p class="text-coast-muted text-[11px] sm:text-xs">
                         {{ format(service.price) }}
                     </p>
                 </div>
@@ -41,7 +41,7 @@ const additionalServices = useAdditionalServices();
                         v-if="serviceQuantityFor(service.id) === 0"
                         type="button"
                         :aria-label="t('addOneMore')"
-                        class="flex size-6 items-center justify-center rounded-full bg-white/10 transition hover:bg-amber-300 hover:text-slate-900 sm:size-7"
+                        class="hover:bg-coast-blue bg-coast-line flex size-6 items-center justify-center rounded-full transition hover:text-white sm:size-7"
                         @click="
                             addService(
                                 service.id,
@@ -54,12 +54,12 @@ const additionalServices = useAdditionalServices();
                     </button>
                     <div
                         v-else
-                        class="flex items-center gap-1.5 rounded-full bg-white/10 p-1 sm:gap-2 sm:p-1.5"
+                        class="bg-coast-line flex items-center gap-1.5 rounded-full p-1 sm:gap-2 sm:p-1.5"
                     >
                         <button
                             type="button"
                             :aria-label="t('removeOne')"
-                            class="flex size-5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:size-6"
+                            class="bg-coast-line hover:bg-coast-mist flex size-5 items-center justify-center rounded-full transition sm:size-6"
                             @click="decrementService(service.id)"
                         >
                             <Minus class="size-3" />
@@ -71,7 +71,7 @@ const additionalServices = useAdditionalServices();
                         <button
                             type="button"
                             :aria-label="t('addOneMore')"
-                            class="flex size-5 items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200 sm:size-6"
+                            class="bg-coast-blue hover:bg-coast-ink flex size-5 items-center justify-center rounded-full text-white transition sm:size-6"
                             @click="
                                 addService(
                                     service.id,

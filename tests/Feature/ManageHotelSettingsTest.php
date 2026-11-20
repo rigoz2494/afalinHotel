@@ -15,12 +15,29 @@ class ManageHotelSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_general_settings_save_leaves_other_sections_intact(): void
+    {
+        $this->actingAs(User::factory()->create());
+        HotelSetting::query()->create(['key' => 'hero_images', 'value' => ['hero.webp']]);
+
+        $this->get(ManageHotelSettings::getUrl(['section' => 'general'], panel: 'admin'))
+            ->assertOk();
+
+        Livewire::test(ManageHotelSettings::class)
+            ->set('data.hero_images', ['unrelated.webp'])
+            ->fillForm(['locale_mode' => 'multilingual'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['hero.webp'], HotelSetting::query()->where('key', 'hero_images')->firstOrFail()->value);
+    }
+
     public function test_uploaded_hero_images_are_stored_and_shown_back_in_the_form(): void
     {
         Storage::fake('public');
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->fillForm([
                 'hotel_name.en' => 'Test Hotel',
                 'hotel_name.ru' => 'Тестовый отель',
@@ -40,7 +57,7 @@ class ManageHotelSettingsTest extends TestCase
             Storage::disk('public')->assertExists($path);
         }
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->assertFormSet(['hero_images' => $storedPaths]);
     }
 
@@ -52,7 +69,7 @@ class ManageHotelSettingsTest extends TestCase
         $remoteUrl = 'https://images.example.com/lobby.jpg';
         HotelSetting::query()->create(['key' => 'hero_images', 'value' => [$remoteUrl]]);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->fillForm([
                 'hotel_name.en' => 'Test Hotel',
                 'hotel_name.ru' => 'Тестовый отель',

@@ -26,7 +26,7 @@ class AdminCredentialsSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'account'])
             ->fillForm(['admin_credentials.email' => 'owner@afalina.example'])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -40,7 +40,7 @@ class AdminCredentialsSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'account'])
             ->fillForm(['admin_credentials.password' => 'new-password-456'])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -61,7 +61,7 @@ class AdminCredentialsSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'account'])
             ->fillForm(['admin_credentials.email' => '', 'admin_credentials.password' => ''])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -78,7 +78,7 @@ class AdminCredentialsSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'account'])
             ->fillForm(['admin_credentials.email' => 'taken@example.com'])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -94,7 +94,7 @@ class AdminCredentialsSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'account'])
             ->fillForm(['admin_credentials.password' => 'should-never-be-stored-here'])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -108,7 +108,7 @@ class AdminCredentialsSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'account'])
             ->fillForm(['admin_credentials.password' => 'temporary-password'])
             ->call('save')
             ->assertFormSet(['admin_credentials.password' => null]);

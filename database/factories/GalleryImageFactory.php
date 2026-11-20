@@ -15,7 +15,7 @@ class GalleryImageFactory extends Factory
      */
     public function definition(): array
     {
-        $words = fake()->words(2, true);
+        $words = implode(' ', (array) fake()->words(2));
 
         return [
             // Not a real file — fine for most tests, but GalleryImage's own

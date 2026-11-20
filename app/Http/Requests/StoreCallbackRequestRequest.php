@@ -4,8 +4,34 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @phpstan-type BookingData array{name: string, phone: string, message: string|null, wants_balcony: bool, special_requests: string|null, room_number: string|null, currency: string|null, rooms: list<array{room_id: int, period: string|null, quantity: int}>, services: list<array{service_id: int, quantity: int}>} */
 class StoreCallbackRequestRequest extends FormRequest
 {
+    /** @return BookingData */
+    public function bookingData(): array
+    {
+        $data = $this->validated();
+
+        return [
+            'name' => $data['name'],
+            'phone' => $data['phone'],
+            'message' => $data['message'] ?? null,
+            'wants_balcony' => (bool) ($data['wants_balcony'] ?? false),
+            'special_requests' => $data['special_requests'] ?? null,
+            'room_number' => $data['room_number'] ?? null,
+            'currency' => $data['currency'] ?? null,
+            'rooms' => array_values(array_map(fn (array $line): array => [
+                'room_id' => (int) $line['room_id'],
+                'period' => $line['period'] ?? null,
+                'quantity' => (int) $line['quantity'],
+            ], $data['rooms'] ?? [])),
+            'services' => array_values(array_map(fn (array $line): array => [
+                'service_id' => (int) $line['service_id'],
+                'quantity' => (int) $line['quantity'],
+            ], $data['services'] ?? [])),
+        ];
+    }
+
     /**
      * @return array<string, mixed>
      */

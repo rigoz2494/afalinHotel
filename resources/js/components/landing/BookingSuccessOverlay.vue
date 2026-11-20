@@ -23,28 +23,28 @@ const close = (): void => {
             >
                 <div
                     v-if="open"
-                    class="fixed inset-0 z-[90] flex items-center justify-center overflow-hidden bg-stone-950 px-4 text-center"
+                    class="bg-coast-deep fixed inset-0 z-[90] flex items-center justify-center overflow-hidden px-4 text-center"
                     role="status"
                     :aria-label="t('bookingReceivedTitle')"
                     @click.self="close"
                 >
                     <div
-                        class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950 to-amber-950/50"
+                        class="from-coast-deep via-coast-deep to-coast-blue/50 absolute inset-0 bg-gradient-to-br"
                         aria-hidden="true"
                     ></div>
 
                     <div class="relative flex flex-col items-center">
                         <img
-                            src="/images/hotel-logo.svg"
+                            src="/images/afalina-logo.webp"
                             alt=""
-                            class="success-logo mb-6 h-14 w-auto opacity-90 sm:h-20"
+                            class="success-logo bg-coast-paper mb-6 h-14 w-auto rounded-lg p-1.5 sm:h-20"
                         />
                         <span
-                            class="success-check mb-5 flex size-16 items-center justify-center rounded-full bg-amber-300/15 ring-1 ring-amber-300/40 sm:size-20"
+                            class="success-check bg-coast-tide/15 ring-coast-tide/40 mb-5 flex size-16 items-center justify-center rounded-full ring-1 sm:size-20"
                         >
                             <CheckCircle2
                                 :stroke-width="1.5"
-                                class="size-9 text-amber-300 sm:size-11"
+                                class="text-coast-tide size-9 sm:size-11"
                             />
                         </span>
                         <h2

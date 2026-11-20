@@ -28,7 +28,7 @@ export function useBookingSubmission() {
     const { items: serviceItems, clear: clearServices } = useServiceBasket();
     const { selected } = useCurrency();
     const { t, locale } = useLocale();
-    const { selectedRoomNumber } = useRoomSelection();
+    const { selectedRoomNumber, setSelectedRoomNumber } = useRoomSelection();
 
     const onPhoneInput = (event: Event): void => {
         form.phone = formatPhoneInput(
@@ -85,6 +85,7 @@ export function useBookingSubmission() {
             specialRequests.value = '';
             clear();
             clearServices();
+            setSelectedRoomNumber(null);
             status.value = 'sent';
 
             clearTimeout(successOverlayTimer);

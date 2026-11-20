@@ -77,7 +77,7 @@ class CallbackRequestForm
                         Placeholder::make('currency_marker')
                             ->label(__('Currency'))
                             ->content(fn (?CallbackRequest $record): ?string => $record?->currency
-                                ? __('Customer Currency: :code', ['code' => $record->currency])
+                                ? (string) __('Customer Currency: :code', ['code' => $record->currency])
                                 : null),
                         TextInput::make('exchange_rate')
                             ->label(__('Exchange rate'))

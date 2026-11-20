@@ -1,37 +1,30 @@
 <script setup lang="ts">
-import { MessageCircle, Phone, Send } from '@lucide/vue';
 import BookingExtras from '@/components/landing/BookingExtras.vue';
 import BookingForm from '@/components/landing/BookingForm.vue';
 import BookingSubmit from '@/components/landing/BookingSubmit.vue';
 import DirectCallCta from '@/components/landing/DirectCallCta.vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
 
 defineProps<{ hotel: HotelSettings }>();
 const { t, locale } = useLocale();
-
-const messengers = [
-    { label: 'Telegram', icon: Send, class: 'hover:bg-sky-500' },
-    { label: 'WhatsApp', icon: MessageCircle, class: 'hover:bg-green-500' },
-    { label: 'Viber', icon: Phone, class: 'hover:bg-purple-500' },
-];
 </script>
 
 <template>
     <section
         id="contact"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-5 text-white sm:px-6 sm:py-14 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
+        class="landing-screen bg-coast-paper text-coast-ink relative flex scroll-mt-14 flex-col items-center justify-center overflow-hidden px-4 py-10 sm:scroll-mt-16 sm:px-6 sm:py-14 lg:py-8"
     >
-        <SectionBackdrop name="contact" />
         <div
-            class="relative z-10 mx-auto w-full max-w-6xl space-y-3 sm:space-y-6 lg:space-y-8"
+            class="relative z-10 mx-auto w-full max-w-6xl space-y-3 sm:space-y-6 2xl:max-w-[104rem]"
         >
             <div class="text-center">
-                <h2 class="text-2xl font-semibold sm:text-3xl lg:text-4xl">
+                <h2
+                    class="font-coastal-heading text-2xl font-semibold sm:text-3xl lg:text-4xl"
+                >
                     {{ localized(hotel.section_headings.contact, locale) }}
                 </h2>
-                <p class="mt-1.5 text-xs text-white/75 sm:mt-2 sm:text-base">
+                <p class="text-coast-muted mt-1.5 text-xs sm:mt-2 sm:text-base">
                     {{ t('contactIntro') }}
                 </p>
             </div>
@@ -61,10 +54,11 @@ const messengers = [
             </div>
 
             <div
-                class="flex flex-col items-center gap-2.5 border-t border-white/10 pt-3 text-center sm:gap-5 sm:pt-6 lg:gap-6"
+                v-if="Object.keys(hotel.contacts).length"
+                class="border-coast-line flex flex-col items-center gap-2.5 border-t pt-3 text-center sm:gap-5 sm:pt-6 lg:flex-row lg:justify-between lg:text-left"
             >
                 <ul
-                    class="space-y-1 text-xs text-white/80 sm:text-sm lg:text-base"
+                    class="text-coast-muted space-y-1 text-xs sm:text-sm lg:flex lg:flex-wrap lg:space-y-0 lg:gap-x-5 lg:gap-y-1"
                 >
                     <li v-for="(value, key) in hotel.contacts" :key="key">
                         <span class="capitalize">{{ key }}</span
@@ -78,22 +72,6 @@ const messengers = [
                         <template v-else>{{ value }}</template>
                     </li>
                 </ul>
-
-                <div class="flex gap-2.5 sm:gap-3">
-                    <a
-                        v-for="messenger in messengers"
-                        :key="messenger.label"
-                        href="#"
-                        :aria-label="messenger.label"
-                        class="flex size-9 items-center justify-center rounded-full bg-white/10 transition sm:size-11"
-                        :class="messenger.class"
-                    >
-                        <component
-                            :is="messenger.icon"
-                            class="size-4 sm:size-5"
-                        />
-                    </a>
-                </div>
             </div>
         </div>
     </section>

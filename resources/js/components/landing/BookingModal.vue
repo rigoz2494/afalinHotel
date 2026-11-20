@@ -67,20 +67,22 @@ onBeforeUnmount(() => {
                     @click.self="close"
                 >
                     <div
-                        class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-sky-950 px-5 py-4 text-white shadow-2xl sm:p-8"
+                        class="bg-coast-paper text-coast-ink relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl px-5 py-4 shadow-2xl sm:p-8"
                     >
                         <button
                             type="button"
                             :aria-label="t('close')"
-                            class="absolute top-3 right-3 rounded-full bg-white/10 p-2 transition hover:bg-white/20 sm:top-4 sm:right-4"
+                            class="bg-coast-line hover:bg-coast-mist absolute top-3 right-3 rounded-full p-2 transition sm:top-4 sm:right-4"
                             @click="close"
                         >
                             <X class="size-5" />
                         </button>
-                        <h2 class="text-xl font-semibold sm:text-3xl">
+                        <h2
+                            class="font-coastal-heading text-xl font-semibold sm:text-3xl"
+                        >
                             {{ t('completeYourBooking') }}
                         </h2>
-                        <p class="mt-1 text-sm text-white/60">
+                        <p class="text-coast-muted mt-1 text-sm">
                             {{ t('reviewSelectedRooms') }}
                         </p>
                         <BookingForm class="mt-6" />

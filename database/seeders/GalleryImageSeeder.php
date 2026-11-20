@@ -6,7 +6,6 @@ use App\Models\GalleryImage;
 use App\Services\ImageOptimizer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\Finder\SplFileInfo as FinderFileInfo;
 use Symfony\Component\HttpFoundation\File\File as HttpFile;
@@ -34,6 +33,10 @@ class GalleryImageSeeder extends Seeder
 
     public function run(ImageOptimizer $images): void
     {
+        if (GalleryImage::query()->exists()) {
+            return;
+        }
+
         $root = public_path(self::PHOTOS_ROOT);
 
         if (! File::isDirectory($root)) {
@@ -49,14 +52,6 @@ class GalleryImageSeeder extends Seeder
 
             return;
         }
-
-        // Reseeding (without a full migrate:fresh) must not pile up
-        // duplicate rows or leave the previous run's webp files orphaned
-        // on disk — there's no stable natural key to updateOrCreate on,
-        // since every conversion gets its own fresh ULID.
-        GalleryImage::query()->delete();
-        Storage::disk('public')->deleteDirectory(self::STORAGE_DIRECTORY);
-        File::ensureDirectoryExists(Storage::disk('public')->path(self::STORAGE_DIRECTORY));
 
         $processed = 0;
 

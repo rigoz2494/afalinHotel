@@ -44,7 +44,7 @@ class PricingService
             ->values()
             ->all();
 
-        return ['columns' => $columns, 'rows' => $rows];
+        return ['columns' => array_values($columns), 'rows' => array_values($rows)];
     }
 
     /**
@@ -77,7 +77,7 @@ class PricingService
                 ? (float) $override->price_override
                 : round($basePrice * (1 + $period->modifier_percentage / 100));
 
-            $promoPercentage = $override?->discount_percentage ?? $room->discount_percentage;
+            $promoPercentage = $override->discount_percentage ?? $room->discount_percentage;
 
             if ($promoPercentage) {
                 $monthlyDiscounts[$period->id] = $promoPercentage;

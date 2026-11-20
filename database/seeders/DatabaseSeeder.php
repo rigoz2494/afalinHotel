@@ -18,8 +18,10 @@ class DatabaseSeeder extends Seeder
             RoomUnitSeeder::class,
             GalleryImageSeeder::class,
             AdditionalServiceSeeder::class,
-            FaqSeeder::class,
-            CallbackRequestSeeder::class,
         ]);
+
+        if (app()->environment(['local', 'testing'])) {
+            $this->call([FaqSeeder::class, CallbackRequestSeeder::class]);
+        }
     }
 }

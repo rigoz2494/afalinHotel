@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
  * A standalone upsell with a flat price (Parking, Breakfast, an extra bed
  * for a child or an adult, ...), shown as a reference list below the
  * pricing matrix rather than as a row within it.
+ *
+ * @property array{en?: string, ru?: string}|string $name
  */
 class AdditionalService extends Model
 {

@@ -64,17 +64,17 @@ onBeforeUnmount(() => {
             v-if="isLoading"
             role="status"
             :aria-label="t('loading')"
-            class="fixed inset-0 z-[100] flex touch-none items-center justify-center overflow-hidden bg-stone-950"
+            class="bg-coast-deep fixed inset-0 z-[100] flex touch-none items-center justify-center overflow-hidden"
         >
             <div
-                class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950 to-amber-950/60"
+                class="from-coast-deep via-coast-deep to-coast-blue/60 absolute inset-0 bg-gradient-to-br"
                 aria-hidden="true"
             ></div>
             <div class="relative flex flex-col items-center gap-5 sm:gap-6">
                 <img
-                    src="/images/hotel-logo.svg"
+                    src="/images/afalina-logo.webp"
                     alt=""
-                    class="preloader-logo h-24 w-auto sm:h-32 md:h-40"
+                    class="preloader-logo bg-coast-paper h-20 w-auto rounded-xl p-2 sm:h-24"
                 />
                 <Transition
                     mode="out-in"
@@ -85,7 +85,7 @@ onBeforeUnmount(() => {
                 >
                     <p
                         :key="copyIndex"
-                        class="px-6 text-center text-xs font-medium tracking-[0.2em] text-amber-200/80 uppercase sm:text-sm"
+                        class="px-6 text-center text-xs font-medium tracking-[0.2em] text-sky-100/80 uppercase sm:text-sm"
                     >
                         {{ currentCopy }}
                     </p>
@@ -106,13 +106,13 @@ onBeforeUnmount(() => {
     100% {
         opacity: 0.55;
         transform: scale(0.97);
-        filter: drop-shadow(0 0 0 rgb(217 165 65 / 0));
+        filter: drop-shadow(0 0 0 rgb(150 220 241 / 0));
     }
 
     50% {
         opacity: 1;
         transform: scale(1.03);
-        filter: drop-shadow(0 0 24px rgb(217 165 65 / 0.45));
+        filter: drop-shadow(0 0 24px rgb(150 220 241 / 0.45));
     }
 }
 

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// A blurred, faded photo under a stone-to-amber gradient, shared by every
-// section that uses one. The top and bottom fades meet stone-950 so
-// neighbouring sections blend into each other while scrolling.
+// A faded photograph behind a navy gradient.
 //
 // `name` maps to a fixed local file in public/images/backdrops/ (e.g.
 // "about" -> /images/backdrops/about.webp) - never a live fetch from
@@ -24,13 +22,13 @@ defineProps<{ name: string }>();
             }"
         ></div>
         <div
-            class="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-950/90 to-amber-950/70"
+            class="from-coast-deep via-coast-deep/90 to-coast-blue/70 absolute inset-0 bg-gradient-to-br"
         ></div>
         <div
-            class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-stone-950 to-transparent sm:h-32"
+            class="from-coast-deep absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent sm:h-32"
         ></div>
         <div
-            class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-stone-950 to-transparent sm:h-32"
+            class="from-coast-deep absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t to-transparent sm:h-32"
         ></div>
     </div>
 </template>

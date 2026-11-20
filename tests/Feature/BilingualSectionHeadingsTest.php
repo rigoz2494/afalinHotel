@@ -23,7 +23,7 @@ class BilingualSectionHeadingsTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->fillForm([
                 'hotel_name.en' => 'Afalina',
                 'hotel_name.ru' => 'Афалина',
@@ -99,7 +99,7 @@ class BilingualSectionHeadingsTest extends TestCase
 
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->assertFormSet([
                 'section_headings.faq.en' => 'Questions',
                 'section_headings.faq.ru' => 'Вопросы',

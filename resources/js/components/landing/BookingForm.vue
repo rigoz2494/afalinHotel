@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { Minus, Plus, Trash2 } from '@lucide/vue';
-import { computed } from 'vue';
 import CustomCheckbox from '@/components/landing/CustomCheckbox.vue';
 import { useBookingBasket } from '@/composables/useBookingBasket';
 import { useBookingSubmission } from '@/composables/useBookingSubmission';
 import { useCurrency } from '@/composables/useCurrency';
 import { useLocale } from '@/composables/useLocale';
-import { useServiceBasket } from '@/composables/useServiceBasket';
 
 const { items, add, decrement, removeItem } = useBookingBasket();
-// Only the shared basket's totals are needed here — the picker UI itself
-// lives in BookingExtras.vue, writing to this same singleton.
-const { items: serviceItems } = useServiceBasket();
-const { convert, format, formatConverted } = useCurrency();
+const { format } = useCurrency();
 const { t } = useLocale();
 const {
     form,
@@ -23,29 +18,15 @@ const {
     submit,
 } = useBookingSubmission();
 
-// Each line is converted and rounded on its own, the same way the server
-// stores it, so the total is the exact sum of what will be recorded.
-const totalPrice = computed(
-    () =>
-        items.value.reduce(
-            (sum, item) => sum + convert(item.basePrice) * item.quantity,
-            0,
-        ) +
-        serviceItems.value.reduce(
-            (sum, item) => sum + convert(item.basePrice) * item.quantity,
-            0,
-        ),
-);
-
 const inputClass =
-    'w-full rounded-lg border border-white/25 bg-black/35 px-3.5 py-2 text-sm text-white placeholder-white/60 outline-none focus:border-amber-300 sm:px-4 sm:py-3 sm:text-base';
+    'w-full rounded-lg border border-coast-line bg-white px-3.5 py-2 text-sm text-coast-ink placeholder-coast-muted outline-none focus:border-coast-blue sm:px-4 sm:py-3 sm:text-base';
 </script>
 
 <template>
     <div class="space-y-3 sm:space-y-4">
         <div>
             <p
-                class="mb-1.5 text-xs tracking-widest text-amber-300 uppercase sm:mb-2"
+                class="text-coast-blue mb-1.5 text-xs tracking-widest uppercase sm:mb-2"
             >
                 {{ t('selectedRooms') }}
             </p>
@@ -54,7 +35,7 @@ const inputClass =
                 <li
                     v-for="item in items"
                     :key="item.key"
-                    class="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2"
+                    class="bg-coast-mist flex items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2"
                 >
                     <div class="min-w-0">
                         <p class="truncate text-xs font-medium sm:text-sm">
@@ -64,7 +45,7 @@ const inputClass =
                             >
                             - {{ format(item.basePrice) }}
                         </p>
-                        <p class="text-[11px] text-white/50 sm:text-xs">
+                        <p class="text-coast-muted text-[11px] sm:text-xs">
                             {{ t('perNight') }}
                         </p>
                     </div>
@@ -72,7 +53,7 @@ const inputClass =
                         <button
                             type="button"
                             :aria-label="t('decreaseQuantity')"
-                            class="flex size-6 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                            class="bg-coast-line hover:bg-coast-mist flex size-6 items-center justify-center rounded-full transition"
                             @click="decrement(item.roomId, item.period)"
                         >
                             <Minus class="size-3" />
@@ -83,7 +64,7 @@ const inputClass =
                         <button
                             type="button"
                             :aria-label="t('increaseQuantity')"
-                            class="flex size-6 items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200"
+                            class="bg-coast-blue hover:bg-coast-ink flex size-6 items-center justify-center rounded-full text-white transition"
                             @click="
                                 add(
                                     item.roomId,
@@ -98,7 +79,7 @@ const inputClass =
                         <button
                             type="button"
                             :aria-label="t('removeRoom')"
-                            class="ml-1 text-white/40 transition hover:text-red-300"
+                            class="text-coast-muted ml-1 transition hover:text-red-700"
                             @click="removeItem(item.key)"
                         >
                             <Trash2 class="size-4" />
@@ -108,20 +89,9 @@ const inputClass =
             </ul>
             <p
                 v-else
-                class="rounded-lg border border-dashed border-white/15 px-3 py-2.5 text-center text-xs text-white/50 sm:py-4 sm:text-sm"
+                class="border-coast-line text-coast-muted rounded-lg border border-dashed px-3 py-2.5 text-center text-xs sm:py-4 sm:text-sm"
             >
                 {{ t('noRoomsSelected') }}
-            </p>
-
-            <p
-                v-if="items.length"
-                class="mt-2 text-right text-sm text-white/70"
-            >
-                {{ t('total') }}
-                <span class="font-semibold text-amber-300">{{
-                    formatConverted(totalPrice)
-                }}</span>
-                {{ t('slashPerNight') }}
             </p>
         </div>
 
@@ -154,7 +124,7 @@ const inputClass =
                 :class="inputClass"
                 @input="onPhoneInput"
             />
-            <p v-if="phoneError" class="text-xs text-red-300">
+            <p v-if="phoneError" class="text-xs text-red-700">
                 {{ phoneError }}
             </p>
             <textarea
@@ -164,7 +134,7 @@ const inputClass =
                 :class="inputClass"
             ></textarea>
             <label
-                class="flex items-center gap-2 text-xs text-white/80 select-none sm:gap-2.5 sm:text-sm"
+                class="text-coast-muted flex items-center gap-2 text-xs select-none sm:gap-2.5 sm:text-sm"
             >
                 <CustomCheckbox v-model="wantsBalcony" />
                 {{ t('balconyPreference') }}

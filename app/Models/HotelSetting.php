@@ -6,8 +6,18 @@ use Database\Factories\HotelSettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/** @property mixed $value */
 class HotelSetting extends Model
 {
+    public const array SEASONAL_THEMES = ['summer', 'autumn', 'winter', 'spring'];
+
+    public static function seasonalTheme(mixed $value): string
+    {
+        return is_string($value) && in_array($value, self::SEASONAL_THEMES, true)
+            ? $value
+            : 'summer';
+    }
+
     /** @use HasFactory<HotelSettingFactory> */
     use HasFactory;
 
@@ -87,7 +97,7 @@ class HotelSetting extends Model
      */
     public static function currentLocaleMode(): string
     {
-        return static::query()->where('key', 'locale_mode')->first()?->value ?? 'multilingual';
+        return static::query()->where('key', 'locale_mode')->first()->value ?? 'multilingual';
     }
 
     /**
@@ -208,9 +218,9 @@ class HotelSetting extends Model
      *
      * @return array<string, string>
      */
-    public static function defaultedAboutStory(mixed $stored): array
+    public static function defaultedAboutStory(mixed $stored, bool $withSampleContent = true): array
     {
-        $story = self::DEFAULT_ABOUT_STORY;
+        $story = $withSampleContent ? self::DEFAULT_ABOUT_STORY : ['en' => '', 'ru' => ''];
 
         if (! is_array($stored)) {
             return $story;
@@ -254,9 +264,15 @@ class HotelSetting extends Model
      * @param  array<string, mixed>  $stored
      * @return array<string, array<string, array<string, string>>>
      */
-    public static function defaultedAboutStats(array $stored): array
+    public static function defaultedAboutStats(array $stored, bool $withSampleContent = true): array
     {
         $stats = self::DEFAULT_ABOUT_STATS;
+
+        if (! $withSampleContent) {
+            foreach ($stats as $badge => $fields) {
+                $stats[$badge]['value'] = ['en' => '', 'ru' => ''];
+            }
+        }
 
         foreach ($stored as $badge => $fields) {
             if (! is_array($fields) || ! isset($stats[$badge])) {

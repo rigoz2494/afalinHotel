@@ -23,7 +23,7 @@ class BilingualAboutStatsTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->fillForm([
                 'about_stats.years.label.en' => 'Years',
                 'about_stats.years.label.ru' => 'Лет',
@@ -71,7 +71,7 @@ class BilingualAboutStatsTest extends TestCase
 
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ManageHotelSettings::class)
+        Livewire::test(ManageHotelSettings::class, ['section' => 'homepage'])
             ->assertFormSet([
                 'about_stats.guests.label.en' => 'Visitors',
                 'about_stats.guests.label.ru' => 'Посетителей',

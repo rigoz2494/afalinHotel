@@ -74,7 +74,7 @@ return new class extends Migration
         DB::table('room_prices')->select('id', 'pricing_period_id')->get()->each(function (object $row): void {
             $period = DB::table('pricing_periods')->find($row->pricing_period_id);
 
-            if ($period) {
+            if (is_object($period) && isset($period->name, $period->sort_order)) {
                 DB::table('room_prices')->where('id', $row->id)->update([
                     'period_label' => $period->name,
                     'period_order' => $period->sort_order,

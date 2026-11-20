@@ -15,7 +15,7 @@ class AdditionalServiceFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->unique()->words(2, true);
+        $name = implode(' ', (array) fake()->unique()->words(2));
 
         return [
             'name' => ['en' => ucfirst($name), 'ru' => ucfirst($name)],

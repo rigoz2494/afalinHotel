@@ -14,7 +14,6 @@ import Preloader from '@/components/landing/Preloader.vue';
 import PricingSection from '@/components/landing/PricingSection.vue';
 import ReviewsSection from '@/components/landing/ReviewsSection.vue';
 import RoomsSection from '@/components/landing/RoomsSection.vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import SideNavDots from '@/components/landing/SideNavDots.vue';
 import {
     faqItems as mockFaqItems,
@@ -23,7 +22,6 @@ import {
     mockHotel,
     mockPricing,
     mockRooms,
-    roomFallbackImages,
 } from '@/data/landingMock';
 import { provideAdditionalServices } from '@/composables/useAdditionalServices';
 import { provideCurrency } from '@/composables/useCurrency';
@@ -40,7 +38,8 @@ import type {
 } from '@/types/landing';
 
 const props = defineProps<{
-    hotel: Partial<HotelSettings>;
+    hotel: HotelSettings;
+    showDemoData: boolean;
     currencies: CurrencyOption[];
     rooms: { data: Room[] };
     faqs: { data: FaqItem[] };
@@ -56,49 +55,48 @@ const props = defineProps<{
     canonicalUrl?: string | null;
 }>();
 
-// Fall back to mock data until the database is seeded. `tagline` is the
-// signal, not `hotel_name`: the latter is always present and truthy once
-// defaulted server-side (see HotelSettingsResource), even on a fresh install.
-const isHotelSeeded = Boolean(props.hotel?.tagline);
+const useDemoHotel = props.showDemoData && !props.hotel.tagline;
 const hotel = ref<HotelSettings>({
-    ...mockHotel,
-    ...Object.fromEntries(
-        Object.entries(props.hotel ?? {}).filter(([, value]) =>
-            Array.isArray(value) ? value.length > 0 : value,
-        ),
-    ),
-    // An unset tagline/banner in the database means "show nothing there",
-    // not "use the mock" — same reasoning for both.
-    tagline: isHotelSeeded ? (props.hotel.tagline ?? null) : mockHotel.tagline,
-    promo_banner: isHotelSeeded
-        ? (props.hotel.promo_banner ?? null)
-        : mockHotel.promo_banner,
+    ...props.hotel,
+    ...(useDemoHotel
+        ? {
+              tagline: mockHotel.tagline,
+              promo_banner: mockHotel.promo_banner,
+              contacts: Object.keys(props.hotel.contacts).length
+                  ? props.hotel.contacts
+                  : mockHotel.contacts,
+          }
+        : {}),
 });
 const rooms = ref<Room[]>(
-    (props.rooms.data.length ? props.rooms.data : mockRooms).map(
-        (room, index) => ({
-            ...room,
-            images: room.images.length
-                ? room.images
-                : [roomFallbackImages[index % roomFallbackImages.length]],
-        }),
-    ),
+    props.showDemoData && !props.rooms.data.length
+        ? mockRooms
+        : props.rooms.data,
 );
 const pricing = ref<PricingTable>(
-    props.pricing.rows.data.length
-        ? { columns: props.pricing.columns, rows: props.pricing.rows.data }
-        : mockPricing,
+    props.showDemoData &&
+        !props.rooms.data.length &&
+        !props.pricing.rows.data.length
+        ? mockPricing
+        : { columns: props.pricing.columns, rows: props.pricing.rows.data },
 );
 const faqs = ref<FaqItem[]>(
-    props.faqs.data.length ? props.faqs.data : mockFaqItems,
+    props.showDemoData && !props.faqs.data.length
+        ? mockFaqItems
+        : props.faqs.data,
 );
 const additionalServices = ref<AdditionalService[]>(
-    props.additionalServices.data.length
-        ? props.additionalServices.data
-        : mockAdditionalServices,
+    props.showDemoData && !props.additionalServices.data.length
+        ? mockAdditionalServices
+        : props.additionalServices.data,
 );
 const gallery = ref<GalleryImage[]>(
-    props.gallery.data.length ? props.gallery.data : mockGalleryImages,
+    props.showDemoData && !props.gallery.data.length
+        ? mockGalleryImages
+        : props.gallery.data,
+);
+const hasPricing = computed(
+    () => pricing.value.rows.length > 0 && pricing.value.columns.length > 0,
 );
 
 provideCurrency(() => props.currencies);
@@ -118,6 +116,14 @@ const forcedLocale = computed(() => {
     return undefined;
 });
 const { t, locale } = provideLocale(forcedLocale.value);
+const hasAbout = computed(
+    () =>
+        gallery.value.length > 0 ||
+        Boolean(localized(hotel.value.about_story, locale.value)) ||
+        Object.values(hotel.value.about_stats).some((stat) =>
+            Boolean(localized(stat.value, locale.value)),
+        ),
+);
 const showLocalizationControls = computed(
     () => hotel.value.locale_mode === 'multilingual',
 );
@@ -129,10 +135,10 @@ const showLocalizationControls = computed(
 // intentionally keeps its own short equivalents instead of reusing them.
 const navLinks = computed(() => [
     { id: 'hero', label: t('navHome') },
-    { id: 'rooms', label: t('navRooms') },
-    { id: 'pricing', label: t('navPricing') },
-    { id: 'about', label: t('navAbout') },
-    { id: 'faq', label: t('navFaq') },
+    ...(rooms.value.length ? [{ id: 'rooms', label: t('navRooms') }] : []),
+    ...(hasPricing.value ? [{ id: 'pricing', label: t('navPricing') }] : []),
+    ...(hasAbout.value ? [{ id: 'about', label: t('navAbout') }] : []),
+    ...(faqs.value.length ? [{ id: 'faq', label: t('navFaq') }] : []),
     { id: 'contact', label: t('navContact') },
     { id: 'location', label: t('navLocation') },
     { id: 'reviews', label: t('navReviews') },
@@ -201,7 +207,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
+    <div :data-hotel-season="hotel.seasonal_theme">
         <Head>
             <title>{{ seoTitle }}</title>
             <meta name="description" :content="seoDescription" />
@@ -231,41 +237,53 @@ onMounted(() => {
             :active-id="activeId"
             :show-localization-controls="showLocalizationControls"
             @navigate="scrollTo"
+            @open-booking="bookingModalOpen = true"
         />
         <main
-            class="scroll-smooth lg:h-screen lg:snap-y lg:snap-mandatory lg:overflow-y-scroll"
+            class="bg-coast-paper scroll-smooth lg:h-screen lg:overflow-y-auto"
         >
-            <HeroSection :hotel="hotel" />
+            <HeroSection
+                :hotel="hotel"
+                :has-rooms="rooms.length > 0"
+                @view-rooms="scrollTo('rooms')"
+            />
+            <svg
+                v-if="rooms.length"
+                aria-hidden="true"
+                class="bg-coast-paper fill-coast-mist block h-6 w-full sm:h-9"
+                viewBox="0 0 1440 48"
+                preserveAspectRatio="none"
+                focusable="false"
+            >
+                <path
+                    d="M0 29C240 29 296 6 528 6S882 39 1114 39C1252 39 1332 24 1440 15V48H0Z"
+                />
+            </svg>
             <RoomsSection
+                v-if="rooms.length"
                 :hotel="hotel"
                 :rooms="rooms"
                 :pricing="pricing"
                 :focus-slug="focusRoomSlug"
             />
             <PricingSection
+                v-if="hasPricing"
                 :hotel="hotel"
                 :pricing="pricing"
                 :additional-services="additionalServices"
             />
-            <AboutSection :hotel="hotel" :images="gallery" />
-            <FaqSection :hotel="hotel" :faqs="faqs" />
+            <AboutSection v-if="hasAbout" :hotel="hotel" :images="gallery" />
+            <FaqSection v-if="faqs.length" :hotel="hotel" :faqs="faqs" />
             <ContactSection :hotel="hotel" />
-            <!--
-                Two independent sections below lg (each its own full,
-                snappable screen with its own id - unchanged), merged at lg
-                and up into a single side-by-side snap-stop instead: this
-                wrapper owns the height/snap/backdrop there, letting both
-                halves sit in one view - with one continuous photo behind
-                them instead of each half's own backdrop fighting the
-                other's color right at the shared seam - rather than two
-                consecutive empty-feeling screens on a wide monitor.
-            -->
             <div
-                class="relative lg:flex lg:h-screen lg:snap-start lg:items-stretch"
+                class="landing-screen lg:bg-coast-mist lg:border-coast-line relative lg:flex lg:items-center lg:border-t"
             >
-                <SectionBackdrop name="reviews" class="hidden lg:block" />
-                <LocationSection :hotel="hotel" class="lg:w-1/2" />
-                <ReviewsSection :hotel="hotel" class="lg:w-1/2" />
+                <div
+                    class="lg:max-w-landing lg:mx-auto lg:grid lg:w-full lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-x-10 lg:gap-y-5 lg:px-12 lg:py-12 2xl:gap-x-16"
+                >
+                    <LocationSection :hotel="hotel" />
+                    <ReviewsSection :hotel="hotel" />
+                </div>
             </div>
         </main>
 

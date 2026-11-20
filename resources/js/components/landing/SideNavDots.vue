@@ -26,13 +26,15 @@ const { t } = useLocale();
             @click="$emit('navigate', link.id)"
         >
             <span
-                class="rounded-full bg-white/40 transition-all duration-300 group-hover:bg-amber-200"
+                class="group-hover:bg-coast-blue rounded-full ring-1 ring-white/75 transition-all duration-300"
                 :class="
-                    activeId === link.id ? 'size-2.5 bg-amber-300' : 'size-1.5'
+                    activeId === link.id
+                        ? 'bg-coast-blue size-2.5'
+                        : 'bg-coast-ink/55 size-1.5'
                 "
             ></span>
             <span
-                class="pointer-events-none absolute right-full mr-3 rounded-md bg-slate-950/90 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
+                class="bg-coast-deep/90 pointer-events-none absolute right-full mr-3 rounded-md px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
             >
                 {{ link.label }}
             </span>

@@ -10,6 +10,7 @@ export type HotelSettings = {
     // behavior if only one language was filled in.
     promo_banner: { en: string | null; ru: string | null } | null;
     hero_images: string[];
+    seasonal_theme: 'summer' | 'autumn' | 'winter' | 'spring';
     contacts: Record<string, string>;
     // Both languages are always present; see the `localized()` helper.
     section_headings: Record<string, { en: string; ru: string }>;
@@ -59,6 +60,7 @@ export type Room = {
 
 /** A specific, numbered physical room belonging to a Room ("Room Type"). */
 export type RoomUnit = {
+    video_url?: string | null;
     id: number;
     number: string;
     // Falls back to the room type's own photos/amenities when this

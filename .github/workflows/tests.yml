@@ -12,6 +12,31 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    services:
+      pgsql:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: afalina_test
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sail -d afalina_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      APP_ENV: testing
+      APP_URL: http://localhost
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: afalina_test
+      DB_USERNAME: sail
+      DB_PASSWORD: ci-only
+      VITE_SKIP_REMOTE_FONTS: '1'
 
     steps:
       - name: Checkout code
@@ -22,17 +47,43 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
+          extensions: pdo_pgsql, pdo_sqlite, gd, intl, zip
           tools: composer:v2
           coverage: none
 
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Setup Application
-        run: composer setup
+        run: |
+          composer install --no-interaction --prefer-dist
+          cp .env.example .env
+          php artisan key:generate
+          npm ci
+          npm run build
 
-      - name: Run CI Checks
-        run: composer ci:check
+      - name: Run PostgreSQL migrations
+        run: php artisan migrate --force
+
+      - name: Verify booking flow on PostgreSQL
+        run: php artisan test --filter=BookingFlowTest
+
+      - name: Check frontend and PHP formatting
+        run: |
+          npm run check
+          npm run types:check
+          composer lint:check
+
+      - name: Run PHPUnit against SQLite
+        if: ${{ !cancelled() }}
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test
+
+      - name: Run PHPStan
+        if: ${{ !cancelled() }}
+        run: vendor/bin/phpstan analyse --memory-limit=512M

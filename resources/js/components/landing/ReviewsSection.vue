@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { HotelSettings } from '@/types/landing';
 
@@ -10,7 +9,7 @@ const { t, locale } = useLocale();
 // Real guest reviews, live from the hotel's verified Yandex Business
 // listing (org id 12100073003) - not written here, since fabricated
 // testimonials on a real hotel's site would be actively dishonest.
-const yandexOrgUrl = 'https://yandex.ru/maps/org/afalina/12100073003/';
+const yandexOrgUrl = 'https://yandex.ru/maps/org/afalina/12100073003/reviews/';
 const yandexReviewsWidgetSrc =
     'https://yandex.ru/maps-reviews-widget/12100073003?comments';
 
@@ -23,66 +22,51 @@ const reviewsUnlocked = ref(false);
 <template>
     <section
         id="reviews"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-full lg:py-0 lg:pt-16"
+        class="bg-coast-mist text-coast-ink relative flex scroll-mt-14 flex-col items-center px-4 py-10 sm:scroll-mt-16 sm:px-6 sm:py-14 lg:row-span-3 lg:grid lg:grid-rows-subgrid lg:items-stretch lg:bg-transparent lg:p-0"
     >
-        <SectionBackdrop name="reviews" class="lg:hidden" />
-        <div
-            class="relative z-10 w-full max-w-2xl text-center lg:max-h-full lg:max-w-md lg:overflow-y-auto lg:py-2"
-        >
-            <p class="text-sm tracking-widest text-amber-300 uppercase">
-                {{ t('navReviews') }}
-            </p>
-            <h2
-                class="mt-3 text-3xl leading-tight font-semibold sm:text-4xl md:text-5xl"
-            >
-                {{ localized(hotel.section_headings.reviews, locale) }}
-            </h2>
-            <p class="mt-3 text-sm text-stone-300 sm:text-base">
-                {{ t('reviewsIntro') }}
-            </p>
+        <div class="relative w-full max-w-2xl text-center lg:contents">
+            <div class="lg:text-left">
+                <h2
+                    class="font-coastal-heading text-3xl leading-tight font-medium sm:text-4xl"
+                >
+                    {{ localized(hotel.section_headings.reviews, locale) }}
+                </h2>
+                <p class="text-coast-muted mt-3 text-sm sm:text-base">
+                    {{ t('reviewsIntro') }}
+                </p>
+            </div>
 
-            <!--
-                Yandex's own review widget for the hotel's verified Business
-                listing - real, live guest reviews, not anything written
-                here. The widget itself is a light card (Yandex's own
-                styling, not restylable from here), so it's framed to read
-                as an intentional bright highlight against the dark section
-                rather than a clashing default embed. `dvh`, not `vh`, below
-                lg: a mobile browser's address bar eats into `vh` without
-                actually shrinking the real visible area, so a `vh`-sized
-                box was cropping this tall enough that no comment - only
-                the rating header - ever fit in view.
-            -->
             <div
-                class="relative mt-5 overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl sm:mt-6"
+                class="border-coast-line relative mt-5 overflow-hidden rounded-xl border bg-white shadow-sm sm:mt-6 lg:mt-0"
             >
                 <iframe
                     :src="yandexReviewsWidgetSrc"
                     :title="t('reviewsWidgetTitle')"
-                    class="h-[70dvh] w-full sm:h-[65dvh] lg:h-[55vh]"
+                    class="block h-[70dvh] w-full sm:h-[65dvh] lg:h-[clamp(19rem,48svh,34rem)]"
                     loading="lazy"
                 ></iframe>
                 <button
                     v-if="!reviewsUnlocked"
                     type="button"
-                    class="absolute inset-0 flex cursor-pointer items-center justify-center bg-stone-950/20 text-sm font-medium text-stone-900 backdrop-blur-[1px] transition hover:bg-stone-950/10"
+                    class="bg-coast-deep/20 hover:bg-coast-deep/10 absolute inset-0 flex cursor-pointer items-center justify-center text-sm font-medium text-stone-900 backdrop-blur-[1px] transition"
                     @click="reviewsUnlocked = true"
                 >
-                    <span class="rounded-full bg-white px-4 py-2 shadow-lg">{{
-                        t('tapToUnlockReviews')
-                    }}</span>
+                    <span
+                        class="border-coast-line rounded-full border bg-white px-4 py-2 shadow-sm"
+                        >{{ t('tapToUnlockReviews') }}</span
+                    >
                 </button>
             </div>
             <a
                 :href="yandexOrgUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="mt-2 inline-block text-xs text-white/40 hover:text-white/70"
+                class="border-coast-blue text-coast-blue hover:text-coast-ink mt-5 inline-block border-b pb-1 text-sm font-semibold transition sm:mt-6 lg:mt-0 lg:justify-self-start"
             >
                 {{
                     locale === 'ru'
-                        ? 'Афалина на карте Феодосии — Яндекс Карты'
-                        : 'Afalina on the map of Feodosia — Yandex Maps'
+                        ? 'Читать отзывы в Яндекс Картах'
+                        : 'Read reviews on Yandex Maps'
                 }}
             </a>
         </div>

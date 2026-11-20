@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import GalleryLightbox from '@/components/landing/GalleryLightbox.vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { GalleryImage, HotelSettings } from '@/types/landing';
 
@@ -25,11 +24,13 @@ const lightboxIndex = ref<number | null>(null);
 // The three marketing badges (e.g. "20+ Years") — label and value are both
 // bilingual, set from Site Settings, not hardcoded on the page.
 const stats = computed(() =>
-    (['years', 'rooms', 'guests'] as const).map((key) => ({
-        key,
-        label: localized(props.hotel.about_stats[key].label, locale.value),
-        value: localized(props.hotel.about_stats[key].value, locale.value),
-    })),
+    (['years', 'rooms', 'guests'] as const)
+        .map((key) => ({
+            key,
+            label: localized(props.hotel.about_stats[key].label, locale.value),
+            value: localized(props.hotel.about_stats[key].value, locale.value),
+        }))
+        .filter((stat) => stat.value),
 );
 
 // A blank line in the admin's free-text story field starts a new <p> on
@@ -45,37 +46,39 @@ const storyParagraphs = computed(() =>
 <template>
     <section
         id="about"
-        class="relative grid min-h-screen gap-6 overflow-hidden bg-stone-950 px-4 pt-24 pb-10 text-stone-100 sm:gap-8 sm:px-6 lg:h-screen lg:snap-start lg:grid-cols-5 lg:px-12 lg:pb-8"
+        class="landing-screen bg-coast-paper text-coast-ink max-w-landing relative mx-auto grid scroll-mt-14 gap-6 px-4 py-10 sm:scroll-mt-16 sm:gap-8 sm:px-6 sm:py-14 lg:grid-cols-5 lg:items-center lg:px-12 2xl:grid-cols-[minmax(20rem,35rem)_minmax(0,1fr)]"
     >
-        <SectionBackdrop name="about" />
-        <div class="relative z-10 flex flex-col justify-center lg:col-span-2">
-            <p class="text-sm tracking-widest text-amber-300 uppercase">
+        <div
+            class="relative z-10 flex flex-col justify-center lg:col-span-2 2xl:col-span-1"
+        >
+            <p class="text-coast-blue text-sm tracking-widest uppercase">
                 {{ t('navAbout') }}
             </p>
             <h2
-                class="mt-3 text-3xl leading-tight font-semibold sm:text-4xl md:text-5xl"
+                class="font-coastal-heading mt-3 text-3xl leading-tight font-medium sm:text-4xl md:text-5xl"
             >
                 {{ localized(hotel.section_headings.about, locale) }}
             </h2>
             <p
                 v-for="(paragraph, index) in storyParagraphs"
                 :key="index"
-                class="text-sm text-stone-300 sm:text-base"
+                class="text-coast-muted text-sm sm:text-base"
                 :class="index === 0 ? 'mt-4 sm:mt-5' : 'mt-3 sm:mt-4'"
             >
                 {{ paragraph }}
             </p>
             <dl
+                v-if="stats.length"
                 class="mt-6 grid grid-cols-3 gap-3 text-center sm:mt-8 sm:gap-4"
             >
                 <div
                     v-for="stat in stats"
                     :key="stat.key"
-                    class="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4"
+                    class="border-coast-line rounded-xl border bg-white p-3 sm:p-4"
                 >
-                    <dt class="text-xs text-stone-300">{{ stat.label }}</dt>
+                    <dt class="text-coast-muted text-xs">{{ stat.label }}</dt>
                     <dd
-                        class="text-xl font-semibold text-amber-300 sm:text-2xl"
+                        class="text-coast-blue text-xl font-semibold sm:text-2xl"
                     >
                         {{ stat.value }}
                     </dd>
@@ -111,17 +114,8 @@ const storyParagraphs = computed(() =>
             </button>
         </div>
 
-        <!--
-            `lg` and up: a native CSS multi-column flow, not a fixed-row
-            grid — each photo keeps its own natural aspect ratio and the
-            columns stagger organically, Pinterest-style, instead of every
-            photo being cropped to fit identical cells. `overflow-y-auto` is
-            needed because the section is pinned to exactly one screen
-            (`lg:h-screen` plus `overflow-hidden`) and a masonry column's
-            total height isn't guaranteed to fit that.
-        -->
         <div
-            class="relative z-10 hidden gap-4 lg:col-span-3 lg:block lg:h-full lg:columns-3 lg:overflow-y-auto"
+            class="relative z-10 hidden gap-4 lg:col-span-3 lg:block lg:columns-3 2xl:col-span-1 2xl:columns-4"
         >
             <button
                 v-for="(image, index) in displayImages"

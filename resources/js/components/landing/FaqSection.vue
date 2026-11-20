@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown } from '@lucide/vue';
 import { ref } from 'vue';
-import SectionBackdrop from '@/components/landing/SectionBackdrop.vue';
 import { localized, useLocale } from '@/composables/useLocale';
 import type { FaqItem, HotelSettings } from '@/types/landing';
 
@@ -24,34 +23,37 @@ const displayAnswer = (item: FaqItem): string =>
 <template>
     <section
         id="faq"
-        class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-stone-950 px-4 py-14 text-stone-100 sm:px-6 lg:h-screen lg:snap-start lg:py-0 lg:pt-16"
+        class="bg-coast-mist text-coast-ink relative flex scroll-mt-14 flex-col items-center px-4 py-10 sm:scroll-mt-16 sm:px-6 sm:py-14"
     >
-        <SectionBackdrop name="faq" />
-        <div class="relative z-10 w-full max-w-3xl 2xl:max-w-4xl">
-            <p
-                class="text-center text-sm tracking-widest text-amber-300 uppercase"
-            >
-                {{ t('navFaq') }}
-            </p>
-            <h2
-                class="mt-3 text-center text-3xl leading-tight font-semibold sm:text-4xl md:text-5xl"
-            >
-                {{ localized(hotel.section_headings.faq, locale) }}
-            </h2>
+        <div
+            class="relative z-10 w-full max-w-3xl 2xl:grid 2xl:max-w-[104rem] 2xl:grid-cols-[minmax(20rem,1fr)_minmax(0,2fr)] 2xl:items-start 2xl:gap-12"
+        >
+            <div>
+                <p
+                    class="text-coast-blue text-center text-sm tracking-widest uppercase 2xl:text-left"
+                >
+                    {{ t('navFaq') }}
+                </p>
+                <h2
+                    class="font-coastal-heading mt-3 text-center text-3xl leading-tight font-medium sm:text-4xl md:text-5xl 2xl:text-left"
+                >
+                    {{ localized(hotel.section_headings.faq, locale) }}
+                </h2>
+            </div>
 
             <div
-                class="mt-8 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur sm:mt-10"
+                class="divide-coast-line border-coast-line mt-8 divide-y rounded-2xl border bg-white shadow-sm backdrop-blur sm:mt-10 2xl:mt-0"
             >
                 <div v-for="(item, index) in faqs" :key="item.question">
                     <button
                         type="button"
-                        class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium transition hover:bg-white/10 sm:px-6 sm:py-5 sm:text-base"
+                        class="hover:bg-coast-mist flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium transition sm:px-6 sm:py-5 sm:text-base"
                         :aria-expanded="openIndex === index"
                         @click="toggle(index)"
                     >
                         {{ displayQuestion(item) }}
                         <ChevronDown
-                            class="size-5 shrink-0 text-amber-300 transition-transform duration-300"
+                            class="text-coast-blue size-5 shrink-0 transition-transform duration-300"
                             :class="openIndex === index ? 'rotate-180' : ''"
                         />
                     </button>
@@ -64,7 +66,7 @@ const displayAnswer = (item: FaqItem): string =>
                     >
                         <div class="overflow-hidden">
                             <p
-                                class="px-5 pb-4 text-sm text-stone-300 sm:px-6 sm:pb-5 sm:text-base"
+                                class="text-coast-muted px-5 pb-4 text-sm sm:px-6 sm:pb-5 sm:text-base"
                             >
                                 {{ displayAnswer(item) }}
                             </p>

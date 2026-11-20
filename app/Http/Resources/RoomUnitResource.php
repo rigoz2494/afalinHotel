@@ -29,6 +29,7 @@ class RoomUnitResource extends JsonResource
             'id' => $this->id,
             'number' => $this->number,
             'images' => $images,
+            'video_url' => $this->video_path === null ? null : url(Storage::disk('public')->url($this->video_path)),
             'amenities' => $this->amenities ?: ($this->room->amenities ?? []),
             'has_balcony' => $this->has_balcony,
         ];

@@ -7,7 +7,7 @@ import {
     ChevronRight,
     X,
 } from '@lucide/vue';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 import ClientOnly from '@/components/ClientOnly.vue';
 import { useAmenityTags } from '@/composables/useAmenityTags';
 import { useLocale } from '@/composables/useLocale';
@@ -20,7 +20,8 @@ const { t } = useLocale();
 const { setSelectedRoomNumber } = useRoomSelection();
 
 const selectedUnitId = ref<number | null>(null);
-const imageIndex = ref(0);
+const slideIndex = ref(0);
+const videoPlayer = useTemplateRef<HTMLVideoElement>('videoPlayer');
 // A deliberate, brief pause before swapping in the new room's photos/tags —
 // not real loading (the data is already on the page), but switching units
 // instantly would flash the new content in jarringly. The skeleton below
@@ -36,10 +37,16 @@ const selectedUnit = computed(
 const amenityTags = computed(() =>
     selectedUnit.value ? useAmenityTags(selectedUnit.value.amenities, t) : [],
 );
+const photoCount = computed(() => selectedUnit.value?.images.length ?? 0);
+const videoUrl = computed(() => selectedUnit.value?.video_url);
+const slideCount = computed(() => photoCount.value + (videoUrl.value ? 1 : 0));
+const isVideoSlide = computed(
+    () => Boolean(videoUrl.value) && slideIndex.value === photoCount.value,
+);
 
 const selectUnit = (id: number | null): void => {
     selectedUnitId.value = id;
-    imageIndex.value = 0;
+    slideIndex.value = 0;
 
     const unit = props.room.units.find((u) => u.id === id);
     setSelectedRoomNumber(unit?.number ?? null);
@@ -56,17 +63,29 @@ const selectUnit = (id: number | null): void => {
 watch(open, (isOpen) => {
     if (isOpen) {
         selectUnit(props.room.units[0]?.id ?? null);
+    } else {
+        clearTimeout(loadingTimer);
+        videoPlayer.value?.pause();
     }
 });
 
-const stepImage = (direction: 1 | -1): void => {
-    const total = selectedUnit.value?.images.length ?? 0;
+watch(videoPlayer, (_, previousPlayer) => previousPlayer?.pause(), {
+    flush: 'sync',
+});
+
+onBeforeUnmount(() => {
+    clearTimeout(loadingTimer);
+    videoPlayer.value?.pause();
+});
+
+const stepSlide = (direction: 1 | -1): void => {
+    const total = slideCount.value;
 
     if (total === 0) {
         return;
     }
 
-    imageIndex.value = (imageIndex.value + direction + total) % total;
+    slideIndex.value = (slideIndex.value + direction + total) % total;
 };
 
 const close = (): void => {
@@ -98,7 +117,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                     @click.self="close"
                 >
                     <div
-                        class="relative max-h-[90vh] w-full max-w-7xl overflow-y-auto rounded-2xl bg-stone-950 p-6 text-white shadow-2xl sm:p-8"
+                        class="bg-coast-deep relative max-h-[94dvh] w-full max-w-[108rem] overflow-y-auto rounded-2xl p-6 text-white shadow-2xl sm:p-8"
                     >
                         <button
                             type="button"
@@ -108,16 +127,20 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                         >
                             <X class="size-5" />
                         </button>
-                        <h2 class="text-2xl font-semibold sm:text-3xl">
+                        <h2
+                            class="font-coastal-heading text-2xl font-semibold sm:text-3xl"
+                        >
                             {{ t('availableRoomsModalTitle') }}
                         </h2>
 
-                        <div class="mt-5 grid gap-6 lg:grid-cols-5 lg:gap-8">
+                        <div
+                            class="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_clamp(16rem,23vw,24rem)] lg:gap-8"
+                        >
                             <!-- Wide, luxury-sized photo column. -->
-                            <div class="lg:col-span-3">
+                            <div class="min-w-0">
                                 <div
                                     v-if="isLoading"
-                                    class="aspect-video w-full animate-pulse rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-white/10 lg:aspect-4/3"
+                                    class="aspect-video w-full animate-pulse rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-white/10 lg:aspect-auto lg:h-[clamp(19rem,calc(94dvh-8rem),52rem)]"
                                 ></div>
                                 <Transition
                                     v-else
@@ -126,7 +149,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                 >
                                     <div
                                         v-if="selectedUnit"
-                                        class="relative aspect-video w-full overflow-hidden rounded-xl bg-white/5 lg:aspect-4/3"
+                                        class="relative aspect-video w-full overflow-hidden rounded-xl bg-white/5 lg:aspect-auto lg:h-[clamp(19rem,calc(94dvh-8rem),52rem)]"
                                     >
                                         <!--
                                             A room photo is landscape, but a
@@ -140,49 +163,67 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                             instead, so the whole photo always
                                             stays visible, whatever its shape.
                                         -->
-                                        <img
-                                            v-if="selectedUnit.images.length"
-                                            :src="
-                                                selectedUnit.images[imageIndex]
-                                            "
-                                            alt=""
-                                            aria-hidden="true"
-                                            loading="lazy"
-                                            decoding="async"
-                                            class="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-2xl"
-                                        />
-                                        <img
-                                            v-if="selectedUnit.images.length"
-                                            :src="
-                                                selectedUnit.images[imageIndex]
-                                            "
-                                            :alt="
-                                                t('roomNumberOption', {
-                                                    number: selectedUnit.number,
-                                                })
-                                            "
+                                        <video
+                                            v-if="isVideoSlide"
+                                            ref="videoPlayer"
+                                            :src="videoUrl ?? undefined"
+                                            :aria-label="t('roomVideo')"
                                             class="absolute inset-0 h-full w-full object-contain"
-                                            loading="lazy"
-                                            decoding="async"
-                                        />
-                                        <template
-                                            v-if="
-                                                selectedUnit.images.length > 1
-                                            "
+                                            controls
+                                            playsinline
+                                            preload="metadata"
+                                        ></video>
+                                        <template v-else-if="photoCount">
+                                            <img
+                                                :src="
+                                                    selectedUnit.images[
+                                                        slideIndex
+                                                    ]
+                                                "
+                                                alt=""
+                                                aria-hidden="true"
+                                                loading="lazy"
+                                                decoding="async"
+                                                class="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-2xl"
+                                            />
+                                            <img
+                                                :src="
+                                                    selectedUnit.images[
+                                                        slideIndex
+                                                    ]
+                                                "
+                                                :alt="
+                                                    t('roomNumberOption', {
+                                                        number: selectedUnit.number,
+                                                    })
+                                                "
+                                                class="absolute inset-0 h-full w-full object-contain"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        </template>
+                                        <button
+                                            v-if="videoUrl && !isVideoSlide"
+                                            type="button"
+                                            class="absolute top-3 right-3 rounded-full bg-black/70 px-3 py-1.5 text-sm backdrop-blur hover:bg-black/90"
+                                            @click="slideIndex = photoCount"
                                         >
+                                            {{ t('roomVideo') }}
+                                        </button>
+                                        <template v-if="slideCount > 1">
                                             <button
                                                 type="button"
                                                 class="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-black/50 p-2 backdrop-blur hover:bg-black/70"
-                                                :aria-label="t('previousPhoto')"
-                                                @click="stepImage(-1)"
+                                                :aria-label="t('previousSlide')"
+                                                @click="stepSlide(-1)"
                                             >
                                                 <ChevronLeft class="size-5" />
                                             </button>
                                             <button
                                                 type="button"
                                                 class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-black/50 p-2 backdrop-blur hover:bg-black/70"
-                                                :aria-label="t('nextPhoto')"
-                                                @click="stepImage(1)"
+                                                :aria-label="t('nextSlide')"
+                                                @click="stepSlide(1)"
                                             >
                                                 <ChevronRight class="size-5" />
                                             </button>
@@ -192,15 +233,15 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                             </div>
 
                             <!-- Selector + details column. -->
-                            <div class="lg:col-span-2">
+                            <div class="min-w-0">
                                 <label
-                                    class="block text-xs tracking-widest text-amber-300/80 uppercase"
+                                    class="text-coast-tide/80 block text-xs tracking-widest uppercase"
                                 >
                                     {{ t('roomNumberSelectLabel') }}
                                     <div class="relative mt-2">
                                         <select
                                             :value="selectedUnitId ?? ''"
-                                            class="block w-full appearance-none rounded-lg border border-white/15 bg-stone-950 px-3 py-2.5 pr-9 text-sm font-normal tracking-normal text-white normal-case transition outline-none hover:border-amber-300/50 focus:border-amber-300"
+                                            class="bg-coast-deep hover:border-coast-tide/50 focus:border-coast-tide block w-full appearance-none rounded-lg border border-white/15 px-3 py-2.5 pr-9 text-sm font-normal tracking-normal text-white normal-case transition outline-none"
                                             @change="
                                                 selectUnit(
                                                     Number(
@@ -224,7 +265,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                             </option>
                                         </select>
                                         <ChevronDown
-                                            class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-amber-300/70"
+                                            class="text-coast-tide/70 pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
                                             aria-hidden="true"
                                         />
                                     </div>
@@ -264,7 +305,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                                 :key="item.tag"
                                                 :title="item.label"
                                                 :aria-label="item.label"
-                                                class="flex size-9 items-center justify-center rounded-full bg-white/10 text-amber-300"
+                                                class="text-coast-tide flex size-9 items-center justify-center rounded-full bg-white/10"
                                             >
                                                 <component
                                                     :is="item.icon"
@@ -277,7 +318,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
                                             class="mt-4 flex items-center gap-2 text-sm"
                                             :class="
                                                 selectedUnit.has_balcony
-                                                    ? 'text-amber-200'
+                                                    ? 'text-sky-100'
                                                     : 'text-white/50'
                                             "
                                         >

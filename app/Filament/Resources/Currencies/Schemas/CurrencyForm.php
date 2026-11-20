@@ -24,7 +24,7 @@ class CurrencyForm
                     ->length(3)
                     ->alpha()
                     ->unique(ignoreRecord: true)
-                    ->dehydrateStateUsing(fn (?string $state): ?string => strtoupper((string) $state)),
+                    ->dehydrateStateUsing(fn (?string $state): string => strtoupper((string) $state)),
                 TextInput::make('symbol')
                     ->label(__('Symbol'))
                     ->helperText(__('Shown next to every price, e.g. $, €, ₽.'))
